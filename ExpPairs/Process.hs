@@ -1,22 +1,23 @@
 {-# LANGUAGE TemplateHaskell  #-}
-module ExpPairs.Process where
+module ExpPairs.Process (Process, Path (), evalPath, lengthPath, aPath, baPath) where
 
-import qualified ExpPairs.Matrix3 as Mx
 import Data.Monoid
 import Data.List
 import Data.Ord
 import Data.Function.Memoize
 
+import qualified ExpPairs.Matrix3 as Mx
+
 data Process = A | BA
-	deriving (Eq, Show, Read)
+	deriving (Eq, Show, Read, Ord, Enum)
 
 deriveMemoizable ''Process
 
 type ProcessMatrix = Mx.Matrix3 Integer
 
 process2matrix :: Process -> ProcessMatrix
-process2matrix  A = Mx.fromList [1,0,0, 1,1,1, 2,0,2]
-process2matrix BA = Mx.fromList [0,1,0, 2,0,1, 2,0,2]
+process2matrix  A = Mx.Matrix3 1 0 0 1 1 1  2 0 2
+process2matrix BA = Mx.Matrix3 0 1 0 2 0 1  2 0 2
 
 data Path = Path ProcessMatrix [Process]
 
@@ -38,6 +39,26 @@ instance Read Path where
 			(path, ys) = reads' xs
 		reads' ('B':xs) = (baPath, xs)
 		reads' xs = (mempty, xs)
+
+instance Eq Path where
+	(Path m1 _) == (Path m2 _) = Mx.normalize m1 == Mx.normalize m2
+
+instance Ord Path where
+	(Path _ p1) <= (Path _ p2) = cmp p1 p2 where
+		cmp (A:p1) (A:p2) = cmp p1 p2
+		cmp (BA:p1) (BA:p2) = cmp p2 p1
+		cmp (A:_) (BA:_) = True
+		cmp (BA:_) (A:_) = False
+		cmp [] _ = True
+		cmp _ [] = False
+
+evalPath :: (Num t) => Path -> (t, t, t) -> (t, t, t)
+evalPath (Path m _) (a,b,c) = (a',b',c') where
+	m' = fmap fromInteger m
+	(Mx.Vector3 a' b' c') = Mx.multCol m' (Mx.Vector3 a b c)
+
+lengthPath :: Path -> Int
+lengthPath (Path _ xs) = length xs
 
 
 symbolWidth = 10

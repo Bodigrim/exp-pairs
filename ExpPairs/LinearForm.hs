@@ -1,4 +1,4 @@
-module ExpPairs.LinearForm where
+module ExpPairs.LinearForm (LinearForm (..), RationalForm (..), IneqType (..), Constraint (..), checkConstraint, evalRF, substituteLF) where
 
 import Data.List
 import Data.Ratio
@@ -37,8 +37,21 @@ evalLF (k, l, m) (LinearForm a b c) = a*k+l*b+m*c
 
 substituteLF (k, l, m) (LinearForm a b c) = (scaleLF a k) + (scaleLF b l) + (scaleLF c m)
 
+
 data RationalForm t = RationalForm (LinearForm t) (LinearForm t)
 	deriving (Show)
+
+instance Num t => Num (RationalForm t) where
+	(+) = undefined
+	(*) = undefined
+	negate (RationalForm a b) = RationalForm (negate a) b
+	abs = undefined
+	signum = undefined
+	fromInteger n = RationalForm (fromInteger n) 1
+
+instance Num t => Fractional (RationalForm t) where
+	fromRational r = RationalForm (fromInteger $ numerator r) (fromInteger $ denominator r)
+	recip (RationalForm a b) = RationalForm b a
 
 evalRF :: (Real t, Num t) => (Integer, Integer, Integer) -> RationalForm t -> Rational
 evalRF (k', l', m') (RationalForm num den) =
@@ -49,6 +62,7 @@ evalRF (k', l', m') (RationalForm num den) =
 			m = fromInteger m'
 
 substituteRF (k, l, m) (RationalForm num den) = RationalForm (substituteLF (k, l, m) num) (substituteLF (k, l, m) den)
+
 
 data IneqType = Strict | NonStrict
 	deriving (Eq, Show)

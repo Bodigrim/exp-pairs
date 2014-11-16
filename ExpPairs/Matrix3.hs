@@ -1,4 +1,4 @@
-module ExpPairs.Matrix3 where
+module ExpPairs.Matrix3 (Matrix3 (..), Vector3 (..), fromList, toList, normalize, prettyMatrix, multCol) where
 
 import qualified Data.List as List
 import Data.Monoid
@@ -76,6 +76,38 @@ instance Num t => Num (Matrix3 t) where
 		a32 = 0,
 		a33 = fromInteger n
 		}
+
+det :: (Num t) => Matrix3 t -> t
+det a =
+	a11 a * (a22 a * a33 a - a32 a * a23 a)
+	- a12 a * (a21 a * a33 a - a23 a * a31 a)
+	+ a13 a * (a21 a * a32 a - a22 a * a31 a)
+
+instance Fractional t => Fractional (Matrix3 t) where
+	fromRational n = Matrix3 {
+		a11 = fromRational n,
+		a12 = 0,
+		a13 = 0,
+		a21 = 0,
+		a22 = fromRational n,
+		a23 = 0,
+		a31 = 0,
+		a32 = 0,
+		a33 = fromRational n
+		}
+
+	recip a = Matrix3 {
+		a11 =  (a22 a * a33 a - a32 a * a23 a) / d,
+		a12 = -(a21 a * a33 a - a23 a * a31 a) / d,
+		a13 =  (a21 a * a32 a - a22 a * a31 a) / d,
+		a21 = -(a12 a * a33 a - a13 a * a32 a) / d,
+		a22 =  (a11 a * a33 a - a13 a * a31 a) / d,
+		a23 = -(a11 a * a32 a - a12 a * a31 a) / d,
+		a31 =  (a12 a * a23 a - a13 a * a22 a) / d,
+		a32 = -(a11 a * a23 a - a13 a * a21 a) / d,
+		a33 =  (a11 a * a22 a - a12 a * a21 a) / d
+		} where d = det a
+
 
 instance Num t => Monoid (Matrix3 t) where
 	mempty = 1
