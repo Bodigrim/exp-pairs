@@ -4,6 +4,8 @@ import Data.List
 import Data.Ratio
 import Data.Monoid
 
+infin = 10^10
+
 data LinearForm t = LinearForm t t t
 	deriving (Eq)
 
@@ -54,12 +56,12 @@ instance Num t => Fractional (RationalForm t) where
 	recip (RationalForm a b) = RationalForm b a
 
 evalRF :: (Real t, Num t) => (Integer, Integer, Integer) -> RationalForm t -> Rational
-evalRF (k', l', m') (RationalForm num den) =
-	(toRational $ evalLF (k, l, m) num)
-		/ (toRational $ evalLF (k, l, m) den) where
-			k = fromInteger k'
-			l = fromInteger l'
-			m = fromInteger m'
+evalRF (k', l', m') (RationalForm num den) = if denom==0 then infin else numer / denom where
+	k = fromInteger k'
+	l = fromInteger l'
+	m = fromInteger m'
+	numer = toRational $ evalLF (k, l, m) num
+	denom = toRational $ evalLF (k, l, m) den
 
 substituteRF (k, l, m) (RationalForm num den) = RationalForm (substituteLF (k, l, m) num) (substituteLF (k, l, m) den)
 
