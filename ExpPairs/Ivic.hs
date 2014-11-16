@@ -7,7 +7,7 @@ import ExpPairs.Optimize
 zetaOnS :: Rational -> (Double, Rational, InitPair, Path)
 zetaOnS s = optimizeWithConstraints
 	[RationalForm (LinearForm 1 1 (-s)) 2]
-	[Constraint (RationalForm (LinearForm (-1) 1 (-s)) 1) NonStrict]
+	[Constraint (LinearForm (-1) 1 (-s)) NonStrict]
 
 lemma82_f :: Rational -> Rational
 lemma82_f s
@@ -54,7 +54,7 @@ mOnS s
 			(2*muS*s - muS)
 
 		cons = if s >= 2%3 then [] else [Constraint
-			(RationalForm (LinearForm (4*s-2) (8*s-6) (2*s-1)) 1)  NonStrict
+			(LinearForm (4*s-2) (8*s-6) (2*s-1)) NonStrict
 			]
 
 		(_, x2', _, _) = optimizeWithConstraints [RationalForm numer denom] cons

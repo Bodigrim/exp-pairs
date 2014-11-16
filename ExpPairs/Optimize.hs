@@ -48,7 +48,7 @@ optimizeWithConstraints' rfs cons (r, ip, path)
 			(r0', ip0') = evalFunctional rfs cons path
 
 		cons0 = cons ++ map (\(RationalForm num den) -> Constraint (consBuilder num den) Strict) rfs
-		consBuilder num den = RationalForm (substituteLF (num, den, 1) (LinearForm (-1) r0 0)) 1
+		consBuilder num den = substituteLF (num, den, 1) (LinearForm (-1) r0 0)
 
 		(r1, ip1, path1) = if checkMConstraints patha cons0 && r1' < r0 then (r1', ip1', path1') else (r0, ip0, path) where
 			patha  = path `mappend` aPath

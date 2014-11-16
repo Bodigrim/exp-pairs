@@ -72,16 +72,15 @@ substituteRF (k, l, m) (RationalForm num den) = RationalForm (substituteLF (k, l
 data IneqType = Strict | NonStrict
 	deriving (Eq, Show)
 
-data Constraint t = Constraint (RationalForm t) IneqType
+data Constraint t = Constraint (LinearForm t) IneqType
 	deriving (Show)
 
 checkConstraint :: (Num t, Eq t) => (Integer, Integer, Integer) -> Constraint t -> Bool
-checkConstraint (k', l', m') (Constraint (RationalForm num den) ineq)
+checkConstraint (k', l', m') (Constraint lf ineq)
 	= if ineq==Strict
-		then numer/=0 && signum numer == signum denom
-		else signum numer==0 || signum numer == signum denom where
+		then signum numer /= -1
+		else signum numer == 1 where
 			k = fromInteger k'
 			l = fromInteger l'
 			m = fromInteger m'
-			numer = evalLF (k, l, m) num
-			denom = evalLF (k, l, m) den
+			numer = evalLF (k, l, m) lf
