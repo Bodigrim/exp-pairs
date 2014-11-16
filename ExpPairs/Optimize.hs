@@ -9,7 +9,7 @@ import ExpPairs.LinearForm
 import ExpPairs.Process
 import ExpPairs.Pair
 
-infin = 10^10
+infin = 1000000
 
 
 fracs2proj :: (Rational, Rational) -> (Integer, Integer, Integer)

@@ -4,10 +4,12 @@ import Data.Ratio
 
 import ExpPairs.Optimize
 
+zetaOnS :: Rational -> (Double, Rational, InitPair, Path)
 zetaOnS s = optimizeWithConstraints
 	[RationalForm (LinearForm 1 1 (-s)) 2]
 	[Constraint (RationalForm (LinearForm (-1) 1 (-s)) 1) NonStrict]
 
+lemma82_f :: Rational -> Rational
 lemma82_f s
 	| s < 1%2   = undefined
 	| s<= 2%3   =  2/(3-4*s)
@@ -25,10 +27,11 @@ lemma82_f s
 -- and that alpha2 <= 1 for S >= 2/3 or S >= 5/8 and
 --          (4S-2)k + (8S-6)l + 2S-1 >=0
 
+mOnS :: Rational -> Rational
 mOnS s
 	| s < 1%2 = undefined
 	| s < 5%8 = 4/(3-4*s)
-	| s>= 1   = 10^10
+	| s>= 1   = 1000000
 	| otherwise = x1 `min` x2 `min` (2*fS) where
 		(_, muS, _, _) = zetaOnS s
 		fS = lemma82_f s

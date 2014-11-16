@@ -21,7 +21,9 @@ process2matrix BA = Mx.Matrix3 0 1 0 2 0 1  2 0 2
 
 data Path = Path ProcessMatrix [Process]
 
+aPath :: Path
 aPath  = Path (process2matrix  A) [ A]
+baPath :: Path
 baPath = Path (process2matrix BA) [BA]
 
 instance Monoid Path where
@@ -32,7 +34,7 @@ instance Show Path where
 	show (Path m l) = Mx.prettyMatrix m ++ "\n" ++ prettyProcesses l
 
 instance Read Path where
-	readsPrec d xs = [reads' xs] where
+	readsPrec _ zs = [reads' zs] where
 		reads' ('A':xs) = (aPath `mappend` path, ys) where
 			(path, ys) = reads' xs
 		reads' ('B':'A':xs) = (baPath `mappend` path, ys) where
@@ -44,7 +46,7 @@ instance Eq Path where
 	(Path m1 _) == (Path m2 _) = Mx.normalize m1 == Mx.normalize m2
 
 instance Ord Path where
-	(Path _ p1) <= (Path _ p2) = cmp p1 p2 where
+	(Path _ q1) <= (Path _ q2) = cmp q1 q2 where
 		cmp (A:p1) (A:p2) = cmp p1 p2
 		cmp (BA:p1) (BA:p2) = cmp p2 p1
 		cmp (A:_) (BA:_) = True
@@ -60,9 +62,11 @@ evalPath (Path m _) (a,b,c) = (a',b',c') where
 lengthPath :: Path -> Int
 lengthPath (Path _ xs) = length xs
 
-
+symbolWidth :: Int
 symbolWidth = 10
+bracketWidth :: Int
 bracketWidth = 4
+subscriptWidth :: Int
 subscriptWidth = 4
 
 -- Пусть строка из n символов является повторением строки из l символов

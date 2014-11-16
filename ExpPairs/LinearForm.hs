@@ -4,7 +4,7 @@ import Data.List
 import Data.Ratio
 import Data.Monoid
 
-infin = 10^10
+infin = 1000000
 
 data LinearForm t = LinearForm t t t
 	deriving (Eq)
@@ -32,11 +32,13 @@ instance Num t => Monoid (LinearForm t) where
 	mappend = (+)
 
 scaleLF :: (Num t, Eq t) => t -> LinearForm t -> LinearForm t
-scaleLF 0 (LinearForm a b c) = LinearForm 0 0 0
+scaleLF 0 (LinearForm _ _ _) = LinearForm 0 0 0
 scaleLF s (LinearForm a b c) = LinearForm (a*s) (b*s) (c*s)
 
+evalLF :: Num t => (t, t, t) -> LinearForm t -> t
 evalLF (k, l, m) (LinearForm a b c) = a*k+l*b+m*c
 
+substituteLF :: (Eq t, Num t) => (LinearForm t, LinearForm t, LinearForm t) -> LinearForm t -> LinearForm t
 substituteLF (k, l, m) (LinearForm a b c) = (scaleLF a k) + (scaleLF b l) + (scaleLF c m)
 
 
@@ -63,6 +65,7 @@ evalRF (k', l', m') (RationalForm num den) = if denom==0 then infin else numer /
 	numer = toRational $ evalLF (k, l, m) num
 	denom = toRational $ evalLF (k, l, m) den
 
+substituteRF :: (Eq t, Num t) => (LinearForm t, LinearForm t, LinearForm t) -> RationalForm t -> RationalForm t
 substituteRF (k, l, m) (RationalForm num den) = RationalForm (substituteLF (k, l, m) num) (substituteLF (k, l, m) den)
 
 

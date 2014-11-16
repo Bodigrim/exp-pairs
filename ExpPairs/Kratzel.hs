@@ -34,6 +34,7 @@ tauab a' b' = minimumBy (comparing (\(_, (_, r, _, _)) -> r)) [kr511a, kr511b, k
 data TauabcTheorems = Kr62 | Kr63
 	deriving (Show)
 
+tauabc :: Integer -> Integer -> Integer -> (TauabcTheorems, (Double, Rational, InitPair, Path))
 tauabc a' b' c' = minimumBy (comparing (\(_, (_, r, _, _)) -> r)) [kr62, kr63] where
 	a = a'%1
 	b = b'%1
