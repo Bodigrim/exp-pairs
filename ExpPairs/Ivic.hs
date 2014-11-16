@@ -60,3 +60,16 @@ mOnS s
 		(_, x2', _, _) = optimizeWithConstraints [RationalForm numer denom] cons
 		x2 = -x2'
 
+checkAbscissa :: [(Rational, Rational)] -> Rational -> Bool
+checkAbscissa xs s = sum rs < 1 where
+	qs = map (\(n,m) -> mOnS (n*s) / m) xs
+	rs = map (\q -> 1/q) qs
+
+searchMinAbscissa :: [(Rational, Rational)] -> Rational
+searchMinAbscissa xs = searchMinAbscissa' from to where
+	from = 1 % 2 / minimum (map fst xs)
+	to   = 1 % 1
+	searchMinAbscissa' a b
+		| b-a < 1%1000000 = a
+		| checkAbscissa xs ((a+b)/2) = searchMinAbscissa' a ((a+b)/2)
+		| otherwise = searchMinAbscissa' ((a+b)/2) b
