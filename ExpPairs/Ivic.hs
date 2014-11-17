@@ -5,9 +5,15 @@ import Data.Ratio
 import ExpPairs.Optimize
 
 zetaOnS :: Rational -> (Double, Rational, InitPair, Path)
-zetaOnS s = optimizeWithConstraints
-	[RationalForm (LinearForm 1 1 (-s)) 2]
-	[Constraint (LinearForm (-1) 1 (-s)) NonStrict]
+zetaOnS s
+	| s >= 1  = simulateOptimizeWithConstraints 0
+	| s >= 1%2 = optimizeWithConstraints
+		[RationalForm (LinearForm 1 1 (-s)) 2]
+		[Constraint (LinearForm (-1) 1 (-s)) NonStrict]
+	| otherwise = (d, r, ip, path) where
+		(_, r', ip, path) = zetaOnS (1-s)
+		r = (1%2 - s) + r'
+		d = fromRational r
 
 lemma82_f :: Rational -> Rational
 lemma82_f s
