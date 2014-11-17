@@ -1,9 +1,11 @@
-module ExpPairs.RatioInf where
+module ExpPairs.RatioInf (RatioInf (..), RationalInf) where
 
 import Data.Ratio
 
 data RatioInf t = InfMinus | Finite (Ratio t) | InfPlus
 	deriving (Ord, Eq)
+
+type RationalInf = RatioInf Integer
 
 instance (Integral t, Show t) => Show (RatioInf t) where
 	show InfMinus = "-Inf"
@@ -71,10 +73,7 @@ instance (Integral t) => Fractional (RatioInf t) where
 	(Finite a) / InfPlus = Finite 0
 	(Finite a) / InfMinus = Finite 0
 
-	(Finite a) / (Finite 0)
-		| signum a == 0 = undefined
-		| signum a == 1 = InfPlus
-		| signum a == (-1) = InfMinus
+	(Finite a) / (Finite 0) = undefined
 	(Finite a) / (Finite b) = Finite (a/b)
 
 instance (Integral t) => Real (RatioInf t) where
