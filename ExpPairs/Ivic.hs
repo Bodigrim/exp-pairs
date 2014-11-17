@@ -33,12 +33,12 @@ lemma82_f s
 -- and that alpha2 <= 1 for S >= 2/3 or S >= 5/8 and
 --          (4S-2)k + (8S-6)l + 2S-1 >=0
 
-mOnS :: Rational -> Rational
+mOnS :: Rational -> RationalInf
 mOnS s
-	| s < 1%2 = undefined
-	| s < 5%8 = 4/(3-4*s)
-	| s>= 1   = 1000000
-	| otherwise = x1 `min` x2 `min` (2*fS) where
+	| s < 1%2 = Finite 0
+	| s < 5%8 = Finite $ 4/(3-4*s)
+	| s>= 1   = InfPlus
+	| otherwise = Finite $ x1 `min` x2 `min` (2*fS) where
 		(_, muS, _, _) = zetaOnS s
 		fS = lemma82_f s
 		alpha1 = (4-4*s)/(1+2*s)
@@ -67,8 +67,8 @@ mOnS s
 		x2 = -x2'
 
 checkAbscissa :: [(Rational, Rational)] -> Rational -> Bool
-checkAbscissa xs s = sum rs < 1 where
-	qs = map (\(n,m) -> mOnS (n*s) / m) xs
+checkAbscissa xs s = sum rs < Finite 1 where
+	qs = map (\(n,m) -> mOnS (n*s) / Finite m) xs
 	rs = map (\q -> 1/q) qs
 
 searchMinAbscissa :: [(Rational, Rational)] -> Rational

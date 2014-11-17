@@ -1,4 +1,4 @@
-module ExpPairs.Optimize (optimizeWithConstraints, LinearForm (..), RationalForm (..), IneqType (..), Constraint (..), InitPair(..), Path, simulateOptimizeWithConstraints) where
+module ExpPairs.Optimize (optimizeWithConstraints, LinearForm (..), RationalForm (..), IneqType (..), Constraint (..), InitPair(..), Path, simulateOptimizeWithConstraints, RatioInf (..), RationalInf) where
 
 import Data.Ratio
 import Data.Ord
