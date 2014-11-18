@@ -76,7 +76,7 @@ data Constraint t = Constraint (LinearForm t) IneqType
 
 checkConstraint :: (Num t, Eq t) => (Integer, Integer, Integer) -> Constraint t -> Bool
 checkConstraint (k', l', m') (Constraint lf ineq)
-	= if ineq==Strict
+	= if ineq==NonStrict
 		then signum numer /= -1
 		else signum numer == 1 where
 			k = fromInteger k'
