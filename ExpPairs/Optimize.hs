@@ -24,7 +24,6 @@ proj2fracs (k, l, m) = (k%m, l%m)
 
 evalFunctional :: [RationalForm Rational] -> [Constraint Rational] -> Path -> (RationalInf, InitPair)
 evalFunctional rfs cons path = if rs==[] then (InfPlus, undefined) else minimumBy (comparing fst) rs where
-	initPairs = [(minBound::InitPair)..maxBound]
 	ps = map (evalPath path . fracs2proj . initPairToValue) initPairs `zip` initPairs
 	qs = filter (\(p,_) -> all (checkConstraint p) cons) ps
 	rs = map (\(p, ip) -> (maximum $ map (evalRF p) rfs, ip)) qs
@@ -34,7 +33,7 @@ checkMConstraints path cons = all (\con -> any (\p -> checkConstraint (evalPath 
 	triangleT = map fracs2proj [ (0%1,1%1), (0%1,1%2), (1%2,1%2)]
 
 simulateOptimizeWithConstraints :: Rational -> (Double, Rational, InitPair, Path)
-simulateOptimizeWithConstraints r = (d, r, Usual, mempty) where
+simulateOptimizeWithConstraints r = (d, r, Corput01, mempty) where
 	d = fromRational r
 
 optimizeWithConstraints :: [RationalForm Rational] -> [Constraint Rational] -> (Double, Rational, InitPair, Path)
