@@ -47,12 +47,31 @@ testMOnSZero a' = a>=1%2 || mOnS a == 0 where
 testMOnSInf a' = a<1 || mOnS a == InfPlus where
 	a = ratioI (-3) 3 a'
 
+
+-- Convexity tests - they fail and it is OK
+testZetaConvex a' b' c' = a==b || b==c || zb <= k*b+l where
+	[a,b,c] = sort $ map ratio01 [a', b', c']
+	[za, zb, zc] = map (snd4 . zetaOnS) [a,b,c]
+	k = (za-zc) / (a-c)
+	l = za - k*a
+
+-- Ivic, Th. 8.1, p. 205
+testMConvex a' b' c' = a==b || b==c || za==InfPlus || zc==InfPlus
+	|| zb>= za*zc*Finite(c-a)/(zc*Finite(c-b) + za*Finite(b-a)) where
+		[a,b,c] = sort $ map (ratioI (1%2) 1) [a', b', c']
+		[za, zb, zc] = map mOnS [a,b,c] :: [RationalInf]
+
+
 testSmth depth (name, test) = do
 	putStrLn name
 	mapM_ (\_ -> quickCheck test) [1..1]
 	smallCheck depth test
 
 testSuite = do
+	--mapM_ (testSmth 1) [
+	--	("mOnS convex", testMConvex),
+	--	("zetaOnS convex", testZetaConvex)
+	--	]
 	mapM_ (testSmth 3) [
 		("zetaOnS monotonic", testZetaOnS1),
 		("zetaOnS strict monotonic", testZetaOnS2),
