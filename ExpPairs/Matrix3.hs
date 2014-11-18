@@ -1,4 +1,4 @@
-module ExpPairs.Matrix3 (Matrix3 (..), Vector3 (..), fromList, toList, normalize, prettyMatrix, multCol) where
+module ExpPairs.Matrix3 (Matrix3 (..), Vector3 (..), fromList, toList, normalize, prettyMatrix, multCol, det) where
 
 import qualified Data.List as List
 import Data.Monoid
@@ -65,6 +65,7 @@ instance Num t => Num (Matrix3 t) where
 
 	signum = undefined
 
+	-- Multiplicative, not additive behaviour
 	fromInteger n = Matrix3 {
 		a11 = fromInteger n,
 		a12 = 0,
@@ -84,6 +85,7 @@ det a =
 	+ a13 a * (a21 a * a32 a - a22 a * a31 a)
 
 instance Fractional t => Fractional (Matrix3 t) where
+	-- Multiplicative, not additive behaviour
 	fromRational n = Matrix3 {
 		a11 = fromRational n,
 		a12 = 0,
@@ -136,7 +138,7 @@ normalize :: Integral t => Matrix3 t -> Matrix3 t
 normalize m = m' where
 	l = toList m
 	d = foldl1 gcd l
-	m' = fromList $ List.map (`div`d) l
+	m' = if d==0 then m else fromList $ List.map (`div`d) l
 
 maximum :: Ord t => Matrix3 t -> t
 maximum = List.maximum . toList
@@ -159,3 +161,6 @@ multCol m v = Vector3 {
 	a2 = a21 m * a1 v + a22 m * a2 v + a23 m * a3 v,
 	a3 = a31 m * a1 v + a32 m * a2 v + a33 m * a3 v
 	}
+
+
+
