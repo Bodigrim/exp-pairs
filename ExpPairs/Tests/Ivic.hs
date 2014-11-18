@@ -1,6 +1,7 @@
 module ExpPairs.Tests.Ivic where
 
 import Data.Ratio
+import Data.List
 import ExpPairs.Ivic
 import ExpPairs.RatioInf
 
@@ -10,38 +11,41 @@ import Test.QuickCheck
 
 snd4 (_, a, _, _) = a
 
-testZetaOnS1 a b = a==b || a<b && za>=zb || a>b && za<=zb where
-	za = snd4 $ zetaOnS a
-	zb = snd4 $ zetaOnS b
+ratio01 a = if a==0 then 0 else (b+1)/2 where
+	b = (if a>0 then min else max) a (recip a)
 
-testZetaOnS2 a' b' = a==b || a<b && za>zb || a>b && za<zb where
-	(_,a) = properFraction $ abs a'
-	(_,b) = properFraction $ abs b'
-	za = snd4 $ zetaOnS a
-	zb = snd4 $ zetaOnS b
+ratioI from to a = from + (to-from) * (ratio01 a)
 
-testZetaOnSsym a = abs (za-za') == abs (a-1%2) where
+testZetaOnS1 a' b' = a==b || za>=zb where
+	[a,b] = sort $ map (ratioI (-3) 3) [a', b']
+	[za, zb] = map (snd4 . zetaOnS) [a,b]
+
+testZetaOnS2 a' b' = a==b || za>zb where
+	[a,b] = sort $ map ratio01 [a', b']
+	[za, zb] = map (snd4 . zetaOnS) [a,b]
+
+testZetaOnSsym a' = abs (za-za') == abs (a-1%2) where
+	a = ratioI (-3) 3 a'
 	za = snd4 $ zetaOnS a
 	za' = snd4 $ zetaOnS (1-a)
 
-testZetaOnSZero a = a<1 || snd4 (zetaOnS a) == 0
+testZetaOnSZero a' = a<1 || snd4 (zetaOnS a) == 0 where
+	a = ratioI (-3) 3 a'
 
 
-testMOnS1 a b = a==b || a<b && za<=zb || a>b && za>=zb where
-	za = mOnS a
-	zb = mOnS b
+testMOnS1 a' b' = a==b || za<=zb where
+	[a,b] = sort $ map (ratioI (-3) 3) [a', b']
+	[za, zb] = map mOnS [a,b]
 
-testMOnS2 a' b' = a==b || a<b && za<zb || a>b && za>zb where
-	a = 1%2 + (snd $ properFraction $ abs a') / 2
-	b = 1%2 + (snd $ properFraction $ abs b') / 2
-	za = mOnS a
-	zb = mOnS b
+testMOnS2 a' b' = a==b || za<zb where
+	[a,b] = sort $ map (ratioI (1%2) 1) [a', b']
+	[za, zb] = map mOnS [a,b]
 
-testMOnSZero a = a>=1%2 || mOnS a == 0
+testMOnSZero a' = a>=1%2 || mOnS a == 0 where
+	a = ratioI (-3) 3 a'
 
-testMOnSInf a = a<1 || mOnS a == InfPlus
-
--- test convexity properties
+testMOnSInf a' = a<1 || mOnS a == InfPlus where
+	a = ratioI (-3) 3 a'
 
 testSmth depth (name, test) = do
 	putStrLn name
