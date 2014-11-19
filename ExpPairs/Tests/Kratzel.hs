@@ -2,6 +2,7 @@ module ExpPairs.Tests.Kratzel where
 
 import Data.Ratio
 import Data.List
+import ExpPairs.Optimize
 import ExpPairs.Kratzel
 
 import Test.SmallCheck
@@ -13,40 +14,38 @@ instance (Num a, Ord a, Arbitrary a) => Arbitrary (Positive a) where
     (Positive . abs) `fmap` (arbitrary `suchThat` (> 0))
 
 
-snd4 (_, a, _, _) = a
-
 testAbMonotonic :: (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> Bool
 testAbMonotonic (Positive a') (Positive b') (Positive c') (Positive d') =  (a==c && b==d) || zab > zcd where
 	[a, c, b, d] = sort [a', b', c', d']
-	zab = snd4 $ snd $ tauab a b
-	zcd = snd4 $ snd $ tauab c d
+	zab = optimalValue $ snd $ tauab a b
+	zcd = optimalValue $ snd $ tauab c d
 
 testAbCompareLow :: (Positive Integer) -> (Positive Integer) -> Bool
-testAbCompareLow (Positive a') (Positive b') = snd4 (snd $ tauab a b) >= 1%(2*a+2*b) where
+testAbCompareLow (Positive a') (Positive b') = optimalValue (snd $ tauab a b) >= Finite (1%(2*a+2*b)) where
 	[a, b] = sort [a', b']
 
 testAbCompareHigh :: (Positive Integer) -> (Positive Integer) -> Bool
-testAbCompareHigh (Positive a') (Positive b') = snd4 (snd $ tauab a b) < 1%(a+b) where
+testAbCompareHigh (Positive a') (Positive b') = optimalValue (snd $ tauab a b) < Finite (1%(a+b)) where
 	[a, b] = sort [a', b']
 
 
 testAbcMonotonic :: (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> Bool
 testAbcMonotonic (Positive a') (Positive b') (Positive c') (Positive d') (Positive e') (Positive f') =  (a==d && b==e && c==f) || zabc > zdef where
 	[a, d, b, e, c, f] = sort [a', b', c', d', e', f']
-	zabc = snd4 $ snd $ tauabc a b c
-	zdef = snd4 $ snd $ tauabc d e f
+	zabc = optimalValue $ snd $ tauabc a b c
+	zdef = optimalValue $ snd $ tauabc d e f
 
 testAbcCompareLow :: (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> Bool
-testAbcCompareLow (Positive a') (Positive b') (Positive c') = c>=a+b || snd4 (snd $ tauabc a b c) >= 1%(a+b+c) where
+testAbcCompareLow (Positive a') (Positive b') (Positive c') = c>=a+b || optimalValue (snd $ tauabc a b c) >= Finite (1%(a+b+c)) where
 	[a, b, c] = sort [a', b', c']
 
 testAbcCompareHigh :: (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> Bool
-testAbcCompareHigh (Positive a') (Positive b') (Positive c') = c>=a+b || snd4 (snd $ tauabc a b c) < 2%(a+b+c) where
+testAbcCompareHigh (Positive a') (Positive b') (Positive c') = c>=a+b || optimalValue (snd $ tauabc a b c) < Finite (2%(a+b+c)) where
 	[a, b, c] = sort [a', b', c']
 
-etalonTauab [a,b,c,d] = c%d >= (snd4 . snd) (tauab a b)
+etalonTauab [a,b,c,d] = Finite (c%d) >= (optimalValue . snd) (tauab a b)
 
-etalonTauabc [a,b,c,d,e] = d%e >= (snd4 . snd) (tauabc a b c)
+etalonTauabc [a,b,c,d,e] = Finite (d%e) >= (optimalValue . snd) (tauabc a b c)
 
 testEtalon f filename = do
 	etalon <- readFile filename
@@ -62,7 +61,7 @@ testSmth depth (name, test) = do
 
 testSuite = do
 	testEtalon etalonTauab  "ExpPairs/Tests/etalon-tauab.txt"
-	--testEtalon etalonTauabc "ExpPairs/Tests/etalon-tauabc.txt"
+	testEtalon etalonTauabc "ExpPairs/Tests/etalon-tauabc.txt"
 	mapM_ (testSmth 7) [
 		("tauabc compare with 1/(a+b+c)", testAbcCompareLow),
 		("tauabc compare with 2/(a+b+c)", testAbcCompareHigh)

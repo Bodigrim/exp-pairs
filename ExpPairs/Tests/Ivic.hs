@@ -3,14 +3,13 @@ module ExpPairs.Tests.Ivic where
 
 import Data.Ratio
 import Data.List
+import ExpPairs.Optimize
 import ExpPairs.Ivic
 import ExpPairs.RatioInf
 
 import Test.SmallCheck
 import Test.SmallCheck.Series
 import Test.QuickCheck
-
-snd4 (_, a, _, _) = a
 
 newtype Ratio01 t = Ratio01 t
 
@@ -29,52 +28,52 @@ ratio01 a = if a==0 then 0 else (b+1)/2 where
 
 testZetaOnS1 (Ratio01 a') (Ratio01 b') = a==b || za>=zb where
 	[a,b] = sort $ map (\n -> (n-1%2)*6) [a', b']
-	[za, zb] = map (snd4 . zetaOnS) [a,b]
+	[za, zb] = map (optimalValue . zetaOnS) [a,b]
 
 testZetaOnS2 (Ratio01 a') (Ratio01 b') = a==b || za>zb where
 	[a,b] = sort [a', b']
-	[za, zb] = map (snd4 . zetaOnS) [a,b]
+	[za, zb] = map (optimalValue . zetaOnS) [a,b]
 
-testZetaOnSsym (Ratio01 a') = abs (za-za') == abs (a-1%2) where
+testZetaOnSsym (Ratio01 a') = (toRational . abs) (za-za') == abs (a-1%2) where
 	a = (a'-1%2)*6
-	za = snd4 $ zetaOnS a
-	za' = snd4 $ zetaOnS (1-a)
+	za = optimalValue $ zetaOnS a
+	za' = optimalValue $ zetaOnS (1-a)
 
-testZetaOnSZero (Ratio01 a') = a<1 || snd4 (zetaOnS a) == 0 where
+testZetaOnSZero (Ratio01 a') = a<1 || optimalValue (zetaOnS a) == 0 where
 	a = (a'-1%2)*6
 
 
 testMOnS1 (Ratio01 a') (Ratio01 b') = a==b || za<=zb where
 	[a,b] = sort $ map (\n -> (n-1%2)*6) [a', b']
-	[za, zb] = map mOnS [a,b]
+	[za, zb] = map (optimalValue . mOnS) [a,b]
 
 testMOnS2 (Ratio01 a') (Ratio01 b') = a==b || za<zb where
 	[a,b] = sort $ map (\n -> n/2+1%2) [a', b']
-	[za, zb] = map mOnS [a,b]
+	[za, zb] = map (optimalValue . mOnS) [a,b]
 
-testMOnSZero (Ratio01 a') = a>=1%2 || mOnS a == 0 where
+testMOnSZero (Ratio01 a') = a>=1%2 || (optimalValue . mOnS) a == 0 where
 	a = (a'-1%2)*6
 
-testMOnSInf (Ratio01 a') = a<1 || mOnS a == InfPlus where
+testMOnSInf (Ratio01 a') = a<1 || (optimalValue . mOnS) a == InfPlus where
 	a = (a'-1%2)*6
 
 
 -- Convexity tests - they fail and it is OK
-testZetaConvex (Ratio01 a') (Ratio01 b') (Ratio01 c') = a==b || b==c || zb <= k*b+l where
+testZetaConvex (Ratio01 a') (Ratio01 b') (Ratio01 c') = a==b || b==c || zb <= k * Finite b + l where
 	[a,b,c] = sort [a', b', c']
-	[za, zb, zc] = map (snd4 . zetaOnS) [a,b,c]
-	k = (za-zc) / (a-c)
-	l = za - k*a
+	[za, zb, zc] = map (optimalValue . zetaOnS) [a,b,c]
+	k = (za-zc) / Finite (a-c)
+	l = za - k * Finite a
 
 -- Ivic, Th. 8.1, p. 205
 testMConvex (Ratio01 a') (Ratio01 b') (Ratio01 c') = a==b || b==c || za==InfPlus || zc==InfPlus
 	|| zb>= za*zc*Finite(c-a)/(zc*Finite(c-b) + za*Finite(b-a)) where
 		[a,b,c] = sort $ map (\n -> n/2+1%2) [a', b', c']
-		[za, zb, zc] = map mOnS [a,b,c] :: [RationalInf]
+		[za, zb, zc] = map (optimalValue . mOnS) [a,b,c] :: [RationalInf]
 
-etalonZetaOnS  [a,b,c,d] = c%d >= snd4 (zetaOnS $ a%b)
+etalonZetaOnS  [a,b,c,d] = Finite (c%d) >= optimalValue (zetaOnS $ a%b)
 
-etalonMOnS  [a,b,c,d] = Finite (c%d) <= mOnS (a%b)
+etalonMOnS  [a,b,c,d] = Finite (c%d) <= (optimalValue . mOnS) (a%b)
 
 testEtalon f filename = do
 	etalon <- readFile filename

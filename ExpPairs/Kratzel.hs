@@ -9,8 +9,8 @@ import ExpPairs.Optimize
 data TauabTheorem = Kr511a | Kr511b | Kr512a | Kr512b
 	deriving (Show)
 
-tauab :: Integer -> Integer -> (TauabTheorem, (Double, Rational, InitPair, Path))
-tauab a' b' = minimumBy (comparing (\(_, (_, r, _, _)) -> r)) [kr511a, kr511b, kr512a, kr512b] where
+tauab :: Integer -> Integer -> (TauabTheorem, OptimizeResult)
+tauab a' b' = minimumBy (comparing (optimalValue . snd)) [kr511a, kr511b, kr512a, kr512b] where
 	a = a'%1
 	b = b'%1
 	kr511a = (Kr511a, optimize
@@ -34,16 +34,16 @@ tauab a' b' = minimumBy (comparing (\(_, (_, r, _, _)) -> r)) [kr511a, kr511b, k
 data TauabcTheorem = Kolesnik | Kr61 | Kr62 | Kr63 | Kr64 | Kr65 | Kr66 | Tauab TauabTheorem
 	deriving (Show)
 
-tauabc :: Integer -> Integer -> Integer -> (TauabcTheorem, (Double, Rational, InitPair, Path))
+tauabc :: Integer -> Integer -> Integer -> (TauabcTheorem, OptimizeResult)
 tauabc 1 1 1 = (Kolesnik, simulateOptimize $ 43%96)
-tauabc a' b' c' = minimumBy (comparing (\(_, (_, r, _, _)) -> r)) [kr61, kr62, kr63, kr64, kr65, kr66] where
+tauabc a' b' c' = minimumBy (comparing (optimalValue . snd)) [kr61, kr62, kr63, kr64, kr65, kr66] where
 	a = a'%1
 	b = b'%1
 	c = c'%1
 	kr61 = if c<a+b
 		then (Kr61, simulateOptimize $ 2/(a+b+c))
-		else if r<1/c then (Kr61, simulateOptimize $ 1/c) else (Tauab th, t) where
-			(th, t@(_, r, _, _)) = tauab a' b'
+		else if optimalValue optRes < Finite (recip c) then (Kr61, simulateOptimize $ 1/c) else (Tauab th, optRes) where
+			(th, optRes) = tauab a' b'
 	kr62 = (Kr62, optimize
 		[RationalForm (LinearForm 2 2 0) (LinearForm 0 0 (a+b+c))]
 		[

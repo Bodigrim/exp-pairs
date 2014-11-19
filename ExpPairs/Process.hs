@@ -31,7 +31,7 @@ instance Monoid Path where
 	mappend (Path m1 l1) (Path m2 l2) = Path (Mx.normalize $ m1*m2) (l1++l2)
 
 instance Show Path where
-	show (Path m l) = Mx.prettyMatrix m ++ "\n" ++ prettyProcesses l
+	show (Path m l) = prettyProcesses l ++ "\n" ++ Mx.prettyMatrix m
 
 instance Read Path where
 	readsPrec _ zs = [reads' zs] where

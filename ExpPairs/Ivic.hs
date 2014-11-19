@@ -1,19 +1,20 @@
 module ExpPairs.Ivic where
 
 import Data.Ratio
+import Data.List
+import Data.Ord
 
 import ExpPairs.Optimize
 
-zetaOnS :: Rational -> (Double, Rational, InitPair, Path)
+zetaOnS :: Rational -> OptimizeResult
 zetaOnS s
 	| s >= 1  = simulateOptimize 0
 	| s >= 1%2 = optimize
 		[RationalForm (LinearForm 1 1 (-s)) 2]
 		[Constraint (LinearForm (-1) 1 (-s)) NonStrict]
-	| otherwise = (d, r, ip, path) where
-		(_, r', ip, path) = zetaOnS (1-s)
-		r = (1%2 - s) + r'
-		d = fromRational r
+	| otherwise = optRes {optimalValue = r} where
+		optRes = zetaOnS (1-s)
+		r = Finite (1%2 - s) + optimalValue optRes
 
 lemma82_f :: Rational -> Rational
 lemma82_f s
@@ -33,17 +34,18 @@ lemma82_f s
 -- and that alpha2 <= 1 for S >= 2/3 or S >= 5/8 and
 --          (4S-2)k + (8S-6)l + 2S-1 >=0
 
-mOnS :: Rational -> RationalInf
+mOnS :: Rational -> OptimizeResult
 mOnS s
-	| s < 1%2 = Finite 0
-	| s < 5%8 = Finite $ 4/(3-4*s)
-	| s>= 1   = InfPlus
-	| otherwise = Finite $ x1 `min` x2 `min` (2*fS) where
-		(_, muS, _, _) = zetaOnS s
-		fS = lemma82_f s
+	| s < 1%2 = simulateOptimize 0
+	| s < 5%8 = simulateOptimize $ 4/(3-4*s)
+	| s>= 1   = simulateOptimize' InfPlus
+	| otherwise = minimumBy (comparing optimalValue) [x1, x2, simulateOptimize (lemma82_f s * 2)] where
+
+		optRes = zetaOnS s
+		muS    = toRational $ optimalValue optRes
 		alpha1 = (4-4*s)/(1+2*s)
-		beta1 = -12/(1+2*s)
-		x1 = (1-alpha1)/muS - beta1
+		beta1  = -12/(1+2*s)
+		x1 = optRes {optimalValue = Finite $ (1-alpha1)/muS - beta1}
 
 		--alpha2 = 4*(1-s)*(k+l)/((2*m+4*l)*s-m+2*k-2*l)
 		--beta2  = -4*(m+2*k+2*l)/((2*m+4*l)*s-m+2*k-2*l)
@@ -63,12 +65,12 @@ mOnS s
 			(LinearForm (4*s-2) (8*s-6) (2*s-1)) NonStrict
 			]
 
-		(_, x2', _, _) = optimize [RationalForm numer denom] cons
-		x2 = -x2'
+		x2' = optimize [RationalForm numer denom] cons
+		x2 = x2' {optimalValue = negate $ optimalValue x2'}
 
 checkAbscissa :: [(Rational, Rational)] -> Rational -> Bool
 checkAbscissa xs s = sum rs < Finite 1 where
-	qs = map (\(n,m) -> mOnS (n*s) / Finite m) xs
+	qs = map (\(n,m) -> optimalValue (mOnS (n*s)) / Finite m) xs
 	rs = map (\q -> 1/q) qs
 
 searchMinAbscissa :: [(Rational, Rational)] -> Rational
