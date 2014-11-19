@@ -6,10 +6,10 @@ import Data.List
 
 import ExpPairs.Optimize
 
-data TauabTheorems = Kr511a | Kr511b | Kr512a | Kr512b
+data TauabTheorem = Kr511a | Kr511b | Kr512a | Kr512b
 	deriving (Show)
 
-tauab :: Integer -> Integer -> (TauabTheorems, (Double, Rational, InitPair, Path))
+tauab :: Integer -> Integer -> (TauabTheorem, (Double, Rational, InitPair, Path))
 tauab a' b' = minimumBy (comparing (\(_, (_, r, _, _)) -> r)) [kr511a, kr511b, kr512a, kr512b] where
 	a = a'%1
 	b = b'%1
@@ -31,11 +31,13 @@ tauab a' b' = minimumBy (comparing (\(_, (_, r, _, _)) -> r)) [kr511a, kr511b, k
 			Constraint (LinearForm 29 29 (-24)) Strict
 		])
 
-data TauabcTheorems = Kr62 | Kr63
+data TauabcTheorem = Kr62 | Kr63 | Kr64 | Kr65 | Kr66 | Tauab TauabTheorem
 	deriving (Show)
 
-tauabc :: Integer -> Integer -> Integer -> (TauabcTheorems, (Double, Rational, InitPair, Path))
-tauabc a' b' c' = minimumBy (comparing (\(_, (_, r, _, _)) -> r)) [kr62, kr63] where
+tauabc :: Integer -> Integer -> Integer -> (TauabcTheorem, (Double, Rational, InitPair, Path))
+tauabc a' b' c' = if c'>=a'+b'
+	then (\(th, r) -> (Tauab th, r)) (tauab a' b')
+	else minimumBy (comparing (\(_, (_, r, _, _)) -> r)) [kr62, kr64, kr65, kr66] where
 	a = a'%1
 	b = b'%1
 	c = c'%1
@@ -48,3 +50,10 @@ tauabc a' b' c' = minimumBy (comparing (\(_, (_, r, _, _)) -> r)) [kr62, kr63] w
 	kr63 = (Kr63, optimize
 		[RationalForm (LinearForm 4 2 3) (LinearForm (2*(a+b+c)) 0 (3*(a+b+c)))]
 		[Constraint (LinearForm (2*(a-b-c)) (2*a) (2*a-b-c)) NonStrict])
+	kr64 = (Kr64, simulateOptimize r) where
+		r = recip (a+b+c) * minimum ((a+b+c):[2-4*(k-1)%(3*2^k-4) | k<-[1..maxk], (3*2^k-2*k-4)%1 * a >= 2 * (b+c), (3*2^k-8)%1 * (a+b) >= (3*2^k-4*k+4)%1 * c])
+		maxk = 4 `max` (floor $ log (fromRational $ b+c) / log 2)
+	kr65 = (Kr65, simulateOptimize r) where
+		r = if 7*a>=2*(b+c) && 4*(a+b)>=5*c then 3%2/(a+b+c) else 1%1
+	kr66 = (Kr66, simulateOptimize r) where
+		r = if 18*a>=7*(b+c) && 2*(a+b)>=3*c then 25%17/(a+b+c) else 1%1

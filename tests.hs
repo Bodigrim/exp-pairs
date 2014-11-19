@@ -3,6 +3,7 @@ import qualified ExpPairs.Tests.Pair as Pair (testSuite)
 import qualified ExpPairs.Tests.Ivic as Ivic (testSuite)
 import qualified ExpPairs.Tests.MenzerNowak as MenzerNowak (testSuite)
 import qualified ExpPairs.Tests.Matrix3 as Matrix3 (testSuite)
+import qualified ExpPairs.Tests.Kratzel as Kratzel (testSuite)
 
 main = do
 	RatioInf.testSuite
@@ -10,3 +11,4 @@ main = do
 	Ivic.testSuite
 	MenzerNowak.testSuite
 	Matrix3.testSuite
+	Kratzel.testSuite
