@@ -1,4 +1,4 @@
-module ExpPairs.Optimize (optimizeWithConstraints, LinearForm (..), RationalForm (..), IneqType (..), Constraint (..), InitPair(..), Path, simulateOptimizeWithConstraints, RatioInf (..), RationalInf) where
+module ExpPairs.Optimize (optimize, LinearForm (..), RationalForm (..), IneqType (..), Constraint (..), InitPair(..), Path, simulateOptimize, RatioInf (..), RationalInf) where
 
 import Data.Ratio
 import Data.Ord
@@ -32,18 +32,18 @@ checkMConstraints :: Path -> [Constraint Rational] -> Bool
 checkMConstraints path cons = all (\con -> any (\p -> checkConstraint (evalPath path p) con ) triangleT) cons where
 	triangleT = map fracs2proj [ (0%1,1%1), (0%1,1%2), (1%2,1%2)]
 
-simulateOptimizeWithConstraints :: Rational -> (Double, Rational, InitPair, Path)
-simulateOptimizeWithConstraints r = (d, r, Corput01, mempty) where
+simulateOptimize :: Rational -> (Double, Rational, InitPair, Path)
+simulateOptimize r = (d, r, Corput01, mempty) where
 	d = fromRational r
 
-optimizeWithConstraints :: [RationalForm Rational] -> [Constraint Rational] -> (Double, Rational, InitPair, Path)
-optimizeWithConstraints rfs cons = (d, r, ip, path) where
-	(r', ip, path) = optimizeWithConstraints' rfs cons (InfPlus, undefined, mempty)
+optimize :: [RationalForm Rational] -> [Constraint Rational] -> (Double, Rational, InitPair, Path)
+optimize rfs cons = (d, r, ip, path) where
+	(r', ip, path) = optimize' rfs cons (InfPlus, undefined, mempty)
 	r = toRational r'
 	d = fromRational r
 
-optimizeWithConstraints' :: [RationalForm Rational] -> [Constraint Rational] -> (RationalInf, InitPair, Path) -> (RationalInf, InitPair, Path)
-optimizeWithConstraints' rfs cons (r, ip, path)
+optimize' :: [RationalForm Rational] -> [Constraint Rational] -> (RationalInf, InitPair, Path) -> (RationalInf, InitPair, Path)
+optimize' rfs cons (r, ip, path)
 	| lengthPath path > 100 = (r, ip, path)
 	| otherwise = (r2, ip2, path2) where
 		(r0, ip0) = if r0' < r then (r0', ip0') else (r, ip) where
@@ -56,8 +56,8 @@ optimizeWithConstraints' rfs cons (r, ip, path)
 
 		(r1, ip1, path1) = if checkMConstraints patha cons0 && r1' < r0 then (r1', ip1', path1') else (r0, ip0, path) where
 			patha  = path `mappend` aPath
-			(r1', ip1', path1') = optimizeWithConstraints' rfs cons (r0, ip0, patha)
+			(r1', ip1', path1') = optimize' rfs cons (r0, ip0, patha)
 
 		(r2, ip2, path2) = if checkMConstraints pathba cons0 && r2' < r1 then (r2', ip2', path2') else (r1, ip1, path1) where
 			pathba  = path `mappend` baPath
-			(r2', ip2', path2') = optimizeWithConstraints' rfs cons (r1, ip1, pathba)
+			(r2', ip2', path2') = optimize' rfs cons (r1, ip1, pathba)

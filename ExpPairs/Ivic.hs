@@ -6,8 +6,8 @@ import ExpPairs.Optimize
 
 zetaOnS :: Rational -> (Double, Rational, InitPair, Path)
 zetaOnS s
-	| s >= 1  = simulateOptimizeWithConstraints 0
-	| s >= 1%2 = optimizeWithConstraints
+	| s >= 1  = simulateOptimize 0
+	| s >= 1%2 = optimize
 		[RationalForm (LinearForm 1 1 (-s)) 2]
 		[Constraint (LinearForm (-1) 1 (-s)) NonStrict]
 	| otherwise = (d, r, ip, path) where
@@ -63,7 +63,7 @@ mOnS s
 			(LinearForm (4*s-2) (8*s-6) (2*s-1)) NonStrict
 			]
 
-		(_, x2', _, _) = optimizeWithConstraints [RationalForm numer denom] cons
+		(_, x2', _, _) = optimize [RationalForm numer denom] cons
 		x2 = -x2'
 
 checkAbscissa :: [(Rational, Rational)] -> Rational -> Bool

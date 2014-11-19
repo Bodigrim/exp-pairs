@@ -5,7 +5,7 @@ import Data.Ratio
 import ExpPairs.Optimize
 
 menzerNowak :: Integer -> Integer -> (Double, Rational, InitPair, Path)
-menzerNowak a' b' = optimizeWithConstraints
+menzerNowak a' b' = optimize
 	[
 		RationalForm (LinearForm 1 1 0) (LinearForm (a+b) 0 (a+b)),
 		RationalForm (LinearForm 1 0 0) (LinearForm (a+b) (-a) a)
