@@ -31,10 +31,11 @@ tauab a' b' = minimumBy (comparing (\(_, (_, r, _, _)) -> r)) [kr511a, kr511b, k
 			Constraint (LinearForm 29 29 (-24)) Strict
 		])
 
-data TauabcTheorem = Kr61 | Kr62 | Kr63 | Kr64 | Kr65 | Kr66 | Tauab TauabTheorem
+data TauabcTheorem = Kolesnik | Kr61 | Kr62 | Kr63 | Kr64 | Kr65 | Kr66 | Tauab TauabTheorem
 	deriving (Show)
 
 tauabc :: Integer -> Integer -> Integer -> (TauabcTheorem, (Double, Rational, InitPair, Path))
+tauabc 1 1 1 = (Kolesnik, simulateOptimize $ 43%96)
 tauabc a' b' c' = minimumBy (comparing (\(_, (_, r, _, _)) -> r)) [kr61, kr62, kr63, kr64, kr65, kr66] where
 	a = a'%1
 	b = b'%1
