@@ -31,16 +31,18 @@ tauab a' b' = minimumBy (comparing (\(_, (_, r, _, _)) -> r)) [kr511a, kr511b, k
 			Constraint (LinearForm 29 29 (-24)) Strict
 		])
 
-data TauabcTheorem = Kr62 | Kr63 | Kr64 | Kr65 | Kr66 | Tauab TauabTheorem
+data TauabcTheorem = Kr61 | Kr62 | Kr63 | Kr64 | Kr65 | Kr66 | Tauab TauabTheorem
 	deriving (Show)
 
 tauabc :: Integer -> Integer -> Integer -> (TauabcTheorem, (Double, Rational, InitPair, Path))
-tauabc a' b' c' = if c'>=a'+b'
-	then (\(th, r) -> (Tauab th, r)) (tauab a' b')
-	else minimumBy (comparing (\(_, (_, r, _, _)) -> r)) [kr62, kr64, kr65, kr66] where
+tauabc a' b' c' = minimumBy (comparing (\(_, (_, r, _, _)) -> r)) [kr61, kr62, kr63, kr64, kr65, kr66] where
 	a = a'%1
 	b = b'%1
 	c = c'%1
+	kr61 = if c<a+b
+		then (Kr61, simulateOptimize $ 2/(a+b+c))
+		else if r<1/c then (Kr61, simulateOptimize $ 1/c) else (Tauab th, t) where
+			(th, t@(_, r, _, _)) = tauab a' b'
 	kr62 = (Kr62, optimize
 		[RationalForm (LinearForm 2 2 0) (LinearForm 0 0 (a+b+c))]
 		[
