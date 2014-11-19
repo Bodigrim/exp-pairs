@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
 module ExpPairs.Tests.Ivic where
 
 import Data.Ratio
@@ -11,54 +12,64 @@ import Test.QuickCheck
 
 snd4 (_, a, _, _) = a
 
+newtype Ratio01 t = Ratio01 t
+
+instance (Ord t, Fractional t, Arbitrary t) => Arbitrary (Ratio01 t) where
+	arbitrary = fmap (Ratio01 . ratio01) arbitrary
+
+instance (Ord t, Fractional t, Serial m t) => Serial m (Ratio01 t) where
+	series = cons1 (Ratio01 . ratio01)
+
+instance Show t => Show (Ratio01 t) where
+  showsPrec n (Ratio01 x) = showsPrec n x
+
+
 ratio01 a = if a==0 then 0 else (b+1)/2 where
-	b = (if a>0 then min else max) a (recip a)
+	b = (if a > 0 then min else max) a (recip a)
 
-ratioI from to a = from + (to-from) * (ratio01 a)
-
-testZetaOnS1 a' b' = a==b || za>=zb where
-	[a,b] = sort $ map (ratioI (-3) 3) [a', b']
+testZetaOnS1 (Ratio01 a') (Ratio01 b') = a==b || za>=zb where
+	[a,b] = sort $ map (\n -> (n-1%2)*6) [a', b']
 	[za, zb] = map (snd4 . zetaOnS) [a,b]
 
-testZetaOnS2 a' b' = a==b || za>zb where
-	[a,b] = sort $ map ratio01 [a', b']
+testZetaOnS2 (Ratio01 a') (Ratio01 b') = a==b || za>zb where
+	[a,b] = sort [a', b']
 	[za, zb] = map (snd4 . zetaOnS) [a,b]
 
-testZetaOnSsym a' = abs (za-za') == abs (a-1%2) where
-	a = ratioI (-3) 3 a'
+testZetaOnSsym (Ratio01 a') = abs (za-za') == abs (a-1%2) where
+	a = (a'-1%2)*6
 	za = snd4 $ zetaOnS a
 	za' = snd4 $ zetaOnS (1-a)
 
-testZetaOnSZero a' = a<1 || snd4 (zetaOnS a) == 0 where
-	a = ratioI (-3) 3 a'
+testZetaOnSZero (Ratio01 a') = a<1 || snd4 (zetaOnS a) == 0 where
+	a = (a'-1%2)*6
 
 
-testMOnS1 a' b' = a==b || za<=zb where
-	[a,b] = sort $ map (ratioI (-3) 3) [a', b']
+testMOnS1 (Ratio01 a') (Ratio01 b') = a==b || za<=zb where
+	[a,b] = sort $ map (\n -> (n-1%2)*6) [a', b']
 	[za, zb] = map mOnS [a,b]
 
-testMOnS2 a' b' = a==b || za<zb where
-	[a,b] = sort $ map (ratioI (1%2) 1) [a', b']
+testMOnS2 (Ratio01 a') (Ratio01 b') = a==b || za<zb where
+	[a,b] = sort $ map (\n -> n/2+1%2) [a', b']
 	[za, zb] = map mOnS [a,b]
 
-testMOnSZero a' = a>=1%2 || mOnS a == 0 where
-	a = ratioI (-3) 3 a'
+testMOnSZero (Ratio01 a') = a>=1%2 || mOnS a == 0 where
+	a = (a'-1%2)*6
 
-testMOnSInf a' = a<1 || mOnS a == InfPlus where
-	a = ratioI (-3) 3 a'
+testMOnSInf (Ratio01 a') = a<1 || mOnS a == InfPlus where
+	a = (a'-1%2)*6
 
 
 -- Convexity tests - they fail and it is OK
-testZetaConvex a' b' c' = a==b || b==c || zb <= k*b+l where
-	[a,b,c] = sort $ map ratio01 [a', b', c']
+testZetaConvex (Ratio01 a') (Ratio01 b') (Ratio01 c') = a==b || b==c || zb <= k*b+l where
+	[a,b,c] = sort [a', b', c']
 	[za, zb, zc] = map (snd4 . zetaOnS) [a,b,c]
 	k = (za-zc) / (a-c)
 	l = za - k*a
 
 -- Ivic, Th. 8.1, p. 205
-testMConvex a' b' c' = a==b || b==c || za==InfPlus || zc==InfPlus
+testMConvex (Ratio01 a') (Ratio01 b') (Ratio01 c') = a==b || b==c || za==InfPlus || zc==InfPlus
 	|| zb>= za*zc*Finite(c-a)/(zc*Finite(c-b) + za*Finite(b-a)) where
-		[a,b,c] = sort $ map (ratioI (1%2) 1) [a', b', c']
+		[a,b,c] = sort $ map (\n -> n/2+1%2) [a', b', c']
 		[za, zb, zc] = map mOnS [a,b,c] :: [RationalInf]
 
 

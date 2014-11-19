@@ -1,14 +1,15 @@
-module ExpPairs.Pair (InitPair (..), initPairs, initPairToValue) where
+module ExpPairs.Pair (InitPair' (..), InitPair, initPairs, initPairToValue) where
 
 import Data.Ratio
 
 data Triangle = Corput16 | HuxW87b1 | Hux05
 	deriving (Show, Bounded, Enum, Eq, Ord)
 
-data InitPair = Corput01 | Corput12 | Mix Rational Rational
+data InitPair' t = Corput01 | Corput12 | Mix t t
 	deriving (Eq)
+type InitPair = InitPair' Rational
 
-instance Show InitPair where
+instance (Show t, Num t, Eq t) => Show (InitPair' t) where
 	show Corput01 = "(0, 1)"
 	show Corput12 = "(1/2, 1/2)"
 	show (Mix r1 r2) =

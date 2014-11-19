@@ -5,8 +5,6 @@ import Data.List
 import qualified Data.Matrix as M
 import qualified ExpPairs.Matrix3 as M3
 
-import Test.SmallCheck
-import Test.SmallCheck.Series
 import Test.QuickCheck
 
 instance (Arbitrary a) => Arbitrary (M3.Matrix3 a) where
@@ -51,7 +49,6 @@ testMultCol m v@(M3.Vector3 v1 v2 v3) = a==a' && b==b' && c==c' where
 testSmth depth (name, test) = do
 	putStrLn name
 	mapM_ (\_ -> quickCheck test) [1..1]
-	--smallCheck depth test
 
 testSuite = do
 	mapM_ (testSmth 1) [

@@ -7,22 +7,27 @@ import ExpPairs.Kratzel
 
 import Test.SmallCheck
 import Test.SmallCheck.Series
-import Test.QuickCheck
+import Test.QuickCheck hiding (Positive)
+
+instance (Num a, Ord a, Arbitrary a) => Arbitrary (Positive a) where
+  arbitrary =
+    (Positive . abs) `fmap` (arbitrary `suchThat` (/= 0))
+
 
 snd4 (_, a, _, _) = a
 
-testMonotonic a' b' c' d' =  (a==c && b==d) || zab > zcd where
-	[a'', b'', c'', d''] = map (\n -> abs n + 1) [a', b', c', d']
-	[a, c] = sort [a'', c'']
-	[b, d] = sort [b'', d'']
+testMonotonic :: (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> Bool
+testMonotonic (Positive a') (Positive b') (Positive c') (Positive d') =  (a==c && b==d) || zab > zcd where
+	[a, c] = sort [a', c']
+	[b, d] = sort [b, d]
 	zab = snd4 $ menzerNowak a b
 	zcd = snd4 $ menzerNowak c d
 
-testCompareLow a' b' = snd4 (snd $ tauab a b) <= snd4 (menzerNowak a b) + 1%(10^30) where
-	[a, b] = map (\n -> abs n + 1) [a', b']
+testCompareLow :: (Positive Integer) -> (Positive Integer) -> Bool
+testCompareLow (Positive a) (Positive b) = snd4 (snd $ tauab a b) <= snd4 (menzerNowak a b) + 1%(10^30) where
 
-testCompareHigh a' b' = snd4 (menzerNowak a b) < 1 where
-	[a, b] = map (\n -> abs n + 1) [a', b']
+testCompareHigh :: (Positive Integer) -> (Positive Integer) -> Bool
+testCompareHigh (Positive a) (Positive b) = snd4 (menzerNowak a b) < 1
 
 testSmth depth (name, test) = do
 	putStrLn name
