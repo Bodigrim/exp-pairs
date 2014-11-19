@@ -22,16 +22,19 @@ proj2fracs :: (Integer, Integer, Integer) -> (Rational, Rational)
 proj2fracs (k, l, m) = (k%m, l%m)
 
 
--- TODO: do not check all initPairs if all corners are inside constraints
--- TODO: do not recheck usual pairs three times
-evalFunctional :: [RationalForm Rational] -> [Constraint Rational] -> Path -> (RationalInf, InitPair)
-evalFunctional rfs cons path = if null rs then (InfPlus, undefined) else minimumBy (comparing fst) rs where
-	ps = map (evalPath path . fracs2proj . initPairToValue) initPairs `zip` initPairs
-	qs = filter (\(p,_) -> all (checkConstraint p) cons) ps
+evalFunctional :: [InitPair] -> [InitPair] -> [RationalForm Rational] -> [Constraint Rational] -> Path -> (RationalInf, InitPair)
+evalFunctional corners interiors rfs cons path = if null rs then (InfPlus, undefined) else minimumBy (comparing fst) rs where
+	applyPath ips = map (evalPath path . fracs2proj . initPairToValue) ips `zip` ips
+	corners'   = applyPath corners
+	interiors' = applyPath interiors
+
+	predicate (p, _) = all (checkConstraint p) cons
+	qs = if all predicate corners' then corners' else filter predicate interiors'
+
 	rs = map (\(p, ip) -> (maximum $ map (evalRF p) rfs, ip)) qs
 
 checkMConstraints :: Path -> [Constraint Rational] -> Bool
-checkMConstraints path cons = all (\con -> any (\p -> checkConstraint (evalPath path p) con ) triangleT) cons where
+checkMConstraints path = all (\con -> any (\p -> checkConstraint (evalPath path p) con ) triangleT) where
 	triangleT = map fracs2proj [ (0%1,1%1), (0%1,1%2), (1%2,1%2)]
 
 simulateOptimize :: Rational -> (Double, Rational, InitPair, Path)
@@ -40,7 +43,8 @@ simulateOptimize r = (d, r, Corput01, mempty) where
 
 optimize :: [RationalForm Rational] -> [Constraint Rational] -> (Double, Rational, InitPair, Path)
 optimize rfs cons = (d, r, ip, path) where
-	(r', ip, path) = optimize' rfs cons (InfPlus, undefined, mempty)
+	(r0, ip0) = evalFunctional [Corput01, Corput12] [Corput01, Corput12] rfs cons mempty
+	(r', ip, path) = optimize' rfs cons (r0, ip0, mempty)
 	r = toRational r'
 	d = fromRational r
 
@@ -49,7 +53,9 @@ optimize' rfs cons ret@(r, ip, path)
 	| lengthPath path > 100 = ret
 	| otherwise = retBA where
 		ret0@(r0, ip0, _) = if r0' < r then (r0', ip0', path) else ret where
-			(r0', ip0') = evalFunctional rfs cons path
+			(r0', ip0') = evalFunctional corners interiors rfs cons path
+			corners = [Mix 1 0, Mix 0 1, Mix 0 0]
+			interiors = initPairs
 
 		cons0 = if r0==InfPlus then cons else cons ++ map (consBuilder r0) rfs
 
