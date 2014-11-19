@@ -72,6 +72,16 @@ testMConvex (Ratio01 a') (Ratio01 b') (Ratio01 c') = a==b || b==c || za==InfPlus
 		[a,b,c] = sort $ map (\n -> n/2+1%2) [a', b', c']
 		[za, zb, zc] = map mOnS [a,b,c] :: [RationalInf]
 
+etalonZetaOnS  [a,b,c,d] = c%d >= snd4 (zetaOnS $ a%b)
+
+etalonMOnS  [a,b,c,d] = Finite (c%d) <= mOnS (a%b)
+
+testEtalon f filename = do
+	etalon <- readFile filename
+	let tests = map (map read . words) (lines etalon) in
+		let results = map f tests in
+			putStrLn $ if and results then filename ++ " success" else filename ++ " fail at " ++ show (fst $ head $ dropWhile snd $ zip tests results)
+	return etalon
 
 testSmth depth (name, test) = do
 	putStrLn name
@@ -79,6 +89,8 @@ testSmth depth (name, test) = do
 	smallCheck depth test
 
 testSuite = do
+	testEtalon etalonZetaOnS "ExpPairs/Tests/etalon-zetaOnS.txt"
+	testEtalon etalonMOnS    "ExpPairs/Tests/etalon-mOnS.txt"
 	--mapM_ (testSmth 1) [
 	--	("mOnS convex", testMConvex),
 	--	("zetaOnS convex", testZetaConvex)

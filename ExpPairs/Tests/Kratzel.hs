@@ -44,6 +44,16 @@ testAbcCompareHigh :: (Positive Integer) -> (Positive Integer) -> (Positive Inte
 testAbcCompareHigh (Positive a') (Positive b') (Positive c') = c>=a+b || snd4 (snd $ tauabc a b c) < 2%(a+b+c) where
 	[a, b, c] = sort [a', b', c']
 
+etalonTauab [a,b,c,d] = c%d >= (snd4 . snd) (tauab a b)
+
+etalonTauabc [a,b,c,d,e] = d%e >= (snd4 . snd) (tauabc a b c)
+
+testEtalon f filename = do
+	etalon <- readFile filename
+	let tests = map (map read . words) (lines etalon) in
+		let results = map f tests in
+			putStrLn $ if and results then filename ++ " success" else filename ++ " fail at " ++ show (fst $ head $ dropWhile snd $ zip tests results)
+	return etalon
 
 testSmth depth (name, test) = do
 	putStrLn name
@@ -51,6 +61,8 @@ testSmth depth (name, test) = do
 	smallCheck depth test
 
 testSuite = do
+	testEtalon etalonTauab  "ExpPairs/Tests/etalon-tauab.txt"
+	--testEtalon etalonTauabc "ExpPairs/Tests/etalon-tauabc.txt"
 	mapM_ (testSmth 7) [
 		("tauabc compare with 1/(a+b+c)", testAbcCompareLow),
 		("tauabc compare with 2/(a+b+c)", testAbcCompareHigh)
