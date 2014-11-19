@@ -22,8 +22,10 @@ proj2fracs :: (Integer, Integer, Integer) -> (Rational, Rational)
 proj2fracs (k, l, m) = (k%m, l%m)
 
 
+-- TODO: do not check all initPairs if all corners are inside constraints
+-- TODO: do not recheck usual pairs three times
 evalFunctional :: [RationalForm Rational] -> [Constraint Rational] -> Path -> (RationalInf, InitPair)
-evalFunctional rfs cons path = if rs==[] then (InfPlus, undefined) else minimumBy (comparing fst) rs where
+evalFunctional rfs cons path = if null rs then (InfPlus, undefined) else minimumBy (comparing fst) rs where
 	ps = map (evalPath path . fracs2proj . initPairToValue) initPairs `zip` initPairs
 	qs = filter (\(p,_) -> all (checkConstraint p) cons) ps
 	rs = map (\(p, ip) -> (maximum $ map (evalRF p) rfs, ip)) qs
@@ -43,21 +45,23 @@ optimize rfs cons = (d, r, ip, path) where
 	d = fromRational r
 
 optimize' :: [RationalForm Rational] -> [Constraint Rational] -> (RationalInf, InitPair, Path) -> (RationalInf, InitPair, Path)
-optimize' rfs cons (r, ip, path)
-	| lengthPath path > 100 = (r, ip, path)
-	| otherwise = (r2, ip2, path2) where
-		(r0, ip0) = if r0' < r then (r0', ip0') else (r, ip) where
+optimize' rfs cons ret@(r, ip, path)
+	| lengthPath path > 100 = ret
+	| otherwise = retBA where
+		ret0@(r0, ip0, _) = if r0' < r then (r0', ip0', path) else ret where
 			(r0', ip0') = evalFunctional rfs cons path
 
-		cons0 = if r0==InfPlus
-			then cons
-			else cons ++ map (\(RationalForm num den) -> Constraint (consBuilder num den) Strict) rfs
-		consBuilder num den = substituteLF (num, den, 1) (LinearForm (-1) (toRational r0) 0)
+		cons0 = if r0==InfPlus then cons else cons ++ map (consBuilder r0) rfs
 
-		(r1, ip1, path1) = if checkMConstraints patha cons0 && r1' < r0 then (r1', ip1', path1') else (r0, ip0, path) where
+		retA@(r1, ip1, _) = if checkMConstraints patha cons0 && r1' < r0 then branchA else ret0 where
 			patha  = path `mappend` aPath
-			(r1', ip1', path1') = optimize' rfs cons (r0, ip0, patha)
+			branchA@(r1', _, _) = optimize' rfs cons (r0, ip0, patha)
 
-		(r2, ip2, path2) = if checkMConstraints pathba cons0 && r2' < r1 then (r2', ip2', path2') else (r1, ip1, path1) where
+		cons1 = if r1==r0	then cons0 else cons ++ map (consBuilder r1) rfs
+
+		retBA = if checkMConstraints pathba cons1 && r2' < r1 then branchB else retA where
 			pathba  = path `mappend` baPath
-			(r2', ip2', path2') = optimize' rfs cons (r1, ip1, pathba)
+			branchB@(r2', _, _) = optimize' rfs cons (r1, ip1, pathba)
+
+		consBuilder rr (RationalForm num den) = Constraint (substituteLF (num, den, 1) (LinearForm (-1) (toRational rr) 0)) Strict
+
