@@ -8,3 +8,7 @@ all: exp-hull tests
 
 test: tests
 	./tests
+
+clean:
+	find -iname "*.hi" -delete -or -iname "*.o" -delete
+	rm exp-hull tests
