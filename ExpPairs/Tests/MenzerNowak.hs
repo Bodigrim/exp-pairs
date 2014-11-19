@@ -11,23 +11,24 @@ import Test.QuickCheck hiding (Positive)
 
 instance (Num a, Ord a, Arbitrary a) => Arbitrary (Positive a) where
   arbitrary =
-    (Positive . abs) `fmap` (arbitrary `suchThat` (/= 0))
+    (Positive . abs) `fmap` (arbitrary `suchThat` (> 0))
 
 
 snd4 (_, a, _, _) = a
 
 testMonotonic :: (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> Bool
 testMonotonic (Positive a') (Positive b') (Positive c') (Positive d') =  (a==c && b==d) || zab > zcd where
-	[a, c] = sort [a', c']
-	[b, d] = sort [b, d]
+	[a, c, b, d] = sort [a', b', c', d']
 	zab = snd4 $ menzerNowak a b
 	zcd = snd4 $ menzerNowak c d
 
 testCompareLow :: (Positive Integer) -> (Positive Integer) -> Bool
-testCompareLow (Positive a) (Positive b) = snd4 (snd $ tauab a b) <= snd4 (menzerNowak a b) + 1%(10^30) where
+testCompareLow (Positive a') (Positive b') = snd4 (snd $ tauab a b) <= snd4 (menzerNowak a b) + 1%(10^30)  where
+	[a, b] = sort [a', b']
 
 testCompareHigh :: (Positive Integer) -> (Positive Integer) -> Bool
-testCompareHigh (Positive a) (Positive b) = snd4 (menzerNowak a b) < 1
+testCompareHigh (Positive a') (Positive b') = snd4 (menzerNowak a b) < 1 where
+	[a, b] = sort [a', b']
 
 testSmth depth (name, test) = do
 	putStrLn name
@@ -35,10 +36,10 @@ testSmth depth (name, test) = do
 	smallCheck depth test
 
 testSuite = do
-	mapM_ (testSmth 5) [
+	mapM_ (testSmth 10) [
 		("menzerNowak compare with tauab", testCompareLow),
 		("menzerNowak compare with 1", testCompareHigh)
 		]
-	mapM_ (testSmth 1) [
+	mapM_ (testSmth 3) [
 		("menzerNowak monotonic", testMonotonic)
 		]
