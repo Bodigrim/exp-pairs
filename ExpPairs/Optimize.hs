@@ -48,6 +48,12 @@ instance Show OptimizeResult where
 		show' (Finite r) = show (fromRational r ) ++ " = " ++ show r
 		show' r = show r
 
+instance Eq OptimizeResult where
+	a==b = (optimalValue a)==(optimalValue b)
+
+instance Ord OptimizeResult where
+	compare a b = compare (optimalValue a) (optimalValue b)
+
 simulateOptimize :: Rational -> OptimizeResult
 simulateOptimize r = OptimizeResult (Finite r) Corput01 mempty
 
