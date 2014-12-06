@@ -16,6 +16,16 @@ zetaOnS s
 		optRes = zetaOnS (1-s)
 		r = Finite (1%2 - s) + optimalValue optRes
 
+zetaOnHalf :: Rational
+zetaOnHalf = 32%205
+
+reverseZetaOnS :: Rational -> OptimizeResult
+reverseZetaOnS mu
+	| mu >= 1%2   = simulateOptimize 0
+	| mu > zetaOnHalf = optimize [RationalForm (LinearForm 1 (-1) 1) 1] [Constraint (LinearForm 0 (-2) (1+2*mu)) NonStrict]
+	| otherwise = optRes {optimalValue = negate $ optimalValue optRes} where
+	optRes = optimize [RationalForm (LinearForm 1 (-1) 0) 1] [Constraint (LinearForm 1 0 (-mu)) NonStrict, Constraint (LinearForm (-1) 1 (-1%2)) NonStrict]
+
 lemma82_f :: Rational -> Rational
 lemma82_f s
 	| s < 1%2   = undefined

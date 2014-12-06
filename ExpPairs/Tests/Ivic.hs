@@ -60,6 +60,11 @@ testMOnSInf (Ratio01 a') = a<1 || (optimalValue . mOnS) a == InfPlus where
 	a = (a'-1%2)*6
 
 
+testZetaReverse (Ratio01 s') = abs (s-t) <= 5%1000 where
+	s = s' / 2
+	zs = zetaOnS s
+	t = toRational $ optimalValue $ reverseZetaOnS $ toRational $ optimalValue zs
+
 -- Convexity tests - they fail and it is OK
 testZetaConvex (Ratio01 a') (Ratio01 b') (Ratio01 c') = a==b || b==c || zb <= k * Finite b + l where
 	[a,b,c] = sort [a', b', c']
@@ -103,8 +108,9 @@ testSuite = do
 		("mOnS strict monotonic", testMOnS2)
 		]
 	mapM_ (testSmth 9) [
+		("zetaOnS reverse", testZetaReverse),
 		("zetaOnS symmetry", testZetaOnSsym),
 		("zetaOnS above s=1", testZetaOnSZero),
 		("mOnS below s=1/2", testMOnSZero),
-		("mOnS above s=1", testMOnSZero)
+		("mOnS above s=1", testMOnSInf)
 		]
