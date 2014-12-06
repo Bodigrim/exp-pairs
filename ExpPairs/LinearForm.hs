@@ -1,4 +1,4 @@
-module ExpPairs.LinearForm (LinearForm (..), RationalForm (..), IneqType (..), Constraint (..), checkConstraint, evalRF, substituteLF) where
+module ExpPairs.LinearForm (LinearForm (..), RationalForm (..), IneqType (..), Constraint (..), checkConstraint, evalLF, evalRF, substituteLF) where
 
 import Data.List
 import Data.Ratio
