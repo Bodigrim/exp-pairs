@@ -23,8 +23,10 @@ instance Show t => Show (Ratio01 t) where
   showsPrec n (Ratio01 x) = showsPrec n x
 
 
-ratio01 a = if a==0 then 0 else (b+1)/2 where
-	b = (if a > 0 then min else max) a (recip a)
+ratio01 a
+	| abs a <= 1 = recip 2 + a/4
+	| a < 0      = recip (negate a) / 4
+	| otherwise  = 3 * recip 4 + recip a / 4
 
 testZetaOnS1 (Ratio01 a') (Ratio01 b') = a==b || za>=zb where
 	[a,b] = sort $ map (\n -> (n-1%2)*6) [a', b']

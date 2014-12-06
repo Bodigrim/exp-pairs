@@ -14,8 +14,10 @@ newtype Ratio01 t = Ratio01 t
 instance (Ord t, Fractional t, Arbitrary t) => Arbitrary (Ratio01 t) where
 	arbitrary = fmap (Ratio01 . ratio01) arbitrary
 
-ratio01 a = if a==0 then 0 else (b+1)/2 where
-	b = (if a > 0 then min else max) a (recip a)
+ratio01 a
+	| abs a <= 1 = recip 2 + a/4
+	| a < 0      = recip (negate a) / 4
+	| otherwise  = 3 * recip 4 + recip a / 4
 
 
 instance (Ord t, Fractional t, Arbitrary t) => Arbitrary (InitPair' t) where
