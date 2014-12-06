@@ -6,6 +6,7 @@ import ExpPairs.LinearForm
 
 import Test.QuickCheck
 
+testPlus :: Rational -> Rational -> Rational -> Rational -> Rational -> Rational -> Bool
 testPlus a b c d e f = a+d==ad && b+e==be && c+f==cf where
 	l1 = LinearForm a b c
 	l2 = LinearForm d e f
@@ -14,6 +15,7 @@ testPlus a b c d e f = a+d==ad && b+e==be && c+f==cf where
 	be = evalLF (0, 1, 0) l3
 	cf = evalLF (0, 0, 1) l3
 
+testMinus :: Rational -> Rational -> Rational -> Rational -> Rational -> Rational -> Bool
 testMinus a b c d e f = a-d==ad && b-e==be && c-f==cf where
 	l1 = LinearForm a b c
 	l2 = LinearForm d e f
@@ -30,7 +32,6 @@ testSmth depth (name, test) = do
 	mapM_ (\_ -> quickCheck test) [1..1]
 
 testSuite = do
-
 	mapM_ (testSmth 1) [
 		("linearform plus", testPlus),
 		("linearform minus", testMinus)
