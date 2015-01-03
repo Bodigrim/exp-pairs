@@ -14,32 +14,32 @@ instance (Num a, Ord a, Arbitrary a) => Arbitrary (Positive a) where
     (Positive . abs) `fmap` (arbitrary `suchThat` (> 0))
 
 
-testAbMonotonic :: (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> Bool
+testAbMonotonic :: Positive Integer -> Positive Integer -> Positive Integer -> Positive Integer -> Bool
 testAbMonotonic (Positive a') (Positive b') (Positive c') (Positive d') =  (a==c && b==d) || zab > zcd where
 	[a, c, b, d] = sort [a', b', c', d']
 	zab = optimalValue $ snd $ tauab a b
 	zcd = optimalValue $ snd $ tauab c d
 
-testAbCompareLow :: (Positive Integer) -> (Positive Integer) -> Bool
+testAbCompareLow :: Positive Integer -> Positive Integer -> Bool
 testAbCompareLow (Positive a') (Positive b') = optimalValue (snd $ tauab a b) >= Finite (1%(2*a+2*b)) where
 	[a, b] = sort [a', b']
 
-testAbCompareHigh :: (Positive Integer) -> (Positive Integer) -> Bool
+testAbCompareHigh :: Positive Integer -> Positive Integer -> Bool
 testAbCompareHigh (Positive a') (Positive b') = optimalValue (snd $ tauab a b) < Finite (1%(a+b)) where
 	[a, b] = sort [a', b']
 
 
-testAbcMonotonic :: (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> Bool
+testAbcMonotonic :: Positive Integer -> Positive Integer -> Positive Integer -> Positive Integer -> Positive Integer -> Positive Integer -> Bool
 testAbcMonotonic (Positive a') (Positive b') (Positive c') (Positive d') (Positive e') (Positive f') =  (a==d && b==e && c==f) || zabc >= zdef where
 	[a, d, b, e, c, f] = sort [a', b', c', d', e', f']
 	zabc = optimalValue $ snd $ tauabc a b c
 	zdef = optimalValue $ snd $ tauabc d e f
 
-testAbcCompareLow :: (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> Bool
+testAbcCompareLow :: Positive Integer -> Positive Integer -> Positive Integer -> Bool
 testAbcCompareLow (Positive a') (Positive b') (Positive c') = c>=a+b || optimalValue (snd $ tauabc a b c) >= Finite (1%(a+b+c)) where
 	[a, b, c] = sort [a', b', c']
 
-testAbcCompareHigh :: (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> Bool
+testAbcCompareHigh :: Positive Integer -> Positive Integer -> Positive Integer -> Bool
 testAbcCompareHigh (Positive a') (Positive b') (Positive c') = c>=a+b || optimalValue (snd $ tauabc a b c) < Finite (2%(a+b+c)) where
 	[a, b, c] = sort [a', b', c']
 
@@ -51,7 +51,7 @@ testEtalon f filename = do
 	etalon <- readFile filename
 	let tests = map (map read . words) (lines etalon) in
 		let results = map f tests in
-			putStrLn $ if and results then filename ++ " success" else filename ++ " fail at " ++ show (fst $ head $ dropWhile snd $ zip tests results)
+			putStrLn $ filename ++ (if and results then " success" else " fail at " ++ show (fst $ head $ dropWhile snd $ zip tests results))
 	return etalon
 
 testSmth depth (name, test) = do

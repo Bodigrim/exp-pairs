@@ -86,7 +86,7 @@ testEtalon f filename = do
 	etalon <- readFile filename
 	let tests = map (map read . words) (lines etalon) in
 		let results = map f tests in
-			putStrLn $ if and results then filename ++ " success" else filename ++ " fail at " ++ show (fst $ head $ dropWhile snd $ zip tests results)
+			putStrLn $ filename ++ (if and results then " success" else " fail at " ++ show (fst $ head $ dropWhile snd $ zip tests results))
 	return etalon
 
 testSmth depth (name, test) = do

@@ -49,7 +49,7 @@ instance Show OptimizeResult where
 		show' r = show r
 
 instance Eq OptimizeResult where
-	a==b = (optimalValue a)==(optimalValue b)
+	a==b = optimalValue a == optimalValue b
 
 instance Ord OptimizeResult where
 	compare a b = compare (optimalValue a) (optimalValue b)
@@ -68,7 +68,7 @@ optimize' :: [RationalForm Rational] -> [Constraint Rational] -> OptimizeResult 
 optimize' rfs cons ret@(OptimizeResult r ip path)
 	| lengthPath path > 100 = ret
 	| otherwise = retBA where
-		ret0@(OptimizeResult r0 ip0 _) = if r0' < r then (OptimizeResult r0' ip0' path) else ret where
+		ret0@(OptimizeResult r0 ip0 _) = if r0' < r then OptimizeResult r0' ip0' path else ret where
 			(r0', ip0') = evalFunctional corners interiors rfs cons path
 			corners = [Mix 1 0, Mix 0 1, Mix 0 0]
 			interiors = initPairs

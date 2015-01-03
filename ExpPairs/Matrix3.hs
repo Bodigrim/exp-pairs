@@ -132,7 +132,7 @@ fromList as = Matrix3 {
 		}
 
 instance Functor Matrix3 where
-	fmap f = fromList . (List.map f) . toList
+	fmap f = fromList . List.map f . toList
 
 normalize :: Integral t => Matrix3 t -> Matrix3 t
 normalize m = m' where
@@ -145,15 +145,15 @@ maximum = List.maximum . toList
 
 prettyMatrix :: (Show t) => Matrix3 t -> String
 prettyMatrix m =
-	(show $ a11 m) ++ " " ++
-	(show $ a12 m) ++ " " ++
-	(show $ a13 m) ++ "\n" ++
-	(show $ a21 m) ++ " " ++
-	(show $ a22 m) ++ " " ++
-	(show $ a23 m) ++ "\n" ++
-	(show $ a31 m) ++ " " ++
-	(show $ a32 m) ++ " " ++
-	(show $ a33 m)
+	show (a11 m) ++ " " ++
+	show (a12 m) ++ " " ++
+	show (a13 m) ++ "\n" ++
+	show (a21 m) ++ " " ++
+	show (a22 m) ++ " " ++
+	show (a23 m) ++ "\n" ++
+	show (a31 m) ++ " " ++
+	show (a32 m) ++ " " ++
+	show (a33 m)
 
 multCol :: (Num t) => Matrix3 t -> Vector3 t -> Vector3 t
 multCol m v = Vector3 {

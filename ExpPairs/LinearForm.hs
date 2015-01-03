@@ -11,7 +11,7 @@ data LinearForm t = LinearForm t t t
 instance (Num t, Eq t, Show t) => Show (LinearForm t) where
 	show (LinearForm a b c) = if (a==0) && (b==0) && (c==0)
 		then "0"
-		else "(" ++ (intercalate " + " $ filter (/=[]) $
+		else "(" ++ intercalate " + " (filter (/=[]) $
 			[if a/= 0 then show a ++ "k" else []] ++
 			[if b/= 0 then show b ++ "l" else []] ++
 			[if c/= 0 then show c        else []] ) ++ ")" -- where
@@ -31,14 +31,14 @@ instance Num t => Monoid (LinearForm t) where
 	mappend = (+)
 
 scaleLF :: (Num t, Eq t) => t -> LinearForm t -> LinearForm t
-scaleLF 0 (LinearForm _ _ _) = LinearForm 0 0 0
+scaleLF 0 (LinearForm {}) = LinearForm 0 0 0
 scaleLF s (LinearForm a b c) = LinearForm (a*s) (b*s) (c*s)
 
 evalLF :: Num t => (t, t, t) -> LinearForm t -> t
 evalLF (k, l, m) (LinearForm a b c) = a*k+l*b+m*c
 
 substituteLF :: (Eq t, Num t) => (LinearForm t, LinearForm t, LinearForm t) -> LinearForm t -> LinearForm t
-substituteLF (k, l, m) (LinearForm a b c) = (scaleLF a k) + (scaleLF b l) + (scaleLF c m)
+substituteLF (k, l, m) (LinearForm a b c) = scaleLF a k + scaleLF b l + scaleLF c m
 
 
 data RationalForm t = RationalForm (LinearForm t) (LinearForm t)

@@ -40,9 +40,11 @@ tauabc a' b' c' = minimumBy (comparing (optimalValue . snd)) [kr61, kr62, kr63, 
 	a = a'%1
 	b = b'%1
 	c = c'%1
-	kr61 = if c<a+b
-		then (Kr61, simulateOptimize $ 2/(a+b+c))
-		else if optimalValue optRes < Finite (recip c) then (Kr61, simulateOptimize $ 1/c) else (Tauab th, optRes) where
+	kr61
+		| c<a+b = (Kr61, simulateOptimize $ 2/(a+b+c))
+		| optimalValue optRes < Finite (recip c) = (Kr61, simulateOptimize $ 1/c)
+		| otherwise = (Tauab th, optRes)
+		where
 			(th, optRes) = tauab a' b'
 	kr62 = (Kr62, optimize
 		[RationalForm (LinearForm 2 2 0) (LinearForm 0 0 (a+b+c))]
@@ -55,7 +57,7 @@ tauabc a' b' c' = minimumBy (comparing (optimalValue . snd)) [kr61, kr62, kr63, 
 		[Constraint (LinearForm (2*(a-b-c)) (2*a) (2*a-b-c)) NonStrict])
 	kr64 = (Kr64, simulateOptimize r) where
 		r = recip (a+b+c) * minimum ((a+b+c):[2-4*(k-1)%(3*2^k-4) | k<-[1..maxk], (3*2^k-2*k-4)%1 * a >= 2 * (b+c), (3*2^k-8)%1 * (a+b) >= (3*2^k-4*k+4)%1 * c])
-		maxk = 4 `max` (floor $ log (fromRational $ b+c) / log 2)
+		maxk = 4 `max` floor (logBase 2 (fromRational $ b+c))
 	kr65 = (Kr65, simulateOptimize r) where
 		r = if 7*a>=2*(b+c) && 4*(a+b)>=5*c then 3%2/(a+b+c) else 1%1
 	kr66 = (Kr66, simulateOptimize r) where
