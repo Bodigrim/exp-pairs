@@ -1,10 +1,8 @@
 module ExpPairs.Tests.RatioInf where
 
-import Data.Ratio
 import ExpPairs.RatioInf
 
 import Test.SmallCheck
-import Test.SmallCheck.Series
 import Test.QuickCheck
 
 testPlus :: Rational -> Rational -> Bool
@@ -36,9 +34,10 @@ testConversion a = toRational (Finite a) == a
 
 testSmth depth (name, test) = do
 	putStrLn name
-	mapM_ (\_ -> quickCheck test) [1..1]
+	mapM_ (\_ -> quickCheck test) [1::Integer .. 1]
 	smallCheck depth test
 
+testSuite :: IO ()
 testSuite = do
 	mapM_ (testSmth 5) [
 		("plus", testPlus),

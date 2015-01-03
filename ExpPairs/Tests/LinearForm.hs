@@ -1,7 +1,5 @@
 module ExpPairs.Tests.LinearForm where
 
-import Data.Ratio
-import Data.List
 import ExpPairs.LinearForm
 
 import Test.QuickCheck
@@ -24,13 +22,15 @@ testMinus a b c d e f = a-d==ad && b-e==be && c-f==cf where
 	be = evalLF (0, 1, 0) l3
 	cf = evalLF (0, 0, 1) l3
 
+testFromInteger :: Integer -> Bool
 testFromInteger a = evalLF (0, 0, 1) (fromInteger a) == a
 
 
-testSmth depth (name, test) = do
+testSmth _ (name, test) = do
 	putStrLn name
-	mapM_ (\_ -> quickCheck test) [1..1]
+	mapM_ (\_ -> quickCheck test) [1::Integer .. 1]
 
+testSuite :: IO ()
 testSuite = do
 	mapM_ (testSmth 1) [
 		("linearform plus", testPlus),

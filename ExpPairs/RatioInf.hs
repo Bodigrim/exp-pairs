@@ -73,22 +73,22 @@ instance (Integral t) => Fractional (RatioInf t) where
 
 	InfMinus / InfMinus = error "Cannot divide infinity by infinity"
 	InfMinus / InfPlus  = error "Cannot divide infinity by infinity"
-	InfPlus  / InfMinus = error "Cannot divide infinity by infinity"
-	InfPlus  / InfPlus  = error "Cannot divide infinity by infinity"
-
 	InfMinus / (Finite a)
 		| signum a ==  0 = error "Cannot divide infinity by zero"
 		| signum a ==  1 = InfMinus
 		| signum a == -1 = InfPlus
+
+	InfPlus  / InfMinus = error "Cannot divide infinity by infinity"
+	InfPlus  / InfPlus  = error "Cannot divide infinity by infinity"
 	InfPlus / (Finite a)
 		| signum a ==  0 = error "Cannot divide infinity by zero"
 		| signum a ==  1 = InfPlus
 		| signum a == -1 = InfMinus
 
-	(Finite a) / InfPlus  = Finite 0
-	(Finite a) / InfMinus = Finite 0
+	(Finite _) / InfPlus  = Finite 0
+	(Finite _) / InfMinus = Finite 0
 
-	(Finite a) / (Finite 0) = error "Cannot divide finite value by zero"
+	(Finite _) / (Finite 0) = error "Cannot divide finite value by zero"
 	(Finite a) / (Finite b) = Finite (a/b)
 
 instance (Integral t) => Real (RatioInf t) where

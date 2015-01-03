@@ -31,9 +31,10 @@ testCompareHigh (Positive a') (Positive b') = optimalValue (menzerNowak a b) < 1
 
 testSmth depth (name, test) = do
 	putStrLn name
-	mapM_ (\_ -> quickCheck test) [1..1]
+	mapM_ (\_ -> quickCheck test) [1::Integer .. 1]
 	smallCheck depth test
 
+testSuite :: IO ()
 testSuite = do
 	mapM_ (testSmth 10) [
 		("menzerNowak compare with tauab", testCompareLow),

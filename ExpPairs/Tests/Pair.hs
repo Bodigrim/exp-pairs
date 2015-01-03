@@ -40,8 +40,9 @@ testBounds ip = k>=0 && k<=1%2 && l>=1%2 && l<=1 where
 
 testSmth depth (name, test) = do
 	putStrLn name
-	mapM_ (\_ -> quickCheck test) [1..1]
+	mapM_ (\_ -> quickCheck test) [1::Integer .. 1]
 	smallCheck depth test
 
+testSuite :: IO ()
 testSuite = do
 	testSmth 5 ("bounds", testBounds)

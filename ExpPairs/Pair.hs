@@ -22,9 +22,10 @@ instance (Show t, Num t, Eq t) => Show (InitPair' t) where
 			s2 = f r2 HuxW87b1
 			s3 = f r3 Hux05
 
-
+sect :: Integer
 sect = 30
 
+initPairs :: [InitPair' (Ratio Integer)]
 initPairs = Corput01 : Corput12 : [Mix (r1%sect) (r2%sect) | r1<-[0..sect], r2<-[0..sect-r1]]
 
 initPairToValue :: InitPair -> (Rational, Rational)

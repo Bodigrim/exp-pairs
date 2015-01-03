@@ -6,6 +6,7 @@ import qualified ExpPairs.Tests.Matrix3 as Matrix3 (testSuite)
 import qualified ExpPairs.Tests.Kratzel as Kratzel (testSuite)
 import qualified ExpPairs.Tests.LinearForm as LinearForm (testSuite)
 
+main :: IO ()
 main = do
 	RatioInf.testSuite
 	Pair.testSuite

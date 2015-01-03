@@ -80,6 +80,7 @@ len0 [BA] n = (symbolWidth + bracketWidth*2 + subscriptWidth, "(" ++ show BA ++ 
 len0 xs n = (lxs + bracketWidth*2 + subscriptWidth, "(" ++ pxs ++ ")^" ++ show n) where
 	(lxs, pxs) = len2M xs
 
+len0M :: [Process] -> Int -> (Int, String)
 len0M = memoize len0
 
 -- Простейшая оптимизация: строка as, целиком состоящая из n повторений подстроки bs, может быть записана как bs^n
@@ -92,6 +93,7 @@ len1 as = if null inner
 		cs m xs = concat (replicate m xs)
 		inner = [len0M (bs n) (l`div`n) | n<-[1..l-1], l`mod`n==0, cs (l`div`n) (bs n) == as]
 
+len1M :: [Process] -> (Int, String)
 len1M = memoize len1
 
 -- Перебираем все способы разбить строку на две части и применить к каждой из них len1
@@ -105,6 +107,7 @@ len2 as = if null inner
 		add (x, xs) (y, ys) = (x+y, xs++ys)
 		inner = [ len2M (bs n) `add` len2M (cs n)  | n<-[1..l-1] ]
 
+len2M :: [Process] -> (Int, String)
 len2M = memoize len2
 
 prettyProcesses :: [Process] -> String

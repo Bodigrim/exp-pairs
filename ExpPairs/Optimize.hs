@@ -1,4 +1,4 @@
-module ExpPairs.Optimize (optimize, LinearForm (..), RationalForm (..), IneqType (..), Constraint (..), InitPair(..), Path, simulateOptimize,simulateOptimize', RatioInf (..), RationalInf, OptimizeResult, optimalValue, optimalPair, optimalPath) where
+module ExpPairs.Optimize (optimize, LinearForm (..), RationalForm (..), IneqType (..), Constraint (..), InitPair, Path, simulateOptimize,simulateOptimize', RatioInf (..), RationalInf, OptimizeResult, optimalValue, optimalPair, optimalPath) where
 
 import Data.Ratio
 import Data.Ord
@@ -44,8 +44,8 @@ data OptimizeResult = OptimizeResult {
 	}
 
 instance Show OptimizeResult where
-	show (OptimizeResult r ip p) = show' r ++ "\n" ++ show ip ++ "\t" ++ show p where
-		show' (Finite r) = show (fromRational r ) ++ " = " ++ show r
+	show (OptimizeResult r' ip p) = show' r' ++ "\n" ++ show ip ++ "\t" ++ show p where
+		show' (Finite r) = show (fromRational r :: Double) ++ " = " ++ show r
 		show' r = show r
 
 instance Eq OptimizeResult where
@@ -65,7 +65,7 @@ optimize rfs cons = optimize' rfs cons (OptimizeResult r0 ip0 mempty) where
 	(r0, ip0) = evalFunctional [Corput01, Corput12] [Corput01, Corput12] rfs cons mempty
 
 optimize' :: [RationalForm Rational] -> [Constraint Rational] -> OptimizeResult -> OptimizeResult
-optimize' rfs cons ret@(OptimizeResult r ip path)
+optimize' rfs cons ret@(OptimizeResult r _ path)
 	| lengthPath path > 100 = ret
 	| otherwise = retBA where
 		ret0@(OptimizeResult r0 ip0 _) = if r0' < r then OptimizeResult r0' ip0' path else ret where

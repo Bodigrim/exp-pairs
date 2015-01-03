@@ -1,7 +1,5 @@
 module ExpPairs.Tests.Matrix3 where
 
-import Data.Ratio
-import Data.List
 import qualified Data.Matrix as M
 import qualified ExpPairs.Matrix3 as M3
 
@@ -46,10 +44,11 @@ testMultCol m v@(M3.Vector3 v1 v2 v3) = a==a' && b==b' && c==c' where
 	[a', b', c'] = M.toList $ toM m * M.fromList 3 1 [v1, v2, v3]
 
 
-testSmth depth (name, test) = do
+testSmth _ (name, test) = do
 	putStrLn name
-	mapM_ (\_ -> quickCheck test) [1..1]
+	mapM_ (\_ -> quickCheck test) [1::Integer .. 1]
 
+testSuite :: IO ()
 testSuite = do
 	mapM_ (testSmth 1) [
 		("matrix plus", testOp (+) (+)),

@@ -5,7 +5,6 @@ import Data.Ratio
 import Data.List
 import ExpPairs.Optimize
 import ExpPairs.Ivic
-import ExpPairs.RatioInf
 
 import Test.SmallCheck
 import Test.SmallCheck.Series
@@ -28,44 +27,52 @@ ratio01 a
 	| a < 0      = recip (negate a) / 4
 	| otherwise  = 3 * recip 4 + recip a / 4
 
+testZetaOnS1 :: Ratio01 (Ratio Integer) -> Ratio01 (Ratio Integer) -> Bool
 testZetaOnS1 (Ratio01 a') (Ratio01 b') = a==b || za>=zb where
 	[a,b] = sort $ map (\n -> (n-1%2)*6) [a', b']
 	[za, zb] = map (optimalValue . zetaOnS) [a,b]
 
+testZetaOnS2 :: Ratio01 (Ratio Integer) -> Ratio01 (Ratio Integer) -> Bool
 testZetaOnS2 (Ratio01 a') (Ratio01 b') = a==b || za>zb where
 	[a,b] = sort [a', b']
 	[za, zb] = map (optimalValue . zetaOnS) [a,b]
 
+testZetaOnSsym :: Ratio01 (Ratio Integer) -> Bool
 testZetaOnSsym (Ratio01 a') = (toRational . abs) (za-za') == abs (a-1%2) where
 	a = (a'-1%2)*6
 	za = optimalValue $ zetaOnS a
 	za' = optimalValue $ zetaOnS (1-a)
 
+testZetaOnSZero :: Ratio01 (Ratio Integer) -> Bool
 testZetaOnSZero (Ratio01 a') = a<1 || optimalValue (zetaOnS a) == 0 where
 	a = (a'-1%2)*6
 
-
+testMOnS1 :: Ratio01 (Ratio Integer) -> Ratio01 (Ratio Integer) -> Bool
 testMOnS1 (Ratio01 a') (Ratio01 b') = a==b || za<=zb where
 	[a,b] = sort $ map (\n -> (n-1%2)*6) [a', b']
 	[za, zb] = map (optimalValue . mOnS) [a,b]
 
+testMOnS2 :: Ratio01 (Ratio Integer) -> Ratio01 (Ratio Integer) -> Bool
 testMOnS2 (Ratio01 a') (Ratio01 b') = a==b || za<zb where
 	[a,b] = sort $ map (\n -> n/2+1%2) [a', b']
 	[za, zb] = map (optimalValue . mOnS) [a,b]
 
+testMOnSZero :: Ratio01 (Ratio Integer) -> Bool
 testMOnSZero (Ratio01 a') = a>=1%2 || (optimalValue . mOnS) a == 0 where
 	a = (a'-1%2)*6
 
+testMOnSInf :: Ratio01 (Ratio Integer) -> Bool
 testMOnSInf (Ratio01 a') = a<1 || (optimalValue . mOnS) a == InfPlus where
 	a = (a'-1%2)*6
 
-
+testZetaReverse :: Ratio01 (Ratio Integer) -> Bool
 testZetaReverse (Ratio01 s') = abs (s-t) <= 5%1000 where
 	s = s' / 2
 	zs = zetaOnS s
 	t = toRational $ optimalValue $ reverseZetaOnS $ toRational $ optimalValue zs
 
 -- Convexity tests - they fail and it is OK
+testZetaConvex :: Ratio01 (Ratio Integer) -> Ratio01 (Ratio Integer) -> Ratio01 (Ratio Integer) -> Bool
 testZetaConvex (Ratio01 a') (Ratio01 b') (Ratio01 c') = a==b || b==c || zb <= k * Finite b + l where
 	[a,b,c] = sort [a', b', c']
 	[za, zb, zc] = map (optimalValue . zetaOnS) [a,b,c]
@@ -73,6 +80,7 @@ testZetaConvex (Ratio01 a') (Ratio01 b') (Ratio01 c') = a==b || b==c || zb <= k 
 	l = za - k * Finite a
 
 -- Ivic, Th. 8.1, p. 205
+testMConvex :: Ratio01 (Ratio Integer) -> Ratio01 (Ratio Integer) -> Ratio01 (Ratio Integer) -> Bool
 testMConvex (Ratio01 a') (Ratio01 b') (Ratio01 c') = a==b || b==c || za==InfPlus || zc==InfPlus
 	|| zb>= za*zc*Finite(c-a)/(zc*Finite(c-b) + za*Finite(b-a)) where
 		[a,b,c] = sort $ map (\n -> n/2+1%2) [a', b', c']
@@ -91,9 +99,10 @@ testEtalon f filename = do
 
 testSmth depth (name, test) = do
 	putStrLn name
-	mapM_ (\_ -> quickCheck test) [1..1]
+	mapM_ (\_ -> quickCheck test) [1::Integer .. 1]
 	smallCheck depth test
 
+testSuite :: IO ()
 testSuite = do
 	--testEtalon etalonZetaOnS "ExpPairs/Tests/etalon-zetaOnS.txt"
 	--testEtalon etalonMOnS    "ExpPairs/Tests/etalon-mOnS.txt"

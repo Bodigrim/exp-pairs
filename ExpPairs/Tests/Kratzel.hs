@@ -43,8 +43,10 @@ testAbcCompareHigh :: Positive Integer -> Positive Integer -> Positive Integer -
 testAbcCompareHigh (Positive a') (Positive b') (Positive c') = c>=a+b || optimalValue (snd $ tauabc a b c) < Finite (2%(a+b+c)) where
 	[a, b, c] = sort [a', b', c']
 
+etalonTauab :: [Integer] -> Bool
 etalonTauab [a,b,c,d] = Finite (c%d) >= (optimalValue . snd) (tauab a b)
 
+etalonTauabc :: [Integer] -> Bool
 etalonTauabc [a,b,c,d,e] = Finite (d%e) >= (optimalValue . snd) (tauabc a b c)
 
 testEtalon f filename = do
@@ -56,9 +58,10 @@ testEtalon f filename = do
 
 testSmth depth (name, test) = do
 	putStrLn name
-	mapM_ (\_ -> quickCheck test) [1..1]
+	mapM_ (\_ -> quickCheck test) [1::Integer .. 1]
 	smallCheck depth test
 
+testSuite :: IO ()
 testSuite = do
 	--testEtalon etalonTauab  "ExpPairs/Tests/etalon-tauab.txt"
 	--testEtalon etalonTauabc "ExpPairs/Tests/etalon-tauabc.txt"
