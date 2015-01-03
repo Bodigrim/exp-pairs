@@ -2,3 +2,4 @@
 *.o
 exp-hull
 tests
+dist
