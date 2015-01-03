@@ -150,9 +150,10 @@ heckeZetaByHalf a = 1 - xt where
 	d = toRational 12.571624917200547
 	ia 2 = 0
 	ia 3 = 1%4
-	ia a | a<=12 = 32%205 * ((1 + 4 / d) * a - 4) + (toRational (optimalValue (mBigOnHalf d)) - 1) * a / d
-	ia a | a<=15 = 32%205 * a + toRational (optimalValue (mBigOnHalf a)) - 1
-	ia a | otherwise = 32%205 * (2 * a - 6)
+	ia a
+		| a<=12 = 32%205 * ((1 + 4 / d) * a - 4) + (toRational (optimalValue (mBigOnHalf d)) - 1) * a / d
+		| a<=15 = 32%205 * a + toRational (optimalValue (mBigOnHalf a)) - 1
+		| otherwise = 32%205 * (2 * a - 6)
 	xt = 1%2 / (1 + ia a)
 
 

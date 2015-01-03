@@ -15,17 +15,17 @@ instance (Num a, Ord a, Arbitrary a) => Arbitrary (Positive a) where
     (Positive . abs) `fmap` (arbitrary `suchThat` (> 0))
 
 
-testMonotonic :: (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> (Positive Integer) -> Bool
+testMonotonic :: Positive Integer -> Positive Integer -> Positive Integer -> Positive Integer -> Bool
 testMonotonic (Positive a') (Positive b') (Positive c') (Positive d') =  (a==c && b==d) || zab > zcd where
 	[a, c, b, d] = sort [a', b', c', d']
 	zab = optimalValue $ menzerNowak a b
 	zcd = optimalValue $ menzerNowak c d
 
-testCompareLow :: (Positive Integer) -> (Positive Integer) -> Bool
+testCompareLow :: Positive Integer -> Positive Integer -> Bool
 testCompareLow (Positive a') (Positive b') = optimalValue (snd $ tauab a b) <= optimalValue (menzerNowak a b) + Finite (1%(10^30))  where
 	[a, b] = sort [a', b']
 
-testCompareHigh :: (Positive Integer) -> (Positive Integer) -> Bool
+testCompareHigh :: Positive Integer -> Positive Integer -> Bool
 testCompareHigh (Positive a') (Positive b') = optimalValue (menzerNowak a b) < 1 where
 	[a, b] = sort [a', b']
 

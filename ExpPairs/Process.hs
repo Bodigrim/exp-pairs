@@ -98,7 +98,7 @@ len1M = memoize len1
 len2 :: [Process] -> (Int, String)
 len2 as = if null inner
 	then len1M as
-	else len1M asq `min` minimumBy (comparing fst) inner where
+	else len1M as `min` minimumBy (comparing fst) inner where
 		l = length as
 		bs n = take n as
 		cs n = drop n as
