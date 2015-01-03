@@ -1,14 +1,14 @@
 ExpPairs: ExpPairs.hs ExpPairs/*.hs
 	ghc -O2 ExpPairs.hs
 
-tests: tests.hs ExpPairs/*.hs ExpPairs/Tests/*.hs
-	ghc -O2 tests.hs
+Tests: Tests.hs ExpPairs/*.hs ExpPairs/Tests/*.hs
+	ghc -O2 Tests.hs
 
-all: ExpPairs tests
+all: ExpPairs Tests
 
-test: tests
-	./tests
+test: Tests
+	./Tests
 
 clean:
 	find -iname "*.hi" -delete -or -iname "*.o" -delete
-	rm ExpPairs tests
+	rm ExpPairs Tests
