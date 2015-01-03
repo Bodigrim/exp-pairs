@@ -11,4 +11,4 @@ test: Tests
 
 clean:
 	find -iname "*.hi" -delete -or -iname "*.o" -delete
-	rm ExpPairs Tests
+	rm -f Tests
