@@ -60,8 +60,8 @@ testSmth depth (name, test) = do
 	smallCheck depth test
 
 testSuite = do
-	testEtalon etalonTauab  "ExpPairs/Tests/etalon-tauab.txt"
-	testEtalon etalonTauabc "ExpPairs/Tests/etalon-tauabc.txt"
+	--testEtalon etalonTauab  "ExpPairs/Tests/etalon-tauab.txt"
+	--testEtalon etalonTauabc "ExpPairs/Tests/etalon-tauabc.txt"
 	mapM_ (testSmth 7) [
 		("tauabc compare with 1/(a+b+c)", testAbcCompareLow),
 		("tauabc compare with 2/(a+b+c)", testAbcCompareHigh)

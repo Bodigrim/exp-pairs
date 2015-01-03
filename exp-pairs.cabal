@@ -16,6 +16,29 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 library
-  exposed-modules:     ExpPairs, ExpPairs.MenzerNowak, ExpPairs.Kratzel, ExpPairs.Ivic
-  -- other-modules:
-  build-depends:       base ==4.6.*, memoize ==0.6.*, smallcheck ==1.1.*, QuickCheck ==2.6.*, matrix ==0.3.*
+  exposed-modules:     ExpPairs,
+                       ExpPairs.Ivic,
+                       ExpPairs.Kratzel,
+                       ExpPairs.MenzerNowak
+  other-modules:       ExpPairs.LinearForm,
+                       ExpPairs.Matrix3,
+                       ExpPairs.Optimize,
+                       ExpPairs.Pair,
+                       ExpPairs.Process,
+                       ExpPairs.RatioInf
+  build-depends:       base >= 4 && < 5,
+                       memoize,
+                       smallcheck,
+                       QuickCheck,
+                       matrix
+
+test-suite tests
+  ghc-options: -Wall
+  type: exitcode-stdio-1.0
+  main-is: Tests.hs
+  build-depends:       base,
+                       QuickCheck,
+                       smallcheck,
+                       exp-pairs,
+                       memoize,
+                       matrix

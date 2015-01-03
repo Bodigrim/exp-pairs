@@ -1,5 +1,5 @@
 *.hi
 *.o
-exp-hull
-tests
+ExpPairs
+Tests
 dist

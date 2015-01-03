@@ -95,8 +95,8 @@ testSmth depth (name, test) = do
 	smallCheck depth test
 
 testSuite = do
-	testEtalon etalonZetaOnS "ExpPairs/Tests/etalon-zetaOnS.txt"
-	testEtalon etalonMOnS    "ExpPairs/Tests/etalon-mOnS.txt"
+	--testEtalon etalonZetaOnS "ExpPairs/Tests/etalon-zetaOnS.txt"
+	--testEtalon etalonMOnS    "ExpPairs/Tests/etalon-mOnS.txt"
 	--mapM_ (testSmth 1) [
 	--	("mOnS convex", testMConvex),
 	--	("zetaOnS convex", testZetaConvex)

@@ -53,7 +53,7 @@ readPath ('B':'A':xs) = baPath `mappend` readPath xs
 
 printer xs = do
 	putStrLn xs
-	putStrLn $ show $ readPath xs
+	print (readPath xs)
 	putStrLn ""
 
 main =
