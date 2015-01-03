@@ -22,19 +22,17 @@ library
                        ExpPairs.Pair,
                        ExpPairs.Process,
                        ExpPairs.RatioInf
-  build-depends:       base >= 4 && < 5,
-                       memoize,
-                       smallcheck,
-                       QuickCheck,
-                       matrix
+  build-depends:       base >=4 && <5,
+                       memoize >=0.1,
+                       matrix >=0.1
 
 test-suite tests
   ghc-options: -Wall
   type: exitcode-stdio-1.0
   main-is: Tests.hs
-  build-depends:       base,
-                       QuickCheck,
-                       smallcheck,
+  build-depends:       base >=4 && <5,
+                       QuickCheck >=2.4.2,
+                       smallcheck >=0.2.1,
                        exp-pairs,
-                       memoize,
-                       matrix
+                       memoize >=0.1,
+                       matrix >=0.1
