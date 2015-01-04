@@ -1,5 +1,5 @@
 {-|
-Module      : ExpPairs.RatioInf
+Module      : Math.ExpPairs.RatioInf
 Description : Rational numbers with infinities
 Copyright   : (c) Andrew Lelechenko, 2014-2015
 License     : GPL-3
@@ -7,7 +7,7 @@ Maintainer  : andrew.lelechenko@gmail.com
 Stability   : experimental
 Portability : POSIX
 
-Provides types and necessary instances for rational numbers, extended with infinite values. Just use @RationalInf@ instead of @Rational@.
+Provides types and necessary instances for rational numbers, extended with infinite values. Just use 'RationalInf' instead of 'Rational' from "Data.Ratio".
 -}
 module Math.ExpPairs.RatioInf (RatioInf (..), RationalInf) where
 
@@ -19,7 +19,7 @@ data RatioInf t = InfMinus | Finite (Ratio t) | InfPlus
 	deriving (Ord, Eq)
 
 -- |Arbitrary-precision rational numbers with positive and negative
--- infinities
+-- infinities.
 type RationalInf = RatioInf Integer
 
 instance (Integral t, Show t) => Show (RatioInf t) where

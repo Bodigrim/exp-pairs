@@ -1,8 +1,21 @@
-module Math.ExpPairs.Matrix3 (Matrix3 (..), Vector3 (..), fromList, toList, normalize, prettyMatrix, multCol, det) where
+{-|
+Module      : Math.ExpPairs.Matrix3
+Description : Implements matrices of order 3
+Copyright   : (c) Andrew Lelechenko, 2014-2015
+License     : GPL-3
+Maintainer  : andrew.lelechenko@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+Provides types and functions for matrices and vectors of order 3.
+Can be used instead of "Data.Matrix" to reduce overhead and simplify code.
+-}
+module Math.ExpPairs.Matrix3 (Matrix3 (..), Vector3 (..), fromList, toList, det, multCol, normalize, prettyMatrix) where
 
 import qualified Data.List as List
 import Data.Monoid
 
+-- |Three-component vector.
 data Vector3 t = Vector3 {
 	a1 :: t,
 	a2 :: t,
@@ -10,6 +23,13 @@ data Vector3 t = Vector3 {
 	}
 	deriving (Eq, Show)
 
+-- |Matrix of order 3. Instances of 'Num', 'Fractional' and 'Monoid'
+-- are defined in terms of the multiplicative group of matrices,
+-- not the additive one. E. g.,
+--
+-- > toList 1 == [1,0,0,0,1,0,0,0,1]
+-- > toList 1 /= [1,1,1,1,1,1,1,1,1]
+--
 data Matrix3 t = Matrix3 {
 	a11 :: t,
 	a12 :: t,
@@ -78,6 +98,7 @@ instance Num t => Num (Matrix3 t) where
 		a33 = fromInteger n
 		}
 
+-- |Computes the determinant of a matrix.
 det :: (Num t) => Matrix3 t -> t
 det a =
 	a11 a * (a22 a * a33 a - a32 a * a23 a)
@@ -115,9 +136,11 @@ instance Num t => Monoid (Matrix3 t) where
 	mempty = 1
 	mappend = (*)
 
+-- |Convert 'Matrix3' into a list of 9 elements.
 toList :: Matrix3 t -> [t]
 toList a = [a11 a, a12 a, a13 a, a21 a, a22 a, a23 a, a31 a, a32 a, a33 a]
 
+-- |Convert a list of 9 elements into 'Matrix3'.
 fromList :: [t] -> Matrix3 t
 fromList as = Matrix3 {
 		a11 = as!!0,
@@ -134,15 +157,21 @@ fromList as = Matrix3 {
 instance Functor Matrix3 where
 	fmap f = fromList . List.map f . toList
 
+-- |Divide all elements of the matrix by their greatest common
+-- divisor. This is useful for matrices of projective
+-- transformations to reduce the magnitude of computations.
 normalize :: Integral t => Matrix3 t -> Matrix3 t
 normalize m = m' where
 	l = toList m
 	d = foldl1 gcd l
 	m' = if d==0 then m else fromList $ List.map (`div`d) l
 
+-- |Return the maximal element of a matrix.
 maximum :: Ord t => Matrix3 t -> t
 maximum = List.maximum . toList
 
+-- |Print a matrix, separating rows with new lines and elements
+-- with spaces.
 prettyMatrix :: (Show t) => Matrix3 t -> String
 prettyMatrix m =
 	show (a11 m) ++ " " ++
@@ -155,6 +184,7 @@ prettyMatrix m =
 	show (a32 m) ++ " " ++
 	show (a33 m)
 
+-- |Multiplicate a matrix by a vector (considered as a column).
 multCol :: (Num t) => Matrix3 t -> Vector3 t -> Vector3 t
 multCol m v = Vector3 {
 	a1 = a11 m * a1 v + a12 m * a2 v + a13 m * a3 v,

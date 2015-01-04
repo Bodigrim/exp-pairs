@@ -20,7 +20,7 @@ library
                        Math.ExpPairs.Ivic,
                        Math.ExpPairs.Kratzel,
                        Math.ExpPairs.MenzerNowak
-  other-modules:       Math.ExpPairs.LinearForm,
+                       Math.ExpPairs.LinearForm,
                        Math.ExpPairs.Matrix3,
                        Math.ExpPairs.Pair,
                        Math.ExpPairs.Process,
