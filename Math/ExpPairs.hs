@@ -1,14 +1,14 @@
-module ExpPairs.Optimize (optimize, LinearForm (..), RationalForm (..), IneqType (..), Constraint (..), InitPair, Path, simulateOptimize,simulateOptimize', RatioInf (..), RationalInf, OptimizeResult, optimalValue, optimalPair, optimalPath) where
+module Math.ExpPairs (optimize, LinearForm (..), RationalForm (..), IneqType (..), Constraint (..), InitPair, Path, simulateOptimize,simulateOptimize', RatioInf (..), RationalInf, OptimizeResult, optimalValue, optimalPair, optimalPath) where
 
 import Data.Ratio
 import Data.Ord
 import Data.List
 import Data.Monoid
 
-import ExpPairs.LinearForm
-import ExpPairs.Process
-import ExpPairs.Pair
-import ExpPairs.RatioInf
+import Math.ExpPairs.LinearForm
+import Math.ExpPairs.Process
+import Math.ExpPairs.Pair
+import Math.ExpPairs.RatioInf
 
 fracs2proj :: (Rational, Rational) -> (Integer, Integer, Integer)
 fracs2proj (q, r) = (k, l, m) where

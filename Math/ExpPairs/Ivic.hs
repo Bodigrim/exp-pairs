@@ -1,10 +1,10 @@
-module ExpPairs.Ivic where
+module Math.ExpPairs.Ivic where
 
 import Data.Ratio
 import Data.List
 import Data.Ord
 
-import ExpPairs.Optimize
+import Math.ExpPairs
 
 zetaOnS :: Rational -> OptimizeResult
 zetaOnS s

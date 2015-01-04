@@ -1,10 +1,10 @@
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
-module ExpPairs.Tests.Ivic where
+module Math.ExpPairs.Tests.Ivic where
 
 import Data.Ratio
 import Data.List
-import ExpPairs.Optimize
-import ExpPairs.Ivic
+import Math.ExpPairs
+import Math.ExpPairs.Ivic
 
 import Test.SmallCheck
 import Test.SmallCheck.Series

@@ -1,8 +1,8 @@
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
-module ExpPairs.Tests.Pair where
+module Math.ExpPairs.Tests.Pair where
 
 import Data.Ratio
-import ExpPairs.Pair
+import Math.ExpPairs.Pair
 
 import Test.SmallCheck
 import Test.SmallCheck.Series

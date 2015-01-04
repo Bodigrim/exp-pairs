@@ -1,9 +1,9 @@
-module ExpPairs.Tests.Kratzel where
+module Math.ExpPairs.Tests.Kratzel where
 
 import Data.Ratio
 import Data.List
-import ExpPairs.Optimize
-import ExpPairs.Kratzel
+import Math.ExpPairs
+import Math.ExpPairs.Kratzel
 
 import Test.SmallCheck
 import Test.SmallCheck.Series

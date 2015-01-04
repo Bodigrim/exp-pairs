@@ -1,6 +1,6 @@
-module ExpPairs.Tests.RatioInf where
+module Math.ExpPairs.Tests.RatioInf where
 
-import ExpPairs.RatioInf
+import Math.ExpPairs.RatioInf
 
 import Test.SmallCheck
 import Test.QuickCheck

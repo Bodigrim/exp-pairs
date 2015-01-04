@@ -1,4 +1,4 @@
-module ExpPairs.Pair (InitPair' (..), InitPair, initPairs, initPairToValue) where
+module Math.ExpPairs.Pair (InitPair' (..), InitPair, initPairs, initPairToValue) where
 
 import Data.Ratio
 

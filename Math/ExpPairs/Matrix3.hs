@@ -1,4 +1,4 @@
-module ExpPairs.Matrix3 (Matrix3 (..), Vector3 (..), fromList, toList, normalize, prettyMatrix, multCol, det) where
+module Math.ExpPairs.Matrix3 (Matrix3 (..), Vector3 (..), fromList, toList, normalize, prettyMatrix, multCol, det) where
 
 import qualified Data.List as List
 import Data.Monoid

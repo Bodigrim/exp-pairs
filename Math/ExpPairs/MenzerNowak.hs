@@ -1,8 +1,8 @@
-module ExpPairs.MenzerNowak where
+module Math.ExpPairs.MenzerNowak where
 
 import Data.Ratio
 
-import ExpPairs.Optimize
+import Math.ExpPairs
 
 menzerNowak :: Integer -> Integer -> OptimizeResult
 menzerNowak a' b' = optimize

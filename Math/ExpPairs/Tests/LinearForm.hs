@@ -1,6 +1,6 @@
-module ExpPairs.Tests.LinearForm where
+module Math.ExpPairs.Tests.LinearForm where
 
-import ExpPairs.LinearForm
+import Math.ExpPairs.LinearForm
 
 import Test.QuickCheck
 

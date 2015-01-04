@@ -1,7 +1,7 @@
-module ExpPairs.Tests.Matrix3 where
+module Math.ExpPairs.Tests.Matrix3 where
 
 import qualified Data.Matrix as M
-import qualified ExpPairs.Matrix3 as M3
+import qualified Math.ExpPairs.Matrix3 as M3
 
 import Test.QuickCheck
 

@@ -1,9 +1,9 @@
-module ExpPairs.LinearForm (LinearForm (..), RationalForm (..), IneqType (..), Constraint (..), checkConstraint, evalLF, evalRF, substituteLF) where
+module Math.ExpPairs.LinearForm (LinearForm (..), RationalForm (..), IneqType (..), Constraint (..), checkConstraint, evalLF, evalRF, substituteLF) where
 
 import Data.List
 import Data.Ratio
 import Data.Monoid
-import ExpPairs.RatioInf
+import Math.ExpPairs.RatioInf
 
 data LinearForm t = LinearForm t t t
 	deriving (Eq)

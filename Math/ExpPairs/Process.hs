@@ -1,12 +1,12 @@
 {-# LANGUAGE TemplateHaskell  #-}
-module ExpPairs.Process (Process, Path (), evalPath, lengthPath, aPath, baPath) where
+module Math.ExpPairs.Process (Process, Path (), evalPath, lengthPath, aPath, baPath) where
 
 import Data.Monoid
 import Data.List
 import Data.Ord
 import Data.Function.Memoize
 
-import qualified ExpPairs.Matrix3 as Mx
+import qualified Math.ExpPairs.Matrix3 as Mx
 
 data Process = A | BA
 	deriving (Eq, Show, Read, Ord, Enum)

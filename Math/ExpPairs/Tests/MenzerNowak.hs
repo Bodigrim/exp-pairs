@@ -1,10 +1,10 @@
-module ExpPairs.Tests.MenzerNowak where
+module Math.ExpPairs.Tests.MenzerNowak where
 
 import Data.Ratio
 import Data.List
-import ExpPairs.Optimize
-import ExpPairs.MenzerNowak
-import ExpPairs.Kratzel
+import Math.ExpPairs
+import Math.ExpPairs.MenzerNowak
+import Math.ExpPairs.Kratzel
 
 import Test.SmallCheck
 import Test.SmallCheck.Series

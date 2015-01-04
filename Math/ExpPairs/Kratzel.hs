@@ -1,10 +1,10 @@
-module ExpPairs.Kratzel where
+module Math.ExpPairs.Kratzel where
 
 import Data.Ratio
 import Data.Ord
 import Data.List
 
-import ExpPairs.Optimize
+import Math.ExpPairs
 
 data TauabTheorem = Kr511a | Kr511b | Kr512a | Kr512b
 	deriving (Show)

@@ -1,5 +1,5 @@
 import Data.Monoid
-import ExpPairs.Process
+import Math.ExpPairs.Process
 
 pathes = [
 	"ABABAABAAB",
