@@ -59,7 +59,6 @@ testSuite = testGroup "Kratzel"
 	, QC.testProperty "tauabc compare with 1/(a+b+c)" testAbcCompareLow
 	, SC.testProperty "tauabc compare with 2/(a+b+c)" testAbcCompareHigh
 	, QC.testProperty "tauabc compare with 2/(a+b+c)" testAbcCompareHigh
-	, SC.testProperty "tauabc monotonic" testAbcMonotonic
 	, QC.testProperty "tauabc monotonic" testAbcMonotonic
 	, SC.testProperty "tauab compare with 1/2(a+b)" testAbCompareLow
 	, QC.testProperty "tauab compare with 1/2(a+b)" testAbCompareLow
