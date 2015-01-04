@@ -4,7 +4,7 @@ ghc:
 - 7.6
 - 7.4
 install:
-  - cabal install tasty --constraint mtl==2.1.2
+  - cabal install  --only-dependencies --enable-tests --constraint mtl==2.1.2
 script:
   - cabal configure --enable-tests && cabal build && ./dist/build/tests/test
 deploy:
