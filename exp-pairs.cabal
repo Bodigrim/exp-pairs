@@ -32,8 +32,12 @@ library
 test-suite tests
   ghc-options: -Wall
   type: exitcode-stdio-1.0
-  main-is: Math/ExpPairs/Tests.hs
+  main-is: Tests.hs
+  hs-source-dirs: tests
   build-depends:       base >=4 && <5,
+                       tasty >=0.7,
+                       tasty-quickcheck,
+                       tasty-smallcheck,
                        QuickCheck >=2.4.2,
                        smallcheck >=0.2.1,
                        exp-pairs,
