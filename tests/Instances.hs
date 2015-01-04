@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
 module Instances (Ratio01 (..), Positive (..)) where
 
@@ -19,6 +20,7 @@ instance (Ord t, Fractional t, Serial m t) => Serial m (Ratio01 t) where
 instance Show t => Show (Ratio01 t) where
   showsPrec n (Ratio01 x) = showsPrec n x
 
+ratio01 :: (Fractional a, Ord a) => a -> a
 ratio01 a
 	| abs a <= 1 = recip 2 + a/4
 	| a < 0      = recip (negate a) / 4
