@@ -33,7 +33,7 @@ library
 test-suite tests
   ghc-options: -Wall
   type: exitcode-stdio-1.0
-  main-is: Tests.hs
+  main-is: ExpPairs/Tests.hs
   build-depends:       base >=4 && <5,
                        QuickCheck >=2.4.2,
                        smallcheck >=0.2.1,

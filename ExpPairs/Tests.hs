@@ -1,3 +1,5 @@
+--module ExpPairs.Tests where
+
 import qualified ExpPairs.Tests.RatioInf as RatioInf (testSuite)
 import qualified ExpPairs.Tests.Pair as Pair (testSuite)
 import qualified ExpPairs.Tests.Ivic as Ivic (testSuite)
