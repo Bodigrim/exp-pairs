@@ -1,11 +1,12 @@
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
-module Instances (Ratio01 (..)) where
+module Instances (Ratio01 (..), Positive (..)) where
 
-import Test.QuickCheck
+import Test.QuickCheck hiding (Positive)
 import Test.SmallCheck.Series
 import Control.Monad
 
 import Math.ExpPairs.Pair (InitPair' (..))
+import Math.ExpPairs.Matrix3 as M3 (Matrix3, fromList, Vector3 (..))
 
 newtype Ratio01 t = Ratio01 t
 
@@ -35,3 +36,13 @@ instance (Ord t, Fractional t, Arbitrary t) => Arbitrary (InitPair' t) where
 
 instance Serial m t => Serial m (InitPair' t) where
 	series = cons0 Corput01 \/ cons0 Corput12 \/ cons2 Mix
+
+instance (Num a, Ord a, Arbitrary a) => Arbitrary (Positive a) where
+  arbitrary =
+    (Positive . abs) `fmap` (arbitrary `suchThat` (> 0))
+
+instance (Arbitrary a) => Arbitrary (M3.Matrix3 a) where
+  arbitrary = fmap M3.fromList $ vectorOf 9 arbitrary
+
+instance (Arbitrary a) => Arbitrary (M3.Vector3 a) where
+  arbitrary = fmap (\[a,b,c] -> M3.Vector3 a b c) $ vectorOf 3 arbitrary

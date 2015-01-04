@@ -1,18 +1,15 @@
-module Math.ExpPairs.Tests.Kratzel where
+module Kratzel where
 
 import Data.Ratio
 import Data.List
 import Math.ExpPairs
 import Math.ExpPairs.Kratzel
 
-import Test.SmallCheck
-import Test.SmallCheck.Series
-import Test.QuickCheck hiding (Positive)
+import Test.Tasty
+import Test.Tasty.SmallCheck as SC
+import Test.Tasty.QuickCheck as QC hiding (Positive)
 
-instance (Num a, Ord a, Arbitrary a) => Arbitrary (Positive a) where
-  arbitrary =
-    (Positive . abs) `fmap` (arbitrary `suchThat` (> 0))
-
+import Instances (Positive (..))
 
 testAbMonotonic :: Positive Integer -> Positive Integer -> Positive Integer -> Positive Integer -> Bool
 testAbMonotonic (Positive a') (Positive b') (Positive c') (Positive d') =  (a==c && b==d) || zab > zcd where
@@ -43,39 +40,34 @@ testAbcCompareHigh :: Positive Integer -> Positive Integer -> Positive Integer -
 testAbcCompareHigh (Positive a') (Positive b') (Positive c') = c>=a+b || optimalValue (snd $ tauabc a b c) < Finite (2%(a+b+c)) where
 	[a, b, c] = sort [a', b', c']
 
-etalonTauab :: [Integer] -> Bool
-etalonTauab [a,b,c,d] = Finite (c%d) >= (optimalValue . snd) (tauab a b)
+etalonTauab :: Integer -> Integer -> Integer -> Integer -> Bool
+etalonTauab a b c d = Finite (c%d) >= (optimalValue . snd) (tauab a b)
 
-etalonTauabc :: [Integer] -> Bool
-etalonTauabc [a,b,c,d,e] = Finite (d%e) >= (optimalValue . snd) (tauabc a b c)
+etalonTauabc :: Integer -> Integer -> Integer -> Integer -> Integer -> Bool
+etalonTauabc a b c d e = Finite (d%e) >= (optimalValue . snd) (tauabc a b c)
 
-testEtalon f filename = do
-	etalon <- readFile filename
-	let tests = map (map read . words) (lines etalon) in
-		let results = map f tests in
-			putStrLn $ filename ++ (if and results then " success" else " fail at " ++ show (fst $ head $ dropWhile snd $ zip tests results))
-	return etalon
+--testEtalon f filename = do
+--	etalon <- readFile filename
+--	let tests = map (map read . words) (lines etalon) in
+--		let results = map f tests in
+--			putStrLn $ filename ++ (if and results then " success" else " fail at " ++ show (fst $ head $ dropWhile snd $ zip tests results))
+--	return etalon
 
-testSmth depth (name, test) = do
-	putStrLn name
-	mapM_ (\_ -> quickCheck test) [1::Integer .. 1]
-	smallCheck depth test
+testSuite :: TestTree
+testSuite = testGroup "Kratzel"
+	[ SC.testProperty "tauabc compare with 1/(a+b+c)" testAbcCompareLow
+	, QC.testProperty "tauabc compare with 1/(a+b+c)" testAbcCompareLow
+	, SC.testProperty "tauabc compare with 2/(a+b+c)" testAbcCompareHigh
+	, QC.testProperty "tauabc compare with 2/(a+b+c)" testAbcCompareHigh
+	, SC.testProperty "tauabc monotonic" testAbcMonotonic
+	, QC.testProperty "tauabc monotonic" testAbcMonotonic
+	, SC.testProperty "tauab compare with 1/2(a+b)" testAbCompareLow
+	, QC.testProperty "tauab compare with 1/2(a+b)" testAbCompareLow
+	, SC.testProperty "tauab compare with 1/(a+b)" testAbCompareHigh
+	, QC.testProperty "tauab compare with 1/(a+b)" testAbCompareHigh
+	, SC.testProperty "tauab monotonic" testAbMonotonic
+	, QC.testProperty "tauab monotonic" testAbMonotonic
+	]
 
-testSuite :: IO ()
-testSuite = do
 	--testEtalon etalonTauab  "ExpPairs/Tests/etalon-tauab.txt"
 	--testEtalon etalonTauabc "ExpPairs/Tests/etalon-tauabc.txt"
-	mapM_ (testSmth 7) [
-		("tauabc compare with 1/(a+b+c)", testAbcCompareLow),
-		("tauabc compare with 2/(a+b+c)", testAbcCompareHigh)
-		]
-	mapM_ (testSmth 2) [
-		("tauabc monotonic", testAbcMonotonic)
-		]
-	mapM_ (testSmth 10) [
-		("tauab compare with 1/2(a+b)", testAbCompareLow),
-		("tauab compare with 1/(a+b)", testAbCompareHigh)
-		]
-	mapM_ (testSmth 3) [
-		("tauab monotonic", testAbMonotonic)
-		]

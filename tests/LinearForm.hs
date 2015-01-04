@@ -1,8 +1,10 @@
-module Math.ExpPairs.Tests.LinearForm where
+module LinearForm where
 
 import Math.ExpPairs.LinearForm
 
-import Test.QuickCheck
+import Test.Tasty
+import Test.Tasty.SmallCheck as SC
+import Test.Tasty.QuickCheck as QC
 
 testPlus :: Rational -> Rational -> Rational -> Rational -> Rational -> Rational -> Bool
 testPlus a b c d e f = a+d==ad && b+e==be && c+f==cf where
@@ -25,14 +27,10 @@ testMinus a b c d e f = a-d==ad && b-e==be && c-f==cf where
 testFromInteger :: Integer -> Bool
 testFromInteger a = evalLF (0, 0, 1) (fromInteger a) == a
 
-
-testSmth _ (name, test) = do
-	putStrLn name
-	mapM_ (\_ -> quickCheck test) [1::Integer .. 1]
-
-testSuite :: IO ()
-testSuite = do
-	mapM_ (testSmth 1) [
-		("linearform plus", testPlus),
-		("linearform minus", testMinus)
-		]
+testSuite :: TestTree
+testSuite = testGroup "LinearForm"
+	[ QC.testProperty "plus" testPlus
+	, QC.testProperty "minus" testMinus
+	, SC.testProperty "from integer" testFromInteger
+	, QC.testProperty "from integer" testFromInteger
+	]
