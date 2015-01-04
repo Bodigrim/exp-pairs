@@ -1,4 +1,18 @@
-module Math.ExpPairs.Ivic where
+{-|
+Module      : Math.ExpPairs.Ivic
+Description : Riemann zeta-function
+Copyright   : (c) Andrew Lelechenko, 2014-2015
+License     : GPL-3
+Maintainer  : andrew.lelechenko@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+Provides functions to compute estimates Riemann zeta-function
+ζ in a critical strip, given in  /Ivić A./ `The Riemann zeta-function: Theory and applications',
+Mineola, New York: Dover Publications, 2003.
+
+-}
+module Math.ExpPairs.Ivic (zetaOnS, reverseZetaOnS, mOnS) where
 
 import Data.Ratio
 import Data.List
@@ -6,6 +20,8 @@ import Data.Ord
 
 import Math.ExpPairs
 
+-- | Compute µ(σ) such that |ζ(σ+it)| ≪ |t|^µ(σ) .
+-- See equation (7.57) in Ivić2003.
 zetaOnS :: Rational -> OptimizeResult
 zetaOnS s
 	| s >= 1  = simulateOptimize 0
@@ -19,6 +35,7 @@ zetaOnS s
 zetaOnHalf :: Rational
 zetaOnHalf = 32%205
 
+-- | An attempt to reverse 'zetaOnS'.
 reverseZetaOnS :: Rational -> OptimizeResult
 reverseZetaOnS mu
 	| mu >= 1%2   = simulateOptimize 0
@@ -44,6 +61,8 @@ lemma82_f s
 -- and that alpha2 <= 1 for S >= 2/3 or S >= 5/8 and
 --          (4S-2)k + (8S-6)l + 2S-1 >=0
 
+-- | Compute m(σ) such that ∫_1^T |ζ(σ+it)|^m(σ) dt ≪ T^(1+ε)
+-- See equation (8.97) in Ivić2003.
 mOnS :: Rational -> OptimizeResult
 mOnS s
 	| s < 1%2 = simulateOptimize 0

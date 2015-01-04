@@ -1,4 +1,20 @@
-module Math.ExpPairs (optimize, LinearForm (..), RationalForm (..), IneqType (..), Constraint (..), InitPair, Path, simulateOptimize,simulateOptimize', RatioInf (..), RationalInf, OptimizeResult, optimalValue, optimalPair, optimalPath) where
+{-|
+Module      : Math.ExpPairs
+Description : Linear programming over exponent pairs
+Copyright   : (c) Andrew Lelechenko, 2014-2015
+License     : GPL-3
+Maintainer  : andrew.lelechenko@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+Package implements an algorithm to minimize the maximum of a list of rational objective functions over the set of exponent pairs. See full description in
+A. V. Lelechenko, Linear programming over exponent pairs. Acta Univ. Sapientiae, Inform. 5, No. 2, 271-287 (2013).
+<http://www.acta.sapientia.ro/acta-info/C5-2/info52-7.pdf>
+
+A set of useful applications can be found in
+"Math.ExpPairs.Ivic", "Math.ExpPairs.Kratzel" and "Math.ExpPairs.MenzerNowak".
+-}
+module Math.ExpPairs (optimize, OptimizeResult, optimalValue, optimalPair, optimalPath, simulateOptimize, simulateOptimize', LinearForm (..), RationalForm (..), IneqType (..), Constraint (..), InitPair, Path, RatioInf (..), RationalInf) where
 
 import Data.Ratio
 import Data.Ord
@@ -37,9 +53,14 @@ checkMConstraints :: Path -> [Constraint Rational] -> Bool
 checkMConstraints path = all (\con -> any (\p -> checkConstraint (evalPath path p) con ) triangleT) where
 	triangleT = map fracs2proj [ (0%1,1%1), (0%1,1%2), (1%2,1%2)]
 
+-- |Container for the result of optimization.
 data OptimizeResult = OptimizeResult {
+	-- | The minimal value of objective function.
 	optimalValue :: RationalInf,
+	-- | The initial exponent pair, on which minimal value was achieved.
 	optimalPair  :: InitPair,
+	-- | The sequence of processes, after which minimal value was
+	-- achieved.
 	optimalPath  :: Path
 	}
 
@@ -54,12 +75,17 @@ instance Eq OptimizeResult where
 instance Ord OptimizeResult where
 	compare a b = compare (optimalValue a) (optimalValue b)
 
+-- |Wrap 'Rational' into 'OptimizeResult'.
 simulateOptimize :: Rational -> OptimizeResult
 simulateOptimize r = OptimizeResult (Finite r) Corput01 mempty
 
+-- |Wrap 'RationalInf' into 'OptimizeResult'.
 simulateOptimize' :: RationalInf -> OptimizeResult
 simulateOptimize' r = OptimizeResult r Corput01 mempty
 
+-- |This function takes a list of rational forms and a list
+-- of constraints and returns an exponent pair, which satisfies
+-- all constraints and minimizes the maximum of all rational forms.
 optimize :: [RationalForm Rational] -> [Constraint Rational] -> OptimizeResult
 optimize rfs cons = optimize' rfs cons (OptimizeResult r0 ip0 mempty) where
 	(r0, ip0) = evalFunctional [Corput01, Corput12] [Corput01, Corput12] rfs cons mempty

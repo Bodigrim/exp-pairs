@@ -15,7 +15,13 @@ import Data.Ratio
 
 -- |Extends a rational type with positive and negative
 -- infinities.
-data RatioInf t = InfMinus | Finite (Ratio t) | InfPlus
+data RatioInf t
+	-- |Negative infinity
+	= InfMinus
+	-- |Finite value
+	| Finite (Ratio t)
+	-- |Positive infinity
+	| InfPlus
 	deriving (Ord, Eq)
 
 -- |Arbitrary-precision rational numbers with positive and negative

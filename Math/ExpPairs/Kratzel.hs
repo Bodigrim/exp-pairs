@@ -1,4 +1,30 @@
-module Math.ExpPairs.Kratzel where
+{-|
+Module      : Math.ExpPairs.Kratzel
+Description : Asymmetric divisor problem
+Copyright   : (c) Andrew Lelechenko, 2014-2015
+License     : GPL-3
+Maintainer  : andrew.lelechenko@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+Let τ_{a, b}(n) denote the number of integer
+(v, w) with v^a w^b = n.
+
+Let τ_{a, b, c}(n) denote the number of integer
+(v, w, z) with v^a w^b z^c = n.
+
+Krätzel
+	(/Krätzel E./
+	`Lattice points'.
+	Dordrecht: Kluwer, 1988)
+proved asymptotic formulas for
+Σ_{n ≤ x} τ_{a, b}(n) with an error term of order x^(Θ(a, b) + ε)
+and for
+Σ_{n ≤ x} τ_{a, b, c}(n) with an error term of order x^(Θ(a, b, c) + ε).
+He also provided a set of theorems to estimate Θ(a, b) and Θ(a, b, c).
+
+-}
+module Math.ExpPairs.Kratzel (TauabTheorem (..), tauab, TauabcTheorem (..), tauabc) where
 
 import Data.Ratio
 import Data.Ord
@@ -6,9 +32,20 @@ import Data.List
 
 import Math.ExpPairs
 
-data TauabTheorem = Kr511a | Kr511b | Kr512a | Kr512b
+-- |Special type to specify the theorem of Krätzel1988,
+-- which provided the best estimate of Θ(a, b)
+data TauabTheorem
+	-- | Theorem 5.11, case a)
+	= Kr511a
+	-- | Theorem 5.11, case b)
+	| Kr511b
+	-- | Theorem 5.12, case a)
+	| Kr512a
+	-- | Theorem 5.12, case b)
+	| Kr512b
 	deriving (Show)
 
+-- |Compute Θ(a, b) for given a and b.
 tauab :: Integer -> Integer -> (TauabTheorem, OptimizeResult)
 tauab a' b' = minimumBy (comparing (optimalValue . snd)) [kr511a, kr511b, kr512a, kr512b] where
 	a = a'%1
@@ -31,9 +68,32 @@ tauab a' b' = minimumBy (comparing (optimalValue . snd)) [kr511a, kr511b, kr512a
 			Constraint (LinearForm 29 29 (-24)) Strict
 		])
 
-data TauabcTheorem = Kolesnik | Kr61 | Kr62 | Kr63 | Kr64 | Kr65 | Kr66 | Tauab TauabTheorem
+-- |Special type to specify the theorem of Krätzel1988,
+-- which provided the best estimate of Θ(a, b, c)
+data TauabcTheorem
+	-- | Kolesnik
+	-- (/Kolesnik G./ `On the estimation of multiple exponential sums'
+	-- \/\/ Recent progress in analytic number theory,
+	-- London: Academic Press, 1981, Vol. 1, P. 231–246)
+	-- proved that  Θ(1, 1, 1) = 43 \/96.
+	= Kolesnik
+	-- | Theorem 6.1
+	| Kr61
+	-- | Theorem 6.2
+	| Kr62
+	-- | Theorem 6.3
+	| Kr63
+	-- | Theorem 6.4
+	| Kr64
+	-- | Theorem 6.5
+	| Kr65
+	-- | Theorem 6.6
+	| Kr66
+	-- | In certain cases Θ(a, b, c) = Θ(a, b).
+	| Tauab TauabTheorem
 	deriving (Show)
 
+-- |Compute Θ(a, b, c) for given a, b and c.
 tauabc :: Integer -> Integer -> Integer -> (TauabcTheorem, OptimizeResult)
 tauabc 1 1 1 = (Kolesnik, simulateOptimize $ 43%96)
 tauabc a' b' c' = minimumBy (comparing (optimalValue . snd)) [kr61, kr62, kr63, kr64, kr65, kr66] where
