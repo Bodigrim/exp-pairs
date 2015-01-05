@@ -8,8 +8,10 @@ import Math.ExpPairs.Ivic
 import Test.Tasty
 import Test.Tasty.SmallCheck as SC
 import Test.Tasty.QuickCheck as QC
+import Test.Tasty.HUnit
 
 import Instances (Ratio01 (..))
+import Etalon (testEtalon)
 
 testZetaOnS1 :: Ratio01 Rational -> Ratio01 Rational -> Bool
 testZetaOnS1 (Ratio01 a') (Ratio01 b') = a==b || za>=zb where
@@ -76,16 +78,13 @@ etalonZetaOnS a b c d = Finite (c%d) >= optimalValue (zetaOnS $ a%b)
 etalonMOnS :: Integer -> Integer -> Integer -> Integer -> Bool
 etalonMOnS a b c d = Finite (c%d) <= (optimalValue . mOnS) (a%b)
 
---testEtalon f filename = do
---	etalon <- readFile filename
---	let tests = map (map read . words) (lines etalon) in
---		let results = map f tests in
---			putStrLn $ filename ++ (if and results then " success" else " fail at " ++ show (fst $ head $ dropWhile snd $ zip tests results))
---	return etalon
-
 testSuite :: TestTree
 testSuite = testGroup "Ivic"
-	[ SC.testProperty "zetaOnS monotonic" testZetaOnS1
+	[ testCase "etalon zetaOnS"
+		(testEtalon 100 (\xs -> etalonZetaOnS (xs!!0) (xs!!1) (xs!!2) (xs!!3)) "tests/etalon-zetaOnS.txt")
+	, testCase "etalon mOnS"
+		(testEtalon 100 (\xs -> etalonMOnS (xs!!0) (xs!!1) (xs!!2) (xs!!3)) "tests/etalon-mOnS.txt")
+	, SC.testProperty "zetaOnS monotonic" testZetaOnS1
 	, QC.testProperty "zetaOnS monotonic" testZetaOnS1
 	, SC.testProperty "zetaOnS strict monotonic" testZetaOnS2
 	, QC.testProperty "zetaOnS strict monotonic" testZetaOnS2
@@ -108,8 +107,5 @@ testSuite = testGroup "Ivic"
 	-- , SC.testProperty "zetaOnS convex" testZetaConvex
 	-- , QC.testProperty "zetaOnS convex" testZetaConvex
 	]
-
-	--testEtalon etalonZetaOnS "ExpPairs/Tests/etalon-zetaOnS.txt"
-	--testEtalon etalonMOnS    "ExpPairs/Tests/etalon-mOnS.txt"
 
 

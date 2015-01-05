@@ -8,8 +8,10 @@ import Math.ExpPairs.Kratzel
 import Test.Tasty
 import Test.Tasty.SmallCheck as SC
 import Test.Tasty.QuickCheck as QC hiding (Positive)
+import Test.Tasty.HUnit
 
 import Instances (Positive (..))
+import Etalon (testEtalon)
 
 testAbMonotonic :: Positive Integer -> Positive Integer -> Positive Integer -> Positive Integer -> Bool
 testAbMonotonic (Positive a') (Positive b') (Positive c') (Positive d') =  (a==c && b==d) || zab > zcd where
@@ -46,16 +48,13 @@ etalonTauab a b c d = Finite (c%d) >= (optimalValue . snd) (tauab a b)
 etalonTauabc :: Integer -> Integer -> Integer -> Integer -> Integer -> Bool
 etalonTauabc a b c d e = Finite (d%e) >= (optimalValue . snd) (tauabc a b c)
 
---testEtalon f filename = do
---	etalon <- readFile filename
---	let tests = map (map read . words) (lines etalon) in
---		let results = map f tests in
---			putStrLn $ filename ++ (if and results then " success" else " fail at " ++ show (fst $ head $ dropWhile snd $ zip tests results))
---	return etalon
-
 testSuite :: TestTree
 testSuite = testGroup "Kratzel"
-	[ SC.testProperty "tauabc compare with 1/(a+b+c)" testAbcCompareLow
+	[ testCase "etalon tauab"
+		(testEtalon 100 (\xs -> etalonTauab (xs!!0) (xs!!1) (xs!!2) (xs!!3)) "tests/etalon-tauab.txt")
+	, testCase "etalon tauabc"
+		(testEtalon 100 (\xs -> etalonTauabc (xs!!0) (xs!!1) (xs!!2) (xs!!3) (xs!!4)) "tests/etalon-tauabc.txt")
+	, SC.testProperty "tauabc compare with 1/(a+b+c)" testAbcCompareLow
 	, QC.testProperty "tauabc compare with 1/(a+b+c)" testAbcCompareLow
 	, SC.testProperty "tauabc compare with 2/(a+b+c)" testAbcCompareHigh
 	, QC.testProperty "tauabc compare with 2/(a+b+c)" testAbcCompareHigh
@@ -67,6 +66,3 @@ testSuite = testGroup "Kratzel"
 	, SC.testProperty "tauab monotonic" testAbMonotonic
 	, QC.testProperty "tauab monotonic" testAbMonotonic
 	]
-
-	--testEtalon etalonTauab  "ExpPairs/Tests/etalon-tauab.txt"
-	--testEtalon etalonTauabc "ExpPairs/Tests/etalon-tauabc.txt"

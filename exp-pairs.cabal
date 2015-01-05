@@ -26,8 +26,7 @@ library
                        Math.ExpPairs.Process,
                        Math.ExpPairs.RatioInf
   build-depends:       base >=4 && <5,
-                       memoize >=0.1,
-                       matrix >=0.1
+                       memoize >=0.1
 
 test-suite tests
   ghc-options: -Wall
@@ -38,8 +37,10 @@ test-suite tests
                        tasty >=0.7,
                        tasty-quickcheck,
                        tasty-smallcheck,
+                       tasty-hunit,
                        QuickCheck >=2.4.2,
                        smallcheck >=0.2.1,
                        exp-pairs,
                        memoize >=0.1,
-                       matrix >=0.1
+                       matrix >=0.1,
+                       random

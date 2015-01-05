@@ -61,7 +61,7 @@ lemma82_f s
 -- and that alpha2 <= 1 for S >= 2/3 or S >= 5/8 and
 --          (4S-2)k + (8S-6)l + 2S-1 >=0
 
--- | Compute m(σ) such that ∫_1^T |ζ(σ+it)|^m(σ) dt ≪ T^(1+ε)
+-- | Compute m(σ) such that ∫_1^T |ζ(σ+it)|^m(σ) dt ≪ T^(1+ε).
 -- See equation (8.97) in Ivić2003.
 mOnS :: Rational -> OptimizeResult
 mOnS s
