@@ -1,17 +1,17 @@
-module Math.ExpPairs.Tests.Matrix3 where
+module Matrix3 where
 
 import qualified Data.Matrix as M
 import qualified Math.ExpPairs.Matrix3 as M3
 
-import Test.QuickCheck
+import Test.Tasty
+import Test.Tasty.QuickCheck as QC
 
-instance (Arbitrary a) => Arbitrary (M3.Matrix3 a) where
-  arbitrary = fmap M3.fromList $ vectorOf 9 arbitrary
+import Instances ()
 
-instance (Arbitrary a) => Arbitrary (M3.Vector3 a) where
-  arbitrary = fmap (\[a,b,c] -> M3.Vector3 a b c) $ vectorOf 3 arbitrary
-
+toM :: M3.Matrix3 a -> M.Matrix a
 toM = M.fromList 3 3 . M3.toList
+
+toM3 :: M.Matrix a -> M3.Matrix3 a
 toM3 = M3.fromList . M.toList
 
 testOp :: (M3.Matrix3 Integer -> M3.Matrix3 Integer -> M3.Matrix3 Integer) -> (M.Matrix Integer -> M.Matrix Integer -> M.Matrix Integer) -> M3.Matrix3 Integer -> M3.Matrix3 Integer -> Bool
@@ -43,29 +43,15 @@ testMultCol m v@(M3.Vector3 v1 v2 v3) = a==a' && b==b' && c==c' where
 	(M3.Vector3 a b c) = M3.multCol m v
 	[a', b', c'] = M.toList $ toM m * M.fromList 3 1 [v1, v2, v3]
 
-
-testSmth _ (name, test) = do
-	putStrLn name
-	mapM_ (\_ -> quickCheck test) [1::Integer .. 1]
-
-testSuite :: IO ()
-testSuite = do
-	mapM_ (testSmth 1) [
-		("matrix plus", testOp (+) (+)),
-		("matrix minus", testOp (-) (-)),
-		("matrix mult", testOp (*) (*))
-		]
-	mapM_ (testSmth 1) [
-		("matrix det1", testDet1),
-		("matrix conversion", testConv)
-		]
-	mapM_ (testSmth 1) [
-		("matrix det2", testDet2),
-		("matrix recip", testRecip)
-		]
-	mapM_ (testSmth 1) [
-		("matrix normalize", testNormalize)
-		]
-	mapM_ (testSmth 1) [
-		("matrix mult column", testMultCol)
-		]
+testSuite :: TestTree
+testSuite = testGroup "LinearForm"
+	[ QC.testProperty "plus"      $ testOp (+) (+)
+	, QC.testProperty "minus"     $ testOp (-) (-)
+	, QC.testProperty "mult"      $ testOp (*) (*)
+	, QC.testProperty "det1"        testDet1
+	, QC.testProperty "conversion"  testConv
+	, QC.testProperty "det2"        testDet2
+	, QC.testProperty "recip"       testRecip
+	, QC.testProperty "normalize"   testNormalize
+	, QC.testProperty "mult column" testMultCol
+	]
