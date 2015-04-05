@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-|
 Module      : Math.ExpPairs.Matrix3
 Description : Implements matrices of order 3
@@ -17,9 +18,9 @@ import Data.Monoid
 
 -- |Three-component vector.
 data Vector3 t = Vector3 {
-	a1 :: t,
-	a2 :: t,
-	a3 :: t
+	a1 :: !t,
+	a2 :: !t,
+	a3 :: !t
 	}
 	deriving (Eq, Show)
 
@@ -31,15 +32,15 @@ data Vector3 t = Vector3 {
 -- > toList 1 /= [1,1,1,1,1,1,1,1,1]
 --
 data Matrix3 t = Matrix3 {
-	a11 :: t,
-	a12 :: t,
-	a13 :: t,
-	a21 :: t,
-	a22 :: t,
-	a23 :: t,
-	a31 :: t,
-	a32 :: t,
-	a33 :: t
+	a11 :: !t,
+	a12 :: !t,
+	a13 :: !t,
+	a21 :: !t,
+	a22 :: !t,
+	a23 :: !t,
+	a31 :: !t,
+	a32 :: !t,
+	a33 :: !t
 	}
 	deriving (Eq, Show)
 
