@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns, RecordWildCards #-}
+{-# LANGUAGE BangPatterns, RecordWildCards, DeriveFunctor, DeriveFoldable, DeriveGeneric #-}
 {-|
 Module      : Math.ExpPairs.Matrix3
 Description : Implements matrices of order 3
@@ -11,10 +11,20 @@ Portability : POSIX
 Provides types and functions for matrices and vectors of order 3.
 Can be used instead of "Data.Matrix" to reduce overhead and simplify code.
 -}
-module Math.ExpPairs.Matrix3 (Matrix3 (..), Vector3 (..), fromList, toList, det, multCol, normalize, prettyMatrix) where
+module Math.ExpPairs.Matrix3
+	( Matrix3 (..)
+	, Vector3 (..)
+	, fromList
+	, toList
+	, det
+	, multCol
+	, normalize
+	, prettyMatrix
+	) where
 
-import qualified Data.List as List
-import Data.Monoid
+import Prelude hiding (foldl1)
+import Data.Foldable (Foldable (..), toList)
+import GHC.Generics (Generic (..))
 
 -- |Three-component vector.
 data Vector3 t = Vector3 {
@@ -22,10 +32,10 @@ data Vector3 t = Vector3 {
 	a2 :: !t,
 	a3 :: !t
 	}
-	deriving (Eq, Show)
+	deriving (Eq, Show, Functor, Foldable, Generic)
 
--- |Matrix of order 3. Instances of 'Num', 'Fractional' and 'Monoid'
--- are defined in terms of the multiplicative group of matrices,
+-- |Matrix of order 3. Instances of 'Num' and 'Fractional'
+-- are given in terms of the multiplicative group of matrices,
 -- not the additive one. E. g.,
 --
 -- > toList 1 == [1,0,0,0,1,0,0,0,1]
@@ -42,7 +52,20 @@ data Matrix3 t = Matrix3 {
 	a32 :: !t,
 	a33 :: !t
 	}
-	deriving (Eq, Show)
+	deriving (Eq, Show, Functor, Foldable, Generic)
+
+diag :: Num t => t -> Matrix3 t
+diag n = Matrix3 {
+	a11 = n,
+	a12 = 0,
+	a13 = 0,
+	a21 = 0,
+	a22 = n,
+	a23 = 0,
+	a31 = 0,
+	a32 = 0,
+	a33 = n
+	}
 
 instance Num t => Num (Matrix3 t) where
 	a + b = Matrix3 {
@@ -70,55 +93,23 @@ instance Num t => Num (Matrix3 t) where
 		a33 = a31 a * a13 b + a32 a * a23 b + a33 a * a33 b
 		}
 
-	negate Matrix3 {..} = Matrix3 {
-		a11 = - a11,
-		a12 = - a12,
-		a13 = - a13,
-		a21 = - a21,
-		a22 = - a22,
-		a23 = - a23,
-		a31 = - a31,
-		a32 = - a32,
-		a33 = - a33
-		}
+	negate = fmap negate
 
 	abs = undefined
 
-	signum = undefined
+	signum = diag . signum . det
 
-	-- Multiplicative, not additive behaviour
-	fromInteger n = Matrix3 {
-		a11 = fromInteger n,
-		a12 = 0,
-		a13 = 0,
-		a21 = 0,
-		a22 = fromInteger n,
-		a23 = 0,
-		a31 = 0,
-		a32 = 0,
-		a33 = fromInteger n
-		}
+	fromInteger = diag . fromInteger
 
 -- |Computes the determinant of a matrix.
-det :: (Num t) => Matrix3 t -> t
+det :: Num t => Matrix3 t -> t
 det Matrix3 {..} =
 	a11 * (a22 * a33 - a32 * a23)
 	- a12 * (a21 * a33 - a23 * a31)
 	+ a13 * (a21 * a32 - a22 * a31)
 
 instance Fractional t => Fractional (Matrix3 t) where
-	-- Multiplicative, not additive behaviour
-	fromRational n = Matrix3 {
-		a11 = fromRational n,
-		a12 = 0,
-		a13 = 0,
-		a21 = 0,
-		a22 = fromRational n,
-		a23 = 0,
-		a31 = 0,
-		a32 = 0,
-		a33 = fromRational n
-		}
+	fromRational = diag . fromRational
 
 	recip a@(Matrix3 {..}) = Matrix3 {
 		a11 =  (a22 * a33 - a32 * a23) / d,
@@ -132,44 +123,28 @@ instance Fractional t => Fractional (Matrix3 t) where
 		a33 =  (a11 * a22 - a12 * a21) / d
 		} where d = det a
 
-
-instance Num t => Monoid (Matrix3 t) where
-	mempty = 1
-	mappend = (*)
-
--- |Convert 'Matrix3' into a list of 9 elements.
-toList :: Matrix3 t -> [t]
-toList Matrix3 {..} = [a11, a12, a13, a21, a22, a23, a31, a32, a33]
-
--- |Convert a list of 9 elements into 'Matrix3'.
+-- |Convert a list of 9 elements into 'Matrix3'. Reverse conversion can be done using 'Foldable' instance.
 fromList :: [t] -> Matrix3 t
-fromList as = Matrix3 {
-		a11 = as!!0,
-		a12 = as!!1,
-		a13 = as!!2,
-		a21 = as!!3,
-		a22 = as!!4,
-		a23 = as!!5,
-		a31 = as!!6,
-		a32 = as!!7,
-		a33 = as!!8
-		}
-
-instance Functor Matrix3 where
-	fmap f = fromList . List.map f . toList
+fromList [a11, a12, a13, a21, a22, a23, a31, a32, a33] = Matrix3 {
+	a11 = a11,
+	a12 = a12,
+	a13 = a13,
+	a21 = a21,
+	a22 = a22,
+	a23 = a23,
+	a31 = a31,
+	a32 = a32,
+	a33 = a33
+	}
+fromList _ = error "The list must contain exactly 9 elements"
 
 -- |Divide all elements of the matrix by their greatest common
 -- divisor. This is useful for matrices of projective
 -- transformations to reduce the magnitude of computations.
 normalize :: Integral t => Matrix3 t -> Matrix3 t
-normalize m = m' where
-	l = toList m
-	d = foldl1 gcd l
-	m' = if d==0 then m else fromList $ List.map (`div`d) l
-
--- |Return the maximal element of a matrix.
-maximum :: Ord t => Matrix3 t -> t
-maximum = List.maximum . toList
+normalize a = case foldl1 gcd a of
+	0 -> a
+	d -> fmap (`div` d) a
 
 -- |Print a matrix, separating rows with new lines and elements
 -- with spaces.
@@ -192,6 +167,3 @@ multCol Matrix3 {..} Vector3 {..} = Vector3 {
 	a2 = a21 * a1 + a22 * a2 + a23 * a3,
 	a3 = a31 * a1 + a32 * a2 + a33 * a3
 	}
-
-
-
