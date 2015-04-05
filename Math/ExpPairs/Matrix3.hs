@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE BangPatterns, RecordWildCards #-}
 {-|
 Module      : Math.ExpPairs.Matrix3
 Description : Implements matrices of order 3
@@ -70,16 +70,16 @@ instance Num t => Num (Matrix3 t) where
 		a33 = a31 a * a13 b + a32 a * a23 b + a33 a * a33 b
 		}
 
-	negate a = Matrix3 {
-		a11 = - a11 a,
-		a12 = - a12 a,
-		a13 = - a13 a,
-		a21 = - a21 a,
-		a22 = - a22 a,
-		a23 = - a23 a,
-		a31 = - a31 a,
-		a32 = - a32 a,
-		a33 = - a33 a
+	negate Matrix3 {..} = Matrix3 {
+		a11 = - a11,
+		a12 = - a12,
+		a13 = - a13,
+		a21 = - a21,
+		a22 = - a22,
+		a23 = - a23,
+		a31 = - a31,
+		a32 = - a32,
+		a33 = - a33
 		}
 
 	abs = undefined
@@ -101,10 +101,10 @@ instance Num t => Num (Matrix3 t) where
 
 -- |Computes the determinant of a matrix.
 det :: (Num t) => Matrix3 t -> t
-det a =
-	a11 a * (a22 a * a33 a - a32 a * a23 a)
-	- a12 a * (a21 a * a33 a - a23 a * a31 a)
-	+ a13 a * (a21 a * a32 a - a22 a * a31 a)
+det Matrix3 {..} =
+	a11 * (a22 * a33 - a32 * a23)
+	- a12 * (a21 * a33 - a23 * a31)
+	+ a13 * (a21 * a32 - a22 * a31)
 
 instance Fractional t => Fractional (Matrix3 t) where
 	-- Multiplicative, not additive behaviour
@@ -120,16 +120,16 @@ instance Fractional t => Fractional (Matrix3 t) where
 		a33 = fromRational n
 		}
 
-	recip a = Matrix3 {
-		a11 =  (a22 a * a33 a - a32 a * a23 a) / d,
-		a12 = -(a21 a * a33 a - a23 a * a31 a) / d,
-		a13 =  (a21 a * a32 a - a22 a * a31 a) / d,
-		a21 = -(a12 a * a33 a - a13 a * a32 a) / d,
-		a22 =  (a11 a * a33 a - a13 a * a31 a) / d,
-		a23 = -(a11 a * a32 a - a12 a * a31 a) / d,
-		a31 =  (a12 a * a23 a - a13 a * a22 a) / d,
-		a32 = -(a11 a * a23 a - a13 a * a21 a) / d,
-		a33 =  (a11 a * a22 a - a12 a * a21 a) / d
+	recip a@(Matrix3 {..}) = Matrix3 {
+		a11 =  (a22 * a33 - a32 * a23) / d,
+		a12 = -(a21 * a33 - a23 * a31) / d,
+		a13 =  (a21 * a32 - a22 * a31) / d,
+		a21 = -(a12 * a33 - a13 * a32) / d,
+		a22 =  (a11 * a33 - a13 * a31) / d,
+		a23 = -(a11 * a32 - a12 * a31) / d,
+		a31 =  (a12 * a23 - a13 * a22) / d,
+		a32 = -(a11 * a23 - a13 * a21) / d,
+		a33 =  (a11 * a22 - a12 * a21) / d
 		} where d = det a
 
 
@@ -139,7 +139,7 @@ instance Num t => Monoid (Matrix3 t) where
 
 -- |Convert 'Matrix3' into a list of 9 elements.
 toList :: Matrix3 t -> [t]
-toList a = [a11 a, a12 a, a13 a, a21 a, a22 a, a23 a, a31 a, a32 a, a33 a]
+toList Matrix3 {..} = [a11, a12, a13, a21, a22, a23, a31, a32, a33]
 
 -- |Convert a list of 9 elements into 'Matrix3'.
 fromList :: [t] -> Matrix3 t
@@ -173,24 +173,24 @@ maximum = List.maximum . toList
 
 -- |Print a matrix, separating rows with new lines and elements
 -- with spaces.
-prettyMatrix :: (Show t) => Matrix3 t -> String
-prettyMatrix m =
-	show (a11 m) ++ " " ++
-	show (a12 m) ++ " " ++
-	show (a13 m) ++ "\n" ++
-	show (a21 m) ++ " " ++
-	show (a22 m) ++ " " ++
-	show (a23 m) ++ "\n" ++
-	show (a31 m) ++ " " ++
-	show (a32 m) ++ " " ++
-	show (a33 m)
+prettyMatrix :: Show t => Matrix3 t -> String
+prettyMatrix Matrix3 {..} =
+	show a11 ++ ' '  :
+	show a12 ++ ' '  :
+	show a13 ++ '\n' :
+	show a21 ++ ' '  :
+	show a22 ++ ' '  :
+	show a23 ++ '\n' :
+	show a31 ++ ' '  :
+	show a32 ++ ' '  :
+	show a33
 
 -- |Multiplicate a matrix by a vector (considered as a column).
-multCol :: (Num t) => Matrix3 t -> Vector3 t -> Vector3 t
-multCol m v = Vector3 {
-	a1 = a11 m * a1 v + a12 m * a2 v + a13 m * a3 v,
-	a2 = a21 m * a1 v + a22 m * a2 v + a23 m * a3 v,
-	a3 = a31 m * a1 v + a32 m * a2 v + a33 m * a3 v
+multCol :: Num t => Matrix3 t -> Vector3 t -> Vector3 t
+multCol Matrix3 {..} Vector3 {..} = Vector3 {
+	a1 = a11 * a1 + a12 * a2 + a13 * a3,
+	a2 = a21 * a1 + a22 * a2 + a23 * a3,
+	a3 = a31 * a1 + a32 * a2 + a33 * a3
 	}
 
 
