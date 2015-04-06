@@ -1,5 +1,5 @@
 name:                exp-pairs
-version:             0.1.1.0
+version:             0.1.2.0
 synopsis:            Linear programming over exponent pairs
 description:         Package implements an algorithm to minimize rational objective function over the set of exponent pairs
 homepage:            https://github.com/Bodigrim/exp-pairs
@@ -9,7 +9,7 @@ author:              Andrew Lelechenko
 maintainer:          andrew.lelechenko@gmail.com
 category:            Math
 build-type:          Simple
-cabal-version:       >=1.8
+cabal-version:       >=1.10
 
 source-repository head
   type:     git
@@ -26,13 +26,14 @@ library
                        Math.ExpPairs.Process,
                        Math.ExpPairs.RatioInf
   build-depends:       base >=4 && <5,
-                       memoize >=0.1
+                       memoize >=0.1,
+                       ghc-prim
+  default-language:    Haskell2010
+  ghc-options:         -O2 -Wall
 
 test-suite tests
-  ghc-options: -Wall
-  type: exitcode-stdio-1.0
-  main-is: Tests.hs
-  hs-source-dirs: tests
+  type:                exitcode-stdio-1.0
+  main-is:             Tests.hs
   build-depends:       base >=4 && <5,
                        tasty >=0.7,
                        tasty-quickcheck,
@@ -44,3 +45,6 @@ test-suite tests
                        memoize >=0.1,
                        matrix >=0.1,
                        random
+  hs-source-dirs:      tests
+  default-language:    Haskell2010
+  ghc-options:         -O2 -Wall
