@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-|
 Module      : Math.ExpPairs.RatioInf
 Description : Rational numbers with infinities
@@ -22,7 +23,7 @@ data RatioInf t
 	-- |Negative infinity
 	= InfMinus
 	-- |Finite value
-	| Finite (Ratio t)
+	| Finite !(Ratio t)
 	-- |Positive infinity
 	| InfPlus
 	deriving (Ord, Eq)
@@ -53,7 +54,7 @@ instance Integral t => Num (RatioInf t) where
 
 	abs InfMinus   = InfPlus
 	abs InfPlus    = InfPlus
-	abs (Finite r) = Finite (abs r)
+	abs Finite r = Finite (abs r)
 
 	negate InfMinus   = InfPlus
 	negate InfPlus    = InfMinus
