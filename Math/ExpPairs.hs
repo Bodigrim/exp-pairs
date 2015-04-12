@@ -14,12 +14,28 @@ A. V. Lelechenko, Linear programming over exponent pairs. Acta Univ. Sapientiae,
 A set of useful applications can be found in
 "Math.ExpPairs.Ivic", "Math.ExpPairs.Kratzel" and "Math.ExpPairs.MenzerNowak".
 -}
-module Math.ExpPairs (optimize, OptimizeResult, optimalValue, optimalPair, optimalPath, simulateOptimize, simulateOptimize', LinearForm (..), RationalForm (..), IneqType (..), Constraint (..), InitPair, Path, RatioInf (..), RationalInf) where
+module Math.ExpPairs
+	( optimize
+	, OptimizeResult
+	, optimalValue
+	, optimalPair
+	, optimalPath
+	, simulateOptimize
+	, simulateOptimize'
+	, LinearForm (..)
+	, RationalForm (..)
+	, IneqType (..)
+	, Constraint (..)
+	, InitPair
+	, Path
+	, RatioInf (..)
+	, RationalInf
+	) where
 
-import Data.Ratio
-import Data.Ord
-import Data.List
-import Data.Monoid
+import Data.Ratio  ((%), numerator, denominator)
+import Data.Ord    (comparing)
+import Data.List   (minimumBy)
+import Data.Monoid (mempty, mappend)
 
 import Math.ExpPairs.LinearForm
 import Math.ExpPairs.Process
@@ -33,10 +49,6 @@ fracs2proj (q, r) = (k, l, m) where
 	m = lcm dq dr
 	k = numerator q * (m `div` dq)
 	l = numerator r * (m `div` dr)
-
-proj2fracs :: (Integer, Integer, Integer) -> (Rational, Rational)
-proj2fracs (k, l, m) = (k%m, l%m)
-
 
 evalFunctional :: [InitPair] -> [InitPair] -> [RationalForm Rational] -> [Constraint Rational] -> Path -> (RationalInf, InitPair)
 evalFunctional corners interiors rfs cons path = if null rs then (InfPlus, undefined) else minimumBy (comparing fst) rs where

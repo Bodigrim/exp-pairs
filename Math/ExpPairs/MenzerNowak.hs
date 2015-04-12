@@ -17,9 +17,11 @@ proved an asymptotic formula for
 Σ_{n ≤ x} τ_{a, b}(l_1, k_1; l_2, k_2; n) with an error term of order (x \/ k_1^a \/ k_2^b)^(Θ(a, b) + ε). They provided an expression for Θ(a, b) in terms of exponent pairs.
 
 -}
-module Math.ExpPairs.MenzerNowak (menzerNowak) where
+module Math.ExpPairs.MenzerNowak
+	( menzerNowak
+	) where
 
-import Data.Ratio
+import Data.Ratio    ((%))
 
 import Math.ExpPairs
 

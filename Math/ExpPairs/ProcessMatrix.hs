@@ -1,0 +1,59 @@
+{-|
+Module      : Math.ExpPairs.ProcessMatrix
+Description : Monoidal wrapper for Matrix3
+Copyright   : (c) Andrew Lelechenko, 2014-2015
+License     : GPL-3
+Maintainer  : andrew.lelechenko@gmail.com
+Stability   : experimental
+Portability : TemplateHaskell
+
+Provides types for sequences of /A/- and /B/-processes of van der Corput. A good account on this topic can be found in /Graham S. W.,  Kolesnik G. A./ Van Der Corput's Method of Exponential Sums, Cambridge University Press, 1991, especially Ch. 5.
+-}
+{-# LANGUAGE TemplateHaskell, BangPatterns, GeneralizedNewtypeDeriving  #-}
+module Math.ExpPairs.ProcessMatrix
+	( Process (..)
+	, ProcessMatrix ()
+	, aMatrix
+	, baMatrix
+	, evalMatrix
+	) where
+
+import Data.Monoid           (Monoid, mempty, mappend)
+import Data.Function.Memoize (deriveMemoizable)
+
+import Math.ExpPairs.Matrix3
+
+-- | Since B^2 = id, B 'Corput16' = 'Corput16', B 'Hux05' = 'Hux05' and B 'HuxW87b1' = ???, the sequence of /A/- and /B/-processes, applied to 'initPairs' can be rewritten as a sequence of 'A' and 'BA'.
+data Process
+	-- | /A/-process
+	= A
+	-- | /BA/-process
+	| BA
+	deriving (Eq, Show, Read, Ord, Enum)
+
+deriveMemoizable ''Process
+
+newtype ProcessMatrix = ProcessMatrix (Matrix3 Integer)
+	deriving (Eq, Num, Show)
+
+instance Monoid ProcessMatrix where
+	mempty = 1
+	mappend (ProcessMatrix a) (ProcessMatrix b) = ProcessMatrix $ normalize $ a * b
+
+process2matrix :: Process -> ProcessMatrix
+process2matrix  A = ProcessMatrix $ Matrix3 1 0 0 1 1 1  2 0 2
+process2matrix BA = ProcessMatrix $ Matrix3 0 1 0 2 0 1  2 0 2
+
+aMatrix :: ProcessMatrix
+aMatrix = process2matrix A
+
+baMatrix :: ProcessMatrix
+baMatrix = process2matrix BA
+
+-- |Apply a projective transformation, defined by 'Path',
+-- to a given point in two-dimensional projective space.
+evalMatrix :: Num t => ProcessMatrix -> (t, t, t) -> (t, t, t)
+evalMatrix (ProcessMatrix m) (a,b,c) = (a',b',c') where
+	m' = fmap fromInteger m
+	(Vector3 a' b' c') = multCol m' (Vector3 a b c)
+

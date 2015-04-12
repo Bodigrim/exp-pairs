@@ -81,9 +81,9 @@ etalonMOnS a b c d = Finite (c%d) <= (optimalValue . mOnS) (a%b)
 testSuite :: TestTree
 testSuite = testGroup "Ivic"
 	[ testCase "etalon zetaOnS"
-		(testEtalon 100 (\xs -> etalonZetaOnS (xs!!0) (xs!!1) (xs!!2) (xs!!3)) "tests/etalon-zetaOnS.txt")
+		(testEtalon 100 (\(a:b:c:d:_) -> etalonZetaOnS a b c d) "tests/etalon-zetaOnS.txt")
 	, testCase "etalon mOnS"
-		(testEtalon 100 (\xs -> etalonMOnS (xs!!0) (xs!!1) (xs!!2) (xs!!3)) "tests/etalon-mOnS.txt")
+		(testEtalon 100 (\(a:b:c:d:_) -> etalonMOnS a b c d) "tests/etalon-mOnS.txt")
 	, SC.testProperty "zetaOnS monotonic" testZetaOnS1
 	, QC.testProperty "zetaOnS monotonic" testZetaOnS1
 	, SC.testProperty "zetaOnS strict monotonic" testZetaOnS2

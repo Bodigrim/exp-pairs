@@ -5,6 +5,7 @@ module Instances (Ratio01 (..), Positive (..)) where
 import Test.QuickCheck hiding (Positive)
 import Test.SmallCheck.Series
 import Control.Monad
+import Control.Applicative
 
 import Math.ExpPairs.Pair (InitPair' (..))
 import Math.ExpPairs.Matrix3 as M3 (Matrix3, fromList, Vector3 (..))
@@ -44,7 +45,7 @@ instance (Num a, Ord a, Arbitrary a) => Arbitrary (Positive a) where
     (Positive . abs) `fmap` (arbitrary `suchThat` (> 0))
 
 instance (Arbitrary a) => Arbitrary (M3.Matrix3 a) where
-  arbitrary = fmap M3.fromList $ vectorOf 9 arbitrary
+  arbitrary = M3.fromList <$> vectorOf 9 arbitrary
 
 instance (Arbitrary a) => Arbitrary (M3.Vector3 a) where
-  arbitrary = fmap (\[a,b,c] -> M3.Vector3 a b c) $ vectorOf 3 arbitrary
+  arbitrary = (\[a,b,c] -> M3.Vector3 a b c) <$> vectorOf 3 arbitrary

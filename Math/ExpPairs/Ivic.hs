@@ -12,11 +12,15 @@ Provides functions to compute estimates Riemann zeta-function
 Mineola, New York: Dover Publications, 2003.
 
 -}
-module Math.ExpPairs.Ivic (zetaOnS, reverseZetaOnS, mOnS) where
+module Math.ExpPairs.Ivic
+	( zetaOnS
+	, reverseZetaOnS
+	, mOnS
+	) where
 
-import Data.Ratio
-import Data.List
-import Data.Ord
+import Data.Ratio ((%))
+import Data.List  (minimumBy)
+import Data.Ord   (comparing)
 
 import Math.ExpPairs
 
@@ -97,6 +101,7 @@ mOnS s
 		x2' = optimize [RationalForm numer denom] cons
 		x2 = x2' {optimalValue = negate $ optimalValue x2'}
 
+reverseMOnS :: RationalInf -> Rational
 reverseMOnS m = reverseMOnS' from to where
 	from = 1 % 2
 	to   = 1 % 1
@@ -139,6 +144,7 @@ searchMinAbscissa xs = searchMinAbscissa' from to where
 -- is produced by
 -- optimize [RationalForm (LinearForm 4 4 2) (LinearForm 1 0 0)] [Constraint (LinearForm (-64) (-77) 64) Strict]
 
+mBigOnHalf :: Rational -> OptimizeResult
 mBigOnHalf a
 	| a < 4     = simulateOptimize 1
 	| a < 12    = simulateOptimize $ 1+(a-4)/8
@@ -150,6 +156,7 @@ mBigOnHalf a
 				[Constraint (LinearForm (4-a) 4 2) NonStrict]
 			x = 1 + 32*(a-6)/205
 
+reverseMBigOnHalf :: Rational -> OptimizeResult
 reverseMBigOnHalf m
 	| m <= 2 = simulateOptimize $ (m-1)*8 + 4
 	| otherwise = if Finite a <= optimalValue optRes
@@ -158,47 +165,4 @@ reverseMBigOnHalf m
 		a = (m-1)*205/32 + 6
 		optRes = optimize [RationalForm (LinearForm 4 4 2) (LinearForm 1 0 0)] [Constraint (LinearForm (1-m) 1 0) NonStrict]
 
-
-f l lambda = (l-lambda)*32/205
-	+ ((toRational . optimalValue . mBigOnHalf) (4*l/(4-lambda)) - 1) * (4-lambda) /4
-
---bestLambda l = minimum $ map (f l) lambdas `zip` lambdas where
---	lambdas = [0,1%100..4-1%100]
-
-heckeZetaByHalf a = 1 - xt where
-	d = toRational 12.571624917200547
-	ia 2 = 0
-	ia 3 = 1%4
-	ia a
-		| a<=12 = 32%205 * ((1 + 4 / d) * a - 4) + (toRational (optimalValue (mBigOnHalf d)) - 1) * a / d
-		| a<=15 = 32%205 * a + toRational (optimalValue (mBigOnHalf a)) - 1
-		| otherwise = 32%205 * (2 * a - 6)
-	xt = 1%2 / (1 + ia a)
-
-
-bestLambda l = (\x -> (x, fromRational $ f l x)) (bestLambda' 0 (3999%1000)) where
-	bestLambda' a b
-		| b-a < 1%1000000000 = a
-		| otherwise = if mx1 > mx2 then bestLambda' x1 b else bestLambda' a x2 where
-			x1 = (2*a+b)/3
-			x2 = (a+2*b)/3
-			ma = f l a
-			mb = f l b
-			mx1 = f l x1
-			mx2 = f l x2
-
-difur a = a * m' - m + (77%205) where
-	h = 1%(10^100)
-	m = toRational $ optimalValue $ mBigOnHalf a
-	mh = toRational $ optimalValue $ mBigOnHalf (a+h)
-	m' = (mh-m) / h
-
-solveD a b
-	| b-a < 1%(10^6) = a
-	| otherwise = if difur c > 0 then solveD a c else solveD c b where
-		c = (a+b)/2
-
-{-
-D = 12.571624917200547
--}
 

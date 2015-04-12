@@ -22,9 +22,9 @@ module Math.ExpPairs.Matrix3
 	) where
 
 import Prelude hiding (foldl1)
-import Data.Foldable (Foldable (..), toList)
-import GHC.Generics (Generic (..))
-import Data.List (transpose)
+import Data.Foldable  (Foldable (..), toList)
+import GHC.Generics   (Generic (..))
+import Data.List      (transpose)
 
 -- |Three-component vector.
 data Vector3 t = Vector3 {

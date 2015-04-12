@@ -12,9 +12,15 @@ of two points (0, 1), (1\/2, 1\/2) and a triangle with vertices in (1\/6, 2\/3),
 
 Below /A/ and /B/ stands for van der Corput's processes. See "Math.ExpPairs.Process" for explanations.
 -}
-module Math.ExpPairs.Pair (Triangle (..), InitPair' (..), InitPair, initPairs, initPairToValue) where
+module Math.ExpPairs.Pair
+	( Triangle (..)
+	, InitPair' (..)
+	, InitPair
+	, initPairs
+	, initPairToValue
+	) where
 
-import Data.Ratio
+import Data.Ratio ((%))
 
 -- |Vertices of the triangle of initial exponent pairs.
 data Triangle

@@ -9,9 +9,12 @@ Portability : POSIX
 
 Provides types and necessary instances for rational numbers, extended with infinite values. Just use 'RationalInf' instead of 'Rational' from "Data.Ratio".
 -}
-module Math.ExpPairs.RatioInf (RatioInf (..), RationalInf) where
+module Math.ExpPairs.RatioInf
+	( RatioInf (..)
+	, RationalInf
+	) where
 
-import Data.Ratio
+import Data.Ratio (Ratio (Ratio))
 
 -- |Extends a rational type with positive and negative
 -- infinities.

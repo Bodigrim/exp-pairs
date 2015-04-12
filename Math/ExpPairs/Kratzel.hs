@@ -24,11 +24,16 @@ and for
 He also provided a set of theorems to estimate Θ(a, b) and Θ(a, b, c).
 
 -}
-module Math.ExpPairs.Kratzel (TauabTheorem (..), tauab, TauabcTheorem (..), tauabc) where
+module Math.ExpPairs.Kratzel
+	( TauabTheorem (..)
+	, tauab
+	, TauabcTheorem (..)
+	, tauabc
+	) where
 
-import Data.Ratio
-import Data.Ord
-import Data.List
+import Data.Ratio ((%))
+import Data.Ord   (comparing)
+import Data.List  (minimumBy)
 
 import Math.ExpPairs
 
@@ -117,7 +122,7 @@ tauabc a' b' c' = minimumBy (comparing (optimalValue . snd)) [kr61, kr62, kr63, 
 		[Constraint (LinearForm (2*(a-b-c)) (2*a) (2*a-b-c)) NonStrict])
 	kr64 = (Kr64, simulateOptimize r) where
 		r = recip (a+b+c) * minimum ((a+b+c):[2-4*(k-1)%(3*2^k-4) | k<-[1..maxk], (3*2^k-2*k-4)%1 * a >= 2 * (b+c), (3*2^k-8)%1 * (a+b) >= (3*2^k-4*k+4)%1 * c])
-		maxk = 4 `max` floor (logBase 2 (fromRational $ b+c))
+		maxk = 4 `max` floor (logBase 2 (fromRational $ b+c) :: Double)
 	kr65 = (Kr65, simulateOptimize r) where
 		r = if 7*a>=2*(b+c) && 4*(a+b)>=5*c then 3%2/(a+b+c) else 1%1
 	kr66 = (Kr66, simulateOptimize r) where

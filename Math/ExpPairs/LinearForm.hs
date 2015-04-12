@@ -9,11 +9,21 @@ Portability : POSIX
 
 Provides types for rational forms (to hold objective functions in "Math.ExpPairs") and linear contraints (to hold constraints of optimization). Both of them are built atop of projective linear forms.
 -}
-module Math.ExpPairs.LinearForm (LinearForm (..), evalLF, substituteLF, RationalForm (..), evalRF, IneqType (..), Constraint (..), checkConstraint) where
+module Math.ExpPairs.LinearForm
+	( LinearForm (..)
+	, evalLF
+	, substituteLF
+	, RationalForm (..)
+	, evalRF
+	, IneqType (..)
+	, Constraint (..)
+	, checkConstraint
+	) where
 
-import Data.List
-import Data.Ratio
-import Data.Monoid
+import Data.List   (intercalate)
+import Data.Ratio  (numerator, denominator)
+import Data.Monoid (Monoid, mempty, mappend)
+
 import Math.ExpPairs.RatioInf
 
 -- |Define an affine linear form of two variables: a*k + b*l + c*m.
@@ -82,9 +92,6 @@ evalRF (k', l', m') (RationalForm num den) = if denom==0 then InfPlus else Finit
 	m = fromInteger m'
 	numer = toRational $ evalLF (k, l, m) num
 	denom = toRational $ evalLF (k, l, m) den
-
-substituteRF :: (Eq t, Num t) => (LinearForm t, LinearForm t, LinearForm t) -> RationalForm t -> RationalForm t
-substituteRF (k, l, m) (RationalForm num den) = RationalForm (substituteLF (k, l, m) num) (substituteLF (k, l, m) den)
 
 -- |Constants to specify the strictness of 'Constraint'.
 data IneqType
