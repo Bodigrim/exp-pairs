@@ -19,12 +19,12 @@ module Math.ExpPairs.Matrix3
 	, det
 	, multCol
 	, normalize
-	, prettyMatrix
 	) where
 
 import Prelude hiding (foldl1)
 import Data.Foldable (Foldable (..), toList)
 import GHC.Generics (Generic (..))
+import Data.List (transpose)
 
 -- |Three-component vector.
 data Vector3 t = Vector3 {
@@ -52,7 +52,7 @@ data Matrix3 t = Matrix3 {
 	a32 :: !t,
 	a33 :: !t
 	}
-	deriving (Eq, Show, Functor, Foldable, Generic)
+	deriving (Eq, Functor, Foldable, Generic)
 
 diag :: Num t => t -> Matrix3 t
 diag n = Matrix3 {
@@ -101,7 +101,7 @@ instance Num t => Num (Matrix3 t) where
 
 	fromInteger = diag . fromInteger
 
--- |Computes the determinant of a matrix.
+-- |Compute the determinant of a matrix.
 det :: Num t => Matrix3 t -> t
 det Matrix3 {..} =
 	a11 * (a22 * a33 - a32 * a23)
@@ -123,7 +123,7 @@ instance Fractional t => Fractional (Matrix3 t) where
 		a33 =  (a11 * a22 - a12 * a21) / d
 		} where d = det a
 
--- |Convert a list of 9 elements into 'Matrix3'. Reverse conversion can be done using 'Foldable' instance.
+-- |Convert a list of 9 elements into 'Matrix3'. Reverse conversion can be done by 'toList' from "Data.Foldable".
 fromList :: [t] -> Matrix3 t
 fromList [a11, a12, a13, a21, a22, a23, a31, a32, a33] = Matrix3 {
 	a11 = a11,
@@ -146,19 +146,12 @@ normalize a = case foldl1 gcd a of
 	0 -> a
 	d -> fmap (`div` d) a
 
--- |Print a matrix, separating rows with new lines and elements
--- with spaces.
-prettyMatrix :: Show t => Matrix3 t -> String
-prettyMatrix Matrix3 {..} =
-	show a11 ++ ' '  :
-	show a12 ++ ' '  :
-	show a13 ++ '\n' :
-	show a21 ++ ' '  :
-	show a22 ++ ' '  :
-	show a23 ++ '\n' :
-	show a31 ++ ' '  :
-	show a32 ++ ' '  :
-	show a33
+instance Show t => Show (Matrix3 t) where
+	show = unlines . map unwords . pad . fmap show where
+		pad (Matrix3 {..}) = map (zipWith padCell ls) table where
+			table = [[a11, a12, a13], [a21, a22, a23], [a31, a32, a33]]
+			ls = map (maximum . map length) (transpose table)
+			padCell l xs = replicate (l - length xs) ' ' ++ xs
 
 -- |Multiplicate a matrix by a vector (considered as a column).
 multCol :: Num t => Matrix3 t -> Vector3 t -> Vector3 t
