@@ -15,7 +15,7 @@ module Math.ExpPairs.RatioInf
 	, RationalInf
 	) where
 
-import Data.Ratio (Ratio (Ratio))
+import Data.Ratio (Ratio)
 
 -- |Extends a rational type with positive and negative
 -- infinities.
@@ -54,7 +54,7 @@ instance Integral t => Num (RatioInf t) where
 
 	abs InfMinus   = InfPlus
 	abs InfPlus    = InfPlus
-	abs Finite r = Finite (abs r)
+	abs (Finite r) = Finite (abs r)
 
 	negate InfMinus   = InfPlus
 	negate InfPlus    = InfMinus
