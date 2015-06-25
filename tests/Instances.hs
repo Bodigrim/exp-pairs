@@ -7,8 +7,16 @@ import Test.SmallCheck.Series
 import Control.Monad
 import Control.Applicative
 
+import Math.ExpPairs.ProcessMatrix
 import Math.ExpPairs.Pair (InitPair' (..))
 import Math.ExpPairs.Matrix3 as M3 (Matrix3, fromList, Vector3 (..))
+
+instance Arbitrary Process where
+	arbitrary = fmap f arbitrary where
+		f x = if x then A else BA
+
+instance Monad m => Serial m Process where
+	series = cons0 A \/ cons0 BA
 
 newtype Ratio01 t = Ratio01 t
 
