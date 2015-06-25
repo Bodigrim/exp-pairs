@@ -15,14 +15,14 @@ main = defaultMain tests
 
 tests :: TestTree
 tests = testGroup "Tests"
-	[ LinearForm.testSuite
-	, Matrix3.testSuite
-	, RatioInf.testSuite
-	, Pair.testSuite
-	, PrettyProcess.testSuite
-	, Ivic.testSuite
-	, Kratzel.testSuite
-	, MenzerNowak.testSuite
+	[ Matrix3.testSuite
+	-- , LinearForm.testSuite
+	-- , RatioInf.testSuite
+	-- , Pair.testSuite
+	-- , PrettyProcess.testSuite
+	-- , Ivic.testSuite
+	-- , Kratzel.testSuite
+	-- , MenzerNowak.testSuite
 	]
 
 
