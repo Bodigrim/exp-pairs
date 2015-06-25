@@ -2,6 +2,7 @@ import qualified LinearForm (testSuite)
 import qualified Matrix3 (testSuite)
 import qualified RatioInf (testSuite)
 import qualified Pair (testSuite)
+import qualified PrettyProcess (testSuite)
 
 import qualified Ivic (testSuite)
 import qualified Kratzel (testSuite)
@@ -18,6 +19,7 @@ tests = testGroup "Tests"
 	, Matrix3.testSuite
 	, RatioInf.testSuite
 	, Pair.testSuite
+	, PrettyProcess.testSuite
 	, Ivic.testSuite
 	, Kratzel.testSuite
 	, MenzerNowak.testSuite

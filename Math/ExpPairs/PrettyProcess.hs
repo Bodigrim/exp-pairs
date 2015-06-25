@@ -21,7 +21,7 @@ module Math.ExpPairs.PrettyProcess
 
 import Data.List                (minimumBy)
 import Data.Ord                 (comparing)
-import Data.Function.Memoize    (memoFix, deriveMemoizable)
+import Data.Function.Memoize    (memoize, deriveMemoizable)
 import Text.PrettyPrint.Leijen
 
 import Math.ExpPairs.ProcessMatrix
@@ -31,18 +31,20 @@ data PrettyProcess
 	= Simply [Process]
 	| Repeat PrettyProcess Int
 	| Sequence PrettyProcess PrettyProcess
+	deriving (Show)
+
+data PrettyProcessWithWidth = PPWL { ppwlProcess :: PrettyProcess, ppwlWidth :: Int }
 
 deriveMemoizable ''PrettyProcess
 
-instance Show PrettyProcess where
-	show = \case
-		Simply xs    -> concatMap show xs
-		Repeat _  0  -> ""
-		Repeat xs 1  -> show xs
-		Repeat xs n  -> case show xs of
-			[ch] -> ch : '^' : show n
-			chs  -> '(' : chs ++ (')' : '^' : show n)
-		Sequence a b -> show a ++ show b
+instance Pretty PrettyProcess where
+	pretty = \case
+		Simply xs    -> hsep (map (text . show) xs)
+		Repeat _  0  -> empty
+		Repeat xs 1  -> pretty xs
+		Repeat (Simply [A]) n -> text (show A) <> char '^' <> int n
+		Repeat xs n  -> parens (pretty xs) <> char '^' <> int n
+		Sequence a b -> pretty a <+> pretty b
 
 -- | Width of the bracket.
 bracketWidth :: Int
@@ -59,16 +61,17 @@ processWidth BA = 20
 
 -- | Compute the width of the 'PrettyProcess' according to 'bracketWidth', 'subscriptWidth' and 'printedWidth''.
 printedWidth :: PrettyProcess -> Int
-printedWidth = memoFix printedWidth'
-
-printedWidth' :: (PrettyProcess -> Int) -> PrettyProcess -> Int
-printedWidth' rec = \case
+printedWidth = \case
 	Simply xs             -> sum (map processWidth xs)
 	Repeat _ 0            -> 0
-	Repeat xs 1           -> rec xs
+	Repeat xs 1           -> printedWidth xs
 	Repeat (Simply [A]) _ -> processWidth A + subscriptWidth
-	Repeat xs _           -> printedWidth' rec xs + bracketWidth * 2 + subscriptWidth
-	Sequence a b          -> rec a + rec b
+	Repeat xs _           -> printedWidth xs + bracketWidth * 2 + subscriptWidth
+	Sequence a b          -> printedWidth a + printedWidth b
+
+-- | Convert 'PrettyProcess' to 'PrettyProcessWithWidth'.
+annotateWithWidth :: PrettyProcess -> PrettyProcessWithWidth
+annotateWithWidth p = PPWL p (printedWidth p)
 
 -- | Return non-trivial divisors of an argument.
 divisors :: Int -> [Int]
@@ -86,17 +89,21 @@ asRepeat xs = pair where
 
 -- | Find the most compact representation of the sequence of processes.
 prettify :: [Process] -> PrettyProcess
-prettify = memoFix prettify' where
+prettify = ppwlProcess . prettifyP
 
-prettify' :: ([Process] -> PrettyProcess) -> [Process] -> PrettyProcess
-prettify' rec = \case
-	[]   -> Simply []
-	[A]  -> Simply [A]
-	[BA] -> Simply [BA]
-	xs   -> minimumBy (comparing printedWidth) yss where
+-- | Find the most compact representation of the sequence of processes, keeping track of widthess.
+prettifyP :: [Process] -> PrettyProcessWithWidth
+prettifyP = memoize prettify' where
+
+prettify' :: [Process] -> PrettyProcessWithWidth
+prettify' = \case
+	[]   -> annotateWithWidth (Simply [])
+	[A]  -> annotateWithWidth (Simply [A])
+	[BA] -> annotateWithWidth (Simply [BA])
+	xs   -> minimumBy (comparing ppwlWidth) yss where
 		xs'' = case asRepeat xs of
-			(_, 1)   -> Simply xs
-			(xs', n) -> Repeat (rec xs') n
+			(_, 1)   -> annotateWithWidth (Simply xs)
+			(xs', n) -> annotateWithWidth (Repeat (prettify xs') n)
 
 		yss = xs'' : map f bcs
 
@@ -105,7 +112,9 @@ prettify' rec = \case
 		bcf (_, [])    = undefined
 		bcf (zs, y:ys) = (zs++[y], ys)
 
-		f (bs, cs) = Sequence (rec bs) (rec cs)
+		f (bs, cs) = PPWL (Sequence bsP csP) (bsW + csW) where
+			PPWL bsP bsW = prettifyP bs
+			PPWL csP csW = prettifyP cs
 
 -- | Unfold back 'PrettyProcess' into the sequence of 'Process'.
 uglify :: PrettyProcess -> [Process]
