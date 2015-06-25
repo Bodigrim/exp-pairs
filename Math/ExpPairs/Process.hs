@@ -40,7 +40,7 @@ instance Monoid Path where
 	mappend = mappenddefault
 
 instance Show Path where
-	show (Path _ l) = show (prettifyM l) -- ++ "\n" ++ Mx.prettyMatrix m
+	show (Path _ l) = show (prettify l) -- ++ "\n" ++ Mx.prettyMatrix m
 
 instance Read Path where
 	readsPrec _ zs = [reads' zs] where

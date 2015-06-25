@@ -24,12 +24,14 @@ library
                        Math.ExpPairs.Matrix3,
                        Math.ExpPairs.Pair,
                        Math.ExpPairs.Process,
+                       Math.ExpPairs.PrettyProcess,
                        Math.ExpPairs.ProcessMatrix,
                        Math.ExpPairs.RatioInf
   build-depends:       base >=4 && <5,
                        memoize >=0.1,
                        ghc-prim,
-                       generic-deriving
+                       generic-deriving,
+                       wl-pprint >=1.2
   default-language:    Haskell2010
   ghc-options:         -Wall
 
