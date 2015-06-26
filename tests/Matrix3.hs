@@ -20,7 +20,7 @@ testOp op1 op2 m1 m2 = m'==m'' where
 	m'' = toM m1 `op2` toM m2
 
 testMakarov :: M3.Matrix3 Integer -> M3.Matrix3 Integer -> Bool
-testMakarov m1 m2 = m1 * m2 == m1 `M3.makarovMult'` m2
+testMakarov m1 m2 = m1 * m2 == m1 `M3.makarovMult` m2
 
 testDet1 :: M3.Matrix3 Integer -> Bool
 testDet1 m = M3.det m == M.detLaplace (toM m)

@@ -21,7 +21,6 @@ module Math.ExpPairs.Matrix3
 	, normalize
 	, usualMult
 	, makarovMult
-	, makarovMult'
 	) where
 
 import Prelude hiding (foldl1)
@@ -90,7 +89,7 @@ instance (Num t, Ord t) => Num (Matrix3 t) where
 		a33 = a33 a + a33 b
 		}
 
-	a * b = (if maximum (toList a) > 10^550 then makarovMult' else usualMult) a b
+	(*) = usualMult
 
 	negate = fmap negate
 
@@ -112,7 +111,6 @@ usualMult a b = Matrix3 {
 		a32 = a31 a * a12 b + a32 a * a22 b + a33 a * a32 b,
 		a33 = a31 a * a13 b + a32 a * a23 b + a33 a * a33 b
 		}
--- {-# INLINE usualMult #-}
 {-# SPECIALIZE usualMult :: Matrix3 Int -> Matrix3 Int -> Matrix3 Int #-}
 {-# SPECIALIZE usualMult :: Matrix3 Integer -> Matrix3 Integer -> Matrix3 Integer #-}
 
@@ -121,100 +119,61 @@ makarovMult
 	(Matrix3 k1 b1 c1 k2 b2 c2 k3 b3 c3)
 	(Matrix3 a1 a2 a3 k4 k5 k6 k7 k8 k9)
 	= Matrix3 r1 r2 r3 r4 r5 r6 r7 r8 r9 where
-		m1  = (a3 + c1 - c2) * (k1 + k7 - k8 + k9)
-		m2  = (a2 + b1 + b2) * (k2 - k4 + k5 - k6)
-		m3  = (a2 + b1 + b3) * (k3 - k4 + k5 - k6)
-		m4  = (a3 - c2 - c3) * (k3 - k7 + k8 - k9)
-		m5  = (a1 - c1 + c2) * k1
-		m6  = (a1 + b1 + b2) * k2
-		m7  = (a1 + b1 + b3 + c2 + c3) * k3
-		m8  = a2 * (k1 + k4 - k5 + k6)
-		m9  = a3 * (k2 + k7 - k8 + k9)
+		u32 = c3 - u38
+		u33 = a3 - c2
+		u34 = c1 - c2
+		u35 = c2 + c3
+		u36 = a2 + b1
+		u37 = b1 + b2
+		u38 = b1 + b3
+
+		v32 = k4 - k5 + k6
+		v33 = k3 - v35
+		v34 = k9 + v35
+		v35 = k7 - k8
+		v36 = k8 + k6
+
+		m1  = (c1 + u33) * (k1 + v34)
+		m2  = (b2 + u36) * (k2 - v32)
+		m3  = (b3 + u36) * (k3 - v32)
+		m4  = (u33 - c3) * (v33 - k9)
+		m5  = (a1 - u34) * k1
+		m6  = (a1 + u37) * k2
+		m7  = (a1 + u35 + u38) * k3
+		m8  = a2 * (k1 + v32)
+		m9  = a3 * (k2 + v34)
 		m10 = b1 * k4
 		m11 = c2 * k7
-		m12 = (c1 - c2) * (k1 + k7)
-		m13 = (b1 + b2) * (k4 - k2)
-		m14 = (a2 + b1) * (k4 - k5 + k6)
+		m12 = u34 * (k1 + k7)
+		m13 = u37 * (k4 - k2)
+		m14 = u36 * v32
 		m15 = b2 * k6
-		m16 = (a3 - c2) * (k7 - k8 + k9)
+		m16 = u33 * v34
 		m17 = c2 * k8
-		m18 = (b3 - c2 - c3) * k6
-		m19 = (c1 + c3 - b1 - b3) * k8
-		m20 = (b1 + b3) * (k4 - k3 + k6 + k8)
-		m21 = (c2 + c3) * (k3 + k6 - k7 + k8)
-		m22 = (c2 + c3 - b1 - b3) * (k6 + k8)
+		m18 = (b3 - u35) * k6
+		m19 = (c1 + u32) * k8
+		m20 = u38 * (k4 - k3 + v36)
+		m21 = u35 * (k6 + v33)
+		m22 = (c2 + u32) * v36
 
-		r1  = m5 + m10 + m11 + m12
-		r2  = m8 + m10 - m14 + m17 - m18 + m19 - m22
-		r3  = m1 - m11 - m12 - m16 + m17 - m18 + m19 - m22
-		r4  = m6 - m10 + m11 + m13
-		r5  = m2 - m10 + m13 + m14 + m15 + m17
-		r6  = m9 - m11 + m15 - m16 + m17
-		r7  = m7 - m10 - m11 + m20 - m21 + m22
-		r8  = m3 - m10 + m14 - m17 + m18 + m20 + m22
-		r9  = m4 + m11 + m16 - m17 + m18 + m21
--- {-# INLINE makarovMult #-}
+
+		t32 = m17 - t35 - m22 - m18
+		t33 = m18 + t34
+		t34 = m16 - m17 + m11
+		t35 = m14 - m10
+		t36 = m10 + m11
+
+		r1 = m12 + m5 + t36
+		r2 = m19 + m8 + t32
+		r3 = m1 - t33 - m22 - m12 + m19
+		r4 = m6 - m10 + m11 + m13
+		r5 = m17 + m13 + m15 + m2 + t35
+		r6 = m9 - t34 + m15
+		r7 = m7 - t36 - m21 + m22 + m20
+		r8 = m3 - t32 + m20
+		r9 = m21 + m4 + t33
 {-# SPECIALIZE makarovMult :: Matrix3 Int -> Matrix3 Int -> Matrix3 Int #-}
 {-# SPECIALIZE makarovMult :: Matrix3 Integer -> Matrix3 Integer -> Matrix3 Integer #-}
-
-makarovMult' :: Num t => Matrix3 t -> Matrix3 t -> Matrix3 t
-makarovMult'
-	(Matrix3 k1 b1 c1 k2 b2 c2 k3 b3 c3)
-	(Matrix3 a1 a2 a3 k4 k5 k6 k7 k8 k9)
-	= Matrix3 r1 r2 r3 r4 r5 r6 r7 r8 r9 where
-		a3_c2 = a3 - c2
-		a2_b1 = a2 + b1
-		a1_b1 = a1 + b1
-		c1_c2 = c1 - c2
-		c2_c3 = c2 + c3
-		b1_b3 = b1 + b3
-
-		k1_k7 = k1 + k7
-		k8_k9 = k8 - k9
-		k2_k4 = k2 - k4
-		k5_k6 = k5 - k6
-		k6_k8 = k6 + k8
-
-		m1  = (a3_c2 + c1) * (k1_k7 - k8_k9)
-		m2  = (a2_b1 + b2) * (k2_k4 + k5_k6)
-		m3  = (a2_b1 + b3) * (k3 - k4 + k5_k6)
-		m4  = (a3_c2 - c3) * (k3 - k7 + k8_k9)
-		m5  = (a1 - c1_c2) * k1
-		m6  = (a1_b1 + b2) * k2
-		m7  = (a1_b1 + b3 + c2_c3) * k3
-		m8  = a2 * (k1 + k4 - k5_k6)
-		m9  = a3 * (k2 + k7 - k8_k9)
-		m10 = b1 * k4
-		m11 = c2 * k7
-		m12 = c1_c2 * k1_k7
-		m13 = (b1 + b2) * (-k2_k4)
-		m14 = a2_b1 * (k4 - k5_k6)
-		m15 = b2 * k6
-		m16 = a3_c2 * (k7 - k8_k9)
-		m17 = c2 * k8
-		m18 = (b3 - c2_c3) * k6
-		m19 = (c1 + c3 - b1_b3) * k8
-		m20 = b1_b3 * (k4 - k3 + k6_k8)
-		m21 = c2_c3 * (k3 + k6_k8 - k7)
-		m22 = (c2_c3 - b1_b3) * k6_k8
-
-		m10_m11 = m10 + m11
-		m10_m14 = m10 - m14
-		m11_m15_m17 = m11 + m16 - m17
-		m17_m18_m22 = m17 - m18 - m22
-
-		r1  = m5 + m10_m11 + m12
-		r2  = m8 + m10_m14 + m17_m18_m22 + m19
-		r3  = m1 - m11_m15_m17 - m12 - m18 + m19 - m22
-		r4  = m6 - m10 + m11 + m13
-		r5  = m2 - m10_m14 + m13 + m15 + m17
-		r6  = m9 - m11_m15_m17 + m15
-		r7  = m7 - m10_m11 + m20 - m21 + m22
-		r8  = m3 - m10_m14 - m17_m18_m22 + m20
-		r9  = m4 + m11_m15_m17 + m18 + m21
--- {-# INLINE makarovMult #-}
-{-# SPECIALIZE makarovMult' :: Matrix3 Int -> Matrix3 Int -> Matrix3 Int #-}
-{-# SPECIALIZE makarovMult' :: Matrix3 Integer -> Matrix3 Integer -> Matrix3 Integer #-}
 
 -- |Compute the determinant of a matrix.
 det :: (Num t, Ord t) => Matrix3 t -> t

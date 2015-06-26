@@ -11,7 +11,7 @@ toM3 :: M.Matrix a -> M3.Matrix3 a
 toM3 = M3.fromList . M.toList
 
 k :: Integer
-k = 560
+k = 450
 
 testm3 :: M3.Matrix3 Integer
 testm3 = M3.fromList $ map (100*10^k `div`) [100..108]
@@ -31,10 +31,10 @@ triboM3 n = M3.a11 $ (M3.fromList [1, 1, 1, 0, 0, 1, 1, 0, 0]) ^ (n - 2)
 
 -- Our benchmark harness.
 main = defaultMain [
-  bgroup "mult" [ bench "Data.Matrix" $ nf (testm *) testm
-                , bench "usualMult"    $ nf (testm3 `M3.usualMult`) testm3
-                --, bench "makarovMult"  $ nf (testm3 `M3.makarovMult`) testm3
-                , bench "makarovMult"  $ nf (testm3 `M3.makarovMult'`) testm3
+  bgroup "mult" [ bench "usualMult"    $ nf (testm3 `M3.usualMult`) testm3
+                , bench "makarovMult"  $ nf (testm3 `M3.makarovMult`) testm3
+                -- , bench "Data.Matrix" $ nf (testm *) testm
+                --, bench "makarovMult"  $ nf (testm3 `M3.makarovMult'`) testm3
                 ],
   bgroup "tribo" [ bench "matrix" $ nf triboM 100000000
                  , bench "matrix3" $ nf triboM3 100000000
