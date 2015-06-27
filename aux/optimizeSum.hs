@@ -1,78 +1,43 @@
-{-# LANGUAGE OverloadedStrings, QuasiQuotes, RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings, QuasiQuotes #-}
 module Main where
-
-import Data.Map.Strict (Map)
-import qualified Data.Map.Strict as M
-import Data.IntMap.Strict (IntMap)
-import qualified Data.IntMap.Strict as IM
 
 import Data.Set (Set)
 import qualified Data.Set as S
 import Data.IntSet (IntSet)
 import qualified Data.IntSet as IS
-
+import Data.IntMap.Strict (IntMap)
+import qualified Data.IntMap.Strict as IM
 import Data.Bimap (Bimap)
 import qualified Data.Bimap as B
 
 import Data.String
 import Text.RawString.QQ     (r)
-import Data.Char
+
+import Data.List (groupBy, sortBy)
 import Data.Monoid
 import Data.Foldable
-
-import Debug.Trace
-
 import Data.Maybe
 import Data.Ord
+import Control.Arrow hiding ((<+>))
+import Data.Function
 
-import Text.PrettyPrint.Leijen hiding ((<>))
+import Text.PrettyPrint.Leijen hiding ((<>), group)
 
-
-import Prelude hiding (foldl, foldl1, maximum)
+import Prelude hiding (foldl, foldl1, maximum, mapM_, minimum, sum, concat)
 
 data Sign = Minus | Plus
 	deriving (Eq, Ord, Show)
 
-instance Pretty Sign where
-	pretty Minus = char '-'
-	pretty Plus  = char '+'
-
-data Form = Form {lhs :: String, rhs :: Set (Sign, String)}
+data Form = Form String (Set (Sign, String))
 	deriving (Eq, Ord, Show)
 
 type Factor = Int
 type Expr   = IntSet
-data Forms = Forms {ids :: Bimap String Int, exprs :: IntMap Expr}
+data Forms = Forms (Bimap String Int) (IntMap Expr)
 	deriving (Eq, Show)
 
-nextId :: (Ord a, Num b, Enum b) => Bimap a b -> b
-nextId bm
-	| B.null bm = 1
-	| otherwise  = succ . fst . B.findMaxR $ bm
-
-addForm :: Form -> Forms -> Forms
-addForm (Form{..}) (Forms{..}) = Forms ids'' exprs' where
-	lhsId = nextId ids
-	ids' :: Bimap String Int
-	ids' = B.insert lhs lhsId ids
-
-	ids'' :: Bimap String Int
-	rhsExpr :: Expr
-	(ids'', rhsExpr) = foldl f (ids', mempty) rhs
-	exprs' :: IntMap Expr
-	exprs' = IM.insert lhsId rhsExpr exprs
-
-	f :: (Bimap String Int, Expr) -> (Sign, String) -> (Bimap String Int, Expr)
-	f (ids, expr) (sign, str) = (ids1, expr1) where
-		maybeId = B.lookup str ids
-		(ids1, newId) = case maybeId of
-			Nothing -> (B.insert str (nextId ids) ids, nextId ids)
-			Just i  -> (ids, i)
-		expr1 = IS.insert (if sign==Plus then newId else negate newId) expr
-
 instance IsString Forms where
-	fromString s = foldl (flip addForm) (Forms B.empty mempty) fs where
-		fs = map parseForm $ filter (not . null) $ lines s
+	fromString = foldl addForm (Forms B.empty mempty) . map parseForm . filter (not . null) . lines
 
 parseForm :: String -> Form
 parseForm xs = case words xs of
@@ -81,21 +46,159 @@ parseForm xs = case words xs of
 		f ("+":z:zs) = S.singleton (Plus, z) <> f zs
 		f ("-":z:zs) = S.singleton (Minus, z) <> f zs
 		f (z:zs) = S.singleton (Plus, z) <> f zs
-	as -> trace (show as) undefined
+	as -> error (show as)
+
+addForm :: Forms -> Form -> Forms
+addForm (Forms ids exprs) (Form lhs rhs) =
+	Forms (B.insert lhs lhsId ids') (IM.insert lhsId rhsExpr exprs) where
+		(ids', rhsExpr) = foldl appendVar (ids, mempty) rhs
+		lhsId = nextId ids'
+
+appendVar :: (Bimap String Int, Expr) -> (Sign, String) -> (Bimap String Int, Expr)
+appendVar (ids, expr) (sign, str) = (ids', expr') where
+	maybeId = B.lookup str ids
+	(ids', newId) = case maybeId of
+		Nothing -> (B.insert str t ids, t) where
+			t = nextId ids
+		Just i  -> (ids, i)
+	expr' = IS.insert (if sign==Plus then newId else negate newId) expr
+
+nextId :: (Ord a, Num b, Enum b) => Bimap a b -> b
+nextId bm
+	| B.null bm = 1
+	| otherwise = succ . fst . B.findMaxR $ bm
 
 instance Pretty Forms where
-	pretty (Forms{..}) = vsep (IM.elems $ IM.mapWithKey f exprs) where
+	pretty (Forms ids exprs) = vsep (IM.elems $ IM.mapWithKey prettyExpr exprs) where
 		toStr i = fromJust $ B.lookupR i ids
-		f :: Int -> Expr -> Doc
-		f lhsId expr = text (toStr lhsId) <+> equals <+> hsep (map g $ IS.toList expr)
-		g n
-			| n < 0 = pretty Minus <+> text (toStr (-n))
-			| otherwise = pretty Plus <+> text (toStr n)
+		prettyExpr lhsId expr = text (toStr lhsId) <+> equals <+> hsep (map prettyVar (IS.toList expr))
+		prettyVar n = char (if n < 0 then '-' else '+') <+> text (toStr (abs n))
 
-forms = forms2
 
-forms1 :: Forms
-forms1 = [r|
+flipSign :: Expr -> Expr
+flipSign = IS.map negate
+
+splitRoot :: IntSet -> [IntSet]
+splitRoot s
+	| IS.null s = [s]
+	| otherwise = case IS.splitRoot s of
+			[_] -> [IS.singleton m, t'] where
+				(m, t') = IS.deleteFindMin s
+			ts -> ts
+
+subsets :: Expr -> Set Expr
+subsets s
+	| IS.null s      = S.singleton mempty
+	| IS.size s == 1 = S.fromList [mempty, s]
+	| otherwise      = foldl1 f $ map subsets $ splitRoot s where
+		f xs ys = S.fromList [x <> y | x <- toList xs, y <- toList ys]
+
+nonTrivial :: Expr -> Bool
+nonTrivial s = IS.size s > 1
+
+absExpr :: Expr -> Expr
+absExpr s = if abs (IS.findMin s) < IS.findMax s then s else flipSign s
+
+nub :: Ord a => [a] -> [a]
+nub = toList . S.fromList
+
+suspicious :: Forms -> [IntSet]
+suspicious (Forms _ exprs) = if null maxSusp then [] else map fst (concat $ take 1 maxSusp) where
+	subexprs = map (S.map absExpr . S.filter nonTrivial . subsets) (toList exprs)
+	maxSusp = groupBy ((==) `on` snd) . sortBy (flip $ comparing snd) . map (id &&& IS.size) . toList . f $ subexprs
+	f :: [Set Expr] -> Set Expr
+	f [] = mempty
+	f (x:xs) = foldMap (`S.intersection` x) xs <> f xs
+
+substitute :: Forms -> Expr -> Forms
+substitute (Forms ids exprs) newExpr = Forms ids' exprs' where
+	lhsId  = nextId ids
+	lhs    = "t" ++ show lhsId
+	ids'   = B.insert lhs lhsId ids
+	exprs' = IM.insert lhsId newExpr (IM.map eliminate exprs)
+
+	newExprNeg = flipSign newExpr
+	eliminate expr
+		| newExpr    `IS.isSubsetOf` expr = IS.insert lhsId (expr `IS.difference` newExpr)
+		| newExprNeg `IS.isSubsetOf` expr = IS.insert (-lhsId) (expr `IS.difference` newExprNeg)
+		| otherwise                       = expr
+
+
+
+suspicious' :: Forms -> [IntSet]
+suspicious' fs@(Forms _ exprs) = if null maxSusp
+	then []
+	else map fst (concat $ take 2 maxSusp) where
+		subexprs = map (S.map absExpr . S.filter nonTrivial . subsets) (toList exprs)
+		maxWeight = weight fs
+		maxSusp = groupBy ((==) `on` snd) . sortBy (comparing snd) . filter ((< maxWeight) . snd) . map (id &&& substitutionWeight fs) . toList . S.unions $ subexprs
+
+signedDiff :: Expr -> Expr -> Maybe Expr
+signedDiff xs ys = if IS.null zs' && IS.size (xs' <> ys') + 1 < IS.size xs then Just (xs' <> ys') else Nothing where
+	zs = xs `IS.intersection` ys
+	xs' = xs `IS.difference` zs
+	ys' = flipSign $ ys `IS.difference` zs
+	zs' = xs' `IS.intersection` ys'
+
+substitutionWeight:: Forms -> Expr -> Int
+substitutionWeight (Forms _ exprs) newExpr = IS.size newExpr - 1 + (getSum $ foldMap (Sum . f) exprs) where
+	f expr = case (signedDiff expr newExpr, signedDiff expr (flipSign newExpr)) of
+		(Just expr', Just expr'') -> (IS.size expr' `min` IS.size expr'')
+		(Just expr', _)           -> IS.size expr'
+		(_         , Just expr'') -> IS.size expr''
+		_                         -> IS.size expr - 1
+
+substitute' :: Forms -> Expr -> Forms
+substitute' (Forms ids exprs) newExpr = Forms ids' exprs' where
+	lhsId  = nextId ids
+	lhs    = "t" ++ show lhsId
+	ids'   = B.insert lhs lhsId ids
+	exprs' = IM.insert lhsId newExpr (IM.map eliminate exprs)
+
+	newExprNeg = flipSign newExpr
+	eliminate expr = case (signedDiff expr newExpr, signedDiff expr (flipSign newExpr)) of
+		(Just expr', Just expr'') -> if IS.size expr' < IS.size expr'' then IS.insert lhsId expr' else IS.insert (-lhsId) expr''
+		(Just expr', _)           -> IS.insert lhsId expr'
+		(_         , Just expr'') -> IS.insert (-lhsId) expr''
+		_                         -> expr
+
+weight :: Forms -> Int
+weight (Forms _ exprs) = getSum $ foldMap (Sum . pred . IS.size) exprs
+
+optimize :: Forms -> Forms
+optimize fs = case suspicious fs of
+	[]   -> fs
+	susp -> minimumBy (comparing weight) . map (optimize . substitute fs) $ susp
+
+optimize' :: Forms -> Forms
+optimize' fs = case suspicious' fs of
+	[]   -> fs
+	susp -> minimumBy (comparing weight) . map (optimize' . substitute' fs) $ susp
+
+main :: IO ()
+main = do
+	let before =
+		[ makarov1
+		, makarov2
+		, makarov3
+		, laderman1
+		, laderman2
+		, laderman3
+		]
+	let weightBefore = map weight before
+	let after = map optimize' before
+	let weightAfter = map weight after
+	mapM_ (print . pretty) after
+	putStrLn $ show weightBefore ++ " = " ++ show (sum weightBefore)
+	putStrLn $ show weightAfter  ++ " = " ++ show (sum weightAfter)
+
+{-
+[44,30,31,27,28,42] = 202
+[33,18,17,20,22,30] = 140
+-}
+
+makarov1 :: Forms
+makarov1 = [r|
 r1  = m5 + m10 + m11 + m12
 r2  = m8 + m10 - m14 + m17 - m18 + m19 - m22
 r3  = m1 - m11 - m12 - m16 + m17 - m18 + m19 - m22
@@ -107,8 +210,8 @@ r8  = m3 - m10 + m14 - m17 + m18 + m20 + m22
 r9  = m4 + m11 + m16 - m17 + m18 + m21
 |]
 
-forms2 :: Forms
-forms2 = [r|
+makarov2 :: Forms
+makarov2 = [r|
 l1  = a3 + c1 - c2
 l2  = a2 + b1 + b2
 l3  = a2 + b1 + b3
@@ -134,8 +237,8 @@ l22 = c2 + c3 - b1 - b3
 |]
 
 
-forms3 :: Forms
-forms3 = [r|
+makarov3 :: Forms
+makarov3 = [r|
 r1 =  k1 + k7 - k8 + k9
 r2 =  k2 - k4 + k5 - k6
 r3 =  k3 - k4 + k5 - k6
@@ -160,68 +263,73 @@ r21 =  k3 + k6 - k7 + k8
 r22 =  k6 + k8
 |]
 
-flipSign :: Expr -> Expr
-flipSign = IS.map negate
+laderman1 :: Forms
+laderman1 = [r|
+l1 = a11 + a12 + a13 - a21 - a22 - a32 - a33
+l2 = a11 - a21
+l3 = a22
+l4 = -a11 + a21 + a22
+l5 = a21 + a22
+l6 = a11
+l7 = -a11 + a32 + a32
+l8 = -a11 + a31
+l9 = a31 + a32
+l10 = a11 + a12 + a13 - a22 - a23 - a31 - a32
+l11 = a32
+l12 = -a13 + a32 + a33
+l13 = a13 - a33
+l14 = a13
+l15 = a32 + a33
+l16 = -a13 + a22 + a23
+l17 = a13 - a23
+l18 = a22 + a23
+l19 = a12
+l20 = a23
+l21 = a21
+l22 = a31
+l23 = a33
+|]
 
-splitRoot :: IntSet -> [IntSet]
-splitRoot s
-	| IS.null s = [s]
-	| otherwise = case IS.splitRoot s of
-		[_] -> [IS.singleton m, t'] where
-			(m, t') = IS.deleteFindMin s
-		ts -> ts
+laderman2 :: Forms
+laderman2 = [r|
+r1 = b22
+r2 = -b12 + b22
+r3 = -b11 + b12 + b21 - b22 - b23 - b32 + b33
+r4 = b11 - b12 + b22
+r5 = -b11 + b12
+r6 = b11
+r7 = b11 - b13 + b23
+r8 = b13 - b23
+r9 = -b11 + b13
+r10 = b23
+r11 = -b11 + b13 + b21 - b22 - b23 - b31 + b32
+r12 = b22 + b31 - b32
+r13 = b22 - b32
+r14 = b31
+r15 = -b31 + b32
+r16 = b23 + b31 - b33
+r17 = b23 - b33
+r18 = -b31 + b33
+r19 = b21
+r20 = b32
+r21 = b13
+r22 = b12
+r23 = b33
+|]
 
-subsets :: IntSet -> Set IntSet
-subsets s
-	| IS.null s      = S.singleton mempty
-	| IS.size s == 1 = S.fromList [IS.empty, s]
-	| otherwise      = foldl1 f $ map subsets $ splitRoot s where
-		f :: Set IntSet -> Set IntSet -> Set IntSet
-		f xs ys = S.fromList [xs <> ys | xs <- toList xs, ys <- toList ys]
-
-nonTrivial :: Expr -> Bool
-nonTrivial s = IS.size s > 1
-
-absExpr :: Expr -> Expr
-absExpr s = if el == IS.findMax s then s else flipSign s where
-	el = maximum $ map abs $ IS.toList s
-
-suspicious :: Forms -> Set IntSet
-suspicious (Forms{..}) = maxSusp where
-	subexprs = IM.toList $ IM.map (S.map absExpr . S.filter nonTrivial . subsets) exprs
-	susp = S.fromList [e11 | (k1, e1) <- subexprs, e11 <- toList e1, (k2, e2) <- subexprs, e22 <- toList e2, e11 == e22, k1 /= k2]
-	maxL = maximum $ S.map IS.size susp
-	maxSusp = S.filter (\s -> IS.size s == maxL) susp
-
-substitute :: Forms -> Expr -> Forms
-substitute (Forms{..}) newExpr = Forms ids' exprs'' where
-	lhsId = nextId ids
-	lhs = "t" ++ show lhsId
-	ids' = B.insert lhs lhsId ids
-
-	exprs' :: IntMap Expr
-	exprs' = IM.map eliminate exprs
-
-	eliminate expr = if newExpr `IS.isSubsetOf` expr
-		then IS.insert lhsId (expr `IS.difference` newExpr)
-		else if (flipSign newExpr) `IS.isSubsetOf` expr
-		then IS.insert (-lhsId) (expr `IS.difference` flipSign newExpr)
-		else expr
-
-	exprs'' :: IntMap Expr
-	exprs'' = IM.insert lhsId newExpr exprs'
-
-weight :: Forms -> Int
-weight (Forms{..}) = getSum $ foldMap (Sum . pred . IS.size) exprs
+laderman3 :: Forms
+laderman3 = [r|
+c11 = m6 + m14 + m19
+c12 = m1 + m4 + m5 + m6 + m12 + m14 + m15
+c13 = m6 + m7 + m9 + m10 + m14 + m16 + m18
+c21 = m2 + m3 + m4 + m6 + m14 + m16 + m17
+c22 = m2 + m4 + m5 + m6 + m20
+c23 = m14 + m16 + m17 + m18 + m21
+c31 = m6 + m7 + m8 + m11 + m12 + m13 + m14
+c32 = m12 + m13 + m14 + m15 + m22
+c33 = m6 + m7 + m8 + m9 + m23
+|]
 
 
-optimize :: Forms -> Forms
-optimize fs = if S.null susp then fs else fs' where
-	fs' = minimumBy (comparing weight) $ map (optimize . substitute fs) $ toList susp
-	susp = suspicious fs
 
-main :: IO ()
-main = do
-	putStrLn $ show $ pretty $ optimize forms1
-	putStrLn $ show $ pretty $ optimize forms2
-	putStrLn $ show $ pretty $ optimize forms3
+
