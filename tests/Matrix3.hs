@@ -22,6 +22,9 @@ testOp op1 op2 m1 m2 = m'==m'' where
 testMakarov :: M3.Matrix3 Integer -> M3.Matrix3 Integer -> Bool
 testMakarov m1 m2 = m1 * m2 == m1 `M3.makarovMult` m2
 
+testLaderman :: M3.Matrix3 Integer -> M3.Matrix3 Integer -> Bool
+testLaderman m1 m2 = m1 * m2 == m1 `M3.ladermanMult` m2
+
 testDet1 :: M3.Matrix3 Integer -> Bool
 testDet1 m = M3.det m == M.detLaplace (toM m)
 
@@ -51,7 +54,8 @@ testSuite = testGroup "LinearForm"
 	[ QC.testProperty "plus"      $ testOp (+) (+)
 	, QC.testProperty "minus"     $ testOp (-) (-)
 	, QC.testProperty "mult"      $ testOp (*) (*)
-	, QC.testProperty "makarov"   $ testMakarov
+	, QC.testProperty "makarov"     testMakarov
+	, QC.testProperty "laderman"    testLaderman
 	, QC.testProperty "det1"        testDet1
 	, QC.testProperty "conversion"  testConv
 	, QC.testProperty "det2"        testDet2

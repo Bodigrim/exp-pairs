@@ -21,6 +21,7 @@ module Math.ExpPairs.Matrix3
 	, normalize
 	, usualMult
 	, makarovMult
+	, ladermanMult
 	) where
 
 import Prelude hiding (foldl1)
@@ -174,6 +175,47 @@ makarovMult
 		r9 = m21 + m4 + t33
 {-# SPECIALIZE makarovMult :: Matrix3 Int -> Matrix3 Int -> Matrix3 Int #-}
 {-# SPECIALIZE makarovMult :: Matrix3 Integer -> Matrix3 Integer -> Matrix3 Integer #-}
+
+ladermanMult :: Num t => Matrix3 t -> Matrix3 t -> Matrix3 t
+ladermanMult
+	(Matrix3 a11 a12 a13 a21 a22 a23 a31 a32 a33)
+	(Matrix3 b11 b12 b13 b21 b22 b23 b31 b32 b33)
+	= Matrix3 c11 c12 c13 c21 c22 c23 c31 c32 c33 where
+			m1 = (a11 + a12 + a13 - a21 - a22 - a32 - a33)* (b22)
+			m2 = (a11 - a21)* (-b12 + b22)
+			m3 = (a22)* (-b11 + b12 + b21 - b22 - b23 - b31 + b33)
+			m4 = (-a11 + a21 + a22)* (b11 - b12 + b22)
+			m5 = (a21 + a22)* (-b11 + b12)
+			m6 = (a11)* (b11)
+			m7 = (-a11 + a31 + a32)* (b11 - b13 + b23)
+			m8 = (-a11 + a31)* (b13 - b23)
+			m9 = (a31 + a32)* (-b11 + b13)
+			m10 = (a11 + a12 + a13 - a22 - a23 - a31 - a32)* (b23)
+			m11 = (a32)* (-b11 + b13 + b21 - b22 - b23 - b31 + b32)
+			m12 = (-a13 + a32 + a33)* (b22 + b31 - b32)
+			m13 = (a13 - a33)* (b22 - b32)
+			m14 = (a13)* (b31)
+			m15 = (a32 + a33)* (-b31 + b32)
+			m16 = (-a13 + a22 + a23)* (b23 + b31 - b33)
+			m17 = (a13 - a23)* (b23 - b33)
+			m18 = (a22 + a23)* (-b31 + b33)
+			m19 = (a12)* (b21)
+			m20 = (a23)* (b32)
+			m21 = (a21)* (b13)
+			m22 = (a31)* (b12)
+			m23 = (a33)* (b33)
+
+			c11 = m6 + m14 + m19
+			c12 = m1 + m4 + m5 + m6 + m12 + m14 + m15
+			c13 = m6 + m7 + m9 + m10 + m14 + m16 + m18
+			c21 = m2 + m3 + m4 + m6 + m14 + m16 + m17
+			c22 = m2 + m4 + m5 + m6 + m20
+			c23 = m14 + m16 + m17 + m18 + m21
+			c31 = m6 + m7 + m8 + m11 + m12 + m13 + m14
+			c32 = m12 + m13 + m14 + m15 + m22
+			c33 = m6 + m7 + m8 + m9 + m23
+{-# SPECIALIZE ladermanMult :: Matrix3 Int -> Matrix3 Int -> Matrix3 Int #-}
+{-# SPECIALIZE ladermanMult :: Matrix3 Integer -> Matrix3 Integer -> Matrix3 Integer #-}
 
 -- |Compute the determinant of a matrix.
 det :: (Num t, Ord t) => Matrix3 t -> t
