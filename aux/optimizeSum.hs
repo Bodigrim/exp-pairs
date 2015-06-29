@@ -71,7 +71,7 @@ nextId bm
 instance Pretty Forms where
 	pretty (Forms ids exprs) = vsep (IM.elems $ IM.mapWithKey prettyExpr exprs) where
 		toStr i = fromJust $ B.lookupR i ids
-		prettyExpr lhsId expr = text (toStr lhsId) <+> equals <+> hsep (map prettyVar (IS.toList expr))
+		prettyExpr lhsId expr = text (toStr lhsId) <+> equals <+> hsep (map prettyVar (IS.toDescList expr))
 		prettyVar n = char (if n < 0 then '-' else '+') <+> text (toStr (abs n))
 
 
@@ -103,17 +103,23 @@ nub :: Ord a => [a] -> [a]
 nub = toList . S.fromList
 
 suspicious :: Forms -> [IntSet]
-suspicious (Forms _ exprs) = if null maxSusp then [] else map fst (concat $ take 1 maxSusp) where
+suspicious fs@(Forms _ exprs) = if null maxSusp then [] else map fst (concat $ take 3 maxSusp) where
 	subexprs = map (S.map absExpr . S.filter nonTrivial . subsets) (toList exprs)
-	maxSusp = groupBy ((==) `on` snd) . sortBy (flip $ comparing snd) . map (id &&& IS.size) . toList . f $ subexprs
+	maxSusp = groupBy ((==) `on` snd) . sortBy (comparing snd) . map (id &&& substitutionWeight fs) . toList . f $ subexprs
 	f :: [Set Expr] -> Set Expr
 	f [] = mempty
 	f (x:xs) = foldMap (`S.intersection` x) xs <> f xs
 
-substitute :: Forms -> Expr -> Forms
-substitute (Forms ids exprs) newExpr = Forms ids' exprs' where
+substitutionWeight:: Forms -> Expr -> Int
+substitutionWeight (Forms _ exprs) newExpr = size * count where
+	newExprNeg = flipSign newExpr
+	size = IS.size newExpr - 1
+	count = 1 - (IM.size $ IM.filter (\expr -> newExpr    `IS.isSubsetOf` expr || newExprNeg `IS.isSubsetOf` expr) exprs)
+
+substitute :: Char -> Forms -> Expr -> Forms
+substitute ch (Forms ids exprs) newExpr = Forms ids' exprs' where
 	lhsId  = nextId ids
-	lhs    = "t" ++ show lhsId
+	lhs    = ch : show lhsId
 	ids'   = B.insert lhs lhsId ids
 	exprs' = IM.insert lhsId newExpr (IM.map eliminate exprs)
 
@@ -123,70 +129,26 @@ substitute (Forms ids exprs) newExpr = Forms ids' exprs' where
 		| newExprNeg `IS.isSubsetOf` expr = IS.insert (-lhsId) (expr `IS.difference` newExprNeg)
 		| otherwise                       = expr
 
-
-
-suspicious' :: Forms -> [IntSet]
-suspicious' fs@(Forms _ exprs) = if null maxSusp
-	then []
-	else map fst (concat $ take 2 maxSusp) where
-		subexprs = map (S.map absExpr . S.filter nonTrivial . subsets) (toList exprs)
-		maxWeight = weight fs
-		maxSusp = groupBy ((==) `on` snd) . sortBy (comparing snd) . filter ((< maxWeight) . snd) . map (id &&& substitutionWeight fs) . toList . S.unions $ subexprs
-
-signedDiff :: Expr -> Expr -> Maybe Expr
-signedDiff xs ys = if IS.null zs' && IS.size (xs' <> ys') + 1 < IS.size xs then Just (xs' <> ys') else Nothing where
-	zs = xs `IS.intersection` ys
-	xs' = xs `IS.difference` zs
-	ys' = flipSign $ ys `IS.difference` zs
-	zs' = xs' `IS.intersection` ys'
-
-substitutionWeight:: Forms -> Expr -> Int
-substitutionWeight (Forms _ exprs) newExpr = IS.size newExpr - 1 + (getSum $ foldMap (Sum . f) exprs) where
-	f expr = case (signedDiff expr newExpr, signedDiff expr (flipSign newExpr)) of
-		(Just expr', Just expr'') -> (IS.size expr' `min` IS.size expr'')
-		(Just expr', _)           -> IS.size expr'
-		(_         , Just expr'') -> IS.size expr''
-		_                         -> IS.size expr - 1
-
-substitute' :: Forms -> Expr -> Forms
-substitute' (Forms ids exprs) newExpr = Forms ids' exprs' where
-	lhsId  = nextId ids
-	lhs    = "t" ++ show lhsId
-	ids'   = B.insert lhs lhsId ids
-	exprs' = IM.insert lhsId newExpr (IM.map eliminate exprs)
-
-	newExprNeg = flipSign newExpr
-	eliminate expr = case (signedDiff expr newExpr, signedDiff expr (flipSign newExpr)) of
-		(Just expr', Just expr'') -> if IS.size expr' < IS.size expr'' then IS.insert lhsId expr' else IS.insert (-lhsId) expr''
-		(Just expr', _)           -> IS.insert lhsId expr'
-		(_         , Just expr'') -> IS.insert (-lhsId) expr''
-		_                         -> expr
-
 weight :: Forms -> Int
 weight (Forms _ exprs) = getSum $ foldMap (Sum . pred . IS.size) exprs
 
-optimize :: Forms -> Forms
-optimize fs = case suspicious fs of
+optimize :: Char -> Forms -> Forms
+optimize ch fs = case suspicious fs of
 	[]   -> fs
-	susp -> minimumBy (comparing weight) . map (optimize . substitute fs) $ susp
-
-optimize' :: Forms -> Forms
-optimize' fs = case suspicious' fs of
-	[]   -> fs
-	susp -> minimumBy (comparing weight) . map (optimize' . substitute' fs) $ susp
+	susp -> minimumBy (comparing weight) . map (optimize ch . substitute ch fs) $ susp
 
 main :: IO ()
 main = do
 	let before =
-		[ makarov1
-		, makarov2
-		, makarov3
-		, laderman1
-		, laderman2
-		, laderman3
+		[ ('t', makarov1)
+		, ('u', makarov2)
+		, ('v', makarov3)
+		-- , ('t', laderman1)
+		-- , ('u', laderman2)
+		-- , ('v', laderman3)
 		]
-	let weightBefore = map weight before
-	let after = map optimize' before
+	let weightBefore = map (weight . snd) before
+	let after = map (uncurry optimize) before
 	let weightAfter = map weight after
 	mapM_ (print . pretty) after
 	putStrLn $ show weightBefore ++ " = " ++ show (sum weightBefore)
@@ -195,23 +157,11 @@ main = do
 {-
 [44,30,31,27,28,42] = 202
 [33,18,17,20,22,30] = 140
+[31,18,17,19,19,30] = 134
 -}
 
 makarov1 :: Forms
 makarov1 = [r|
-r1  = m5 + m10 + m11 + m12
-r2  = m8 + m10 - m14 + m17 - m18 + m19 - m22
-r3  = m1 - m11 - m12 - m16 + m17 - m18 + m19 - m22
-r4  = m6 - m10 + m11 + m13
-r5  = m2 - m10 + m13 + m14 + m15 + m17
-r6  = m9 - m11 + m15 - m16 + m17
-r7  = m7 - m10 - m11 + m20 - m21 + m22
-r8  = m3 - m10 + m14 - m17 + m18 + m20 + m22
-r9  = m4 + m11 + m16 - m17 + m18 + m21
-|]
-
-makarov2 :: Forms
-makarov2 = [r|
 l1  = a3 + c1 - c2
 l2  = a2 + b1 + b2
 l3  = a2 + b1 + b3
@@ -237,8 +187,8 @@ l22 = c2 + c3 - b1 - b3
 |]
 
 
-makarov3 :: Forms
-makarov3 = [r|
+makarov2 :: Forms
+makarov2 = [r|
 r1 =  k1 + k7 - k8 + k9
 r2 =  k2 - k4 + k5 - k6
 r3 =  k3 - k4 + k5 - k6
@@ -263,6 +213,19 @@ r21 =  k3 + k6 - k7 + k8
 r22 =  k6 + k8
 |]
 
+makarov3 :: Forms
+makarov3 = [r|
+c11 = m5 + m10 + m11 + m12
+c12 = m8 + m10 - m14 + m17 - m18 + m19 - m22
+c13 = m1 - m11 - m12 - m16 + m17 - m18 + m19 - m22
+c21 = m6 - m10 + m11 + m13
+c22 = m2 - m10 + m13 + m14 + m15 + m17
+r23 = m9 - m11 + m15 - m16 + m17
+r31 = m7 - m10 - m11 + m20 - m21 + m22
+r32 = m3 - m10 + m14 - m17 + m18 + m20 + m22
+r33 = m4 + m11 + m16 - m17 + m18 + m21
+|]
+
 laderman1 :: Forms
 laderman1 = [r|
 l1 = a11 + a12 + a13 - a21 - a22 - a32 - a33
@@ -271,7 +234,7 @@ l3 = a22
 l4 = -a11 + a21 + a22
 l5 = a21 + a22
 l6 = a11
-l7 = -a11 + a32 + a32
+l7 = -a11 + a31 + a32
 l8 = -a11 + a31
 l9 = a31 + a32
 l10 = a11 + a12 + a13 - a22 - a23 - a31 - a32
@@ -294,7 +257,7 @@ laderman2 :: Forms
 laderman2 = [r|
 r1 = b22
 r2 = -b12 + b22
-r3 = -b11 + b12 + b21 - b22 - b23 - b32 + b33
+r3 = -b11 + b12 + b21 - b22 - b23 - b31 + b33
 r4 = b11 - b12 + b22
 r5 = -b11 + b12
 r6 = b11
