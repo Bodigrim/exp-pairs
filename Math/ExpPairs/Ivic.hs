@@ -16,6 +16,11 @@ module Math.ExpPairs.Ivic
 	( zetaOnS
 	, reverseZetaOnS
 	, mOnS
+	, reverseMOnS
+	, checkAbscissa
+	, findMinAbscissa
+	, mBigOnHalf
+	, reverseMBigOnHalf
 	) where
 
 import Data.Ratio ((%))
@@ -65,7 +70,7 @@ lemma82_f s
 -- and that alpha2 <= 1 for S >= 2/3 or S >= 5/8 and
 --          (4S-2)k + (8S-6)l + 2S-1 >=0
 
--- | Compute m(σ) such that ∫_1^T |ζ(σ+it)|^m(σ) dt ≪ T^(1+ε).
+-- | Compute maximal m(σ) such that ∫_1^T |ζ(σ+it)|^m(σ) dt ≪ T^(1+ε).
 -- See equation (8.97) in Ivić2003.
 mOnS :: Rational -> OptimizeResult
 mOnS s
@@ -101,49 +106,38 @@ mOnS s
 		x2' = optimize [RationalForm numer denom] cons
 		x2 = x2' {optimalValue = negate $ optimalValue x2'}
 
-reverseMOnS :: RationalInf -> Rational
-reverseMOnS m = reverseMOnS' from to where
+-- | Try to reverse 'mOnS': for a given precision and m compute minimal possible σ.
+-- Implementation is usual try-and-divide search, so performance is very poor.
+-- Sometimes, when 'mOnS' gets especially lucky exponent pair, 'reverseMOnS' can miss
+-- real σ and returns bigger value.
+reverseMOnS :: Rational -> RationalInf -> Rational
+reverseMOnS prec m = reverseMOnS' from to where
 	from = 1 % 2
 	to   = 1 % 1
 	reverseMOnS' a b
-		| b-a < 1%1000000 = a
+		| b-a < prec = a
 		| optimalValue (mOnS ((a+b)/2)) > m = reverseMOnS' a ((a+b)/2)
 		| otherwise = reverseMOnS' ((a+b)/2) b
 
+-- | Check whether ∫_1^T 	Π |ζ(n_i*σ+it)|^m_i dt ≪ T^(1+ε) for a given list of pairs [(n_1, m_1), ...] and fixed σ.
 checkAbscissa :: [(Rational, Rational)] -> Rational -> Bool
 checkAbscissa xs s = sum rs < Finite 1 where
 	qs = map (\(n,m) -> optimalValue (mOnS (n*s)) / Finite m) xs
 	rs = map (\q -> 1/q) qs
 
-searchMinAbscissa :: [(Rational, Rational)] -> Rational
-searchMinAbscissa xs = searchMinAbscissa' from to where
+-- | Find for a given precision and list of pairs [(n_1, m_1), ...] the minimal σ
+-- such that ∫_1^T 	Π |ζ(n_i*σ+it)|^m_i dt ≪ T^(1+ε).
+findMinAbscissa :: Rational -> [(Rational, Rational)] -> Rational
+findMinAbscissa prec xs = searchMinAbscissa' from to where
 	from = 1 % 2 / minimum (map fst xs)
 	to   = 1 % 1
 	searchMinAbscissa' a b
-		| b-a < 1%1000000 = a
+		| b-a < prec = a
 		| checkAbscissa xs ((a+b)/2) = searchMinAbscissa' a ((a+b)/2)
 		| otherwise = searchMinAbscissa' ((a+b)/2) b
 
--- % \begin{lemma}\label{l:pointwise-moments-on-1/2}
--- % For $A\ge12$ let
--- % $$
--- % f(A) = 1+\inf \{ l/k \mid (4-A)k+4l+2 \ge 0 \}.
--- % $$
--- % Then
--- % $$
--- % R \ll T V^{-6} \log^8 T + T^{f(A)+\eps} V^{-A}
--- %   \ll T^{\max \{ 1+32(A-6)/205, f(A) \}} V^{-A}
--- % $$
--- % and thus
--- % $$
--- % M(A) \le \max \{ 1+32(A-6)/205, f(A) \}.
--- % $$
--- % \end{lemma}
-
--- Constant
--- is produced by
--- optimize [RationalForm (LinearForm 4 4 2) (LinearForm 1 0 0)] [Constraint (LinearForm (-64) (-77) 64) Strict]
-
+-- | Compute minimal M(A) such that ∫_1^T |ζ(1/2+it)|^A dt ≪ T^(M(A)+ε).
+-- See Ch. 8 in Ivić2003. Further justification will be published elsewhere.
 mBigOnHalf :: Rational -> OptimizeResult
 mBigOnHalf a
 	| a < 4     = simulateOptimize 1
@@ -155,7 +149,13 @@ mBigOnHalf a
 			optRes = optimize [RationalForm (LinearForm 1 1 0) (LinearForm 1 0 0)]
 				[Constraint (LinearForm (4-a) 4 2) NonStrict]
 			x = 1 + 32*(a-6)/205
+-- Constant 41614060315296730740083860226662 % 2636743270445733804969041895717
+-- is produced by
+-- optimize [RationalForm (LinearForm 4 4 2) (LinearForm 1 0 0)] [Constraint (LinearForm (-64) (-77) 64) Strict]
 
+-- | Try to reverse 'mBigOnHalf': for a given M(A) find maximal possible A.
+-- Sometimes, when 'mBigOnHalf' gets especially lucky exponent pair, 'reverseMBigOnHalf' can miss
+-- real A and returns lower value.
 reverseMBigOnHalf :: Rational -> OptimizeResult
 reverseMBigOnHalf m
 	| m <= 2 = simulateOptimize $ (m-1)*8 + 4
