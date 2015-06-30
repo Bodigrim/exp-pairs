@@ -19,7 +19,6 @@ module Math.ExpPairs.Matrix3
 	, det
 	, multCol
 	, normalize
-	, usualMult
 	, makarovMult
 	, ladermanMult
 	) where
@@ -115,107 +114,141 @@ usualMult a b = Matrix3 {
 {-# SPECIALIZE usualMult :: Matrix3 Int -> Matrix3 Int -> Matrix3 Int #-}
 {-# SPECIALIZE usualMult :: Matrix3 Integer -> Matrix3 Integer -> Matrix3 Integer #-}
 
-makarovMult :: Num t => Matrix3 t -> Matrix3 t -> Matrix3 t
-makarovMult
-	(Matrix3 k1 b1 c1 k2 b2 c2 k3 b3 c3)
-	(Matrix3 a1 a2 a3 k4 k5 k6 k7 k8 k9)
-	= Matrix3 r1 r2 r3 r4 r5 r6 r7 r8 r9 where
-		u32 = c3 - u38
-		u33 = a3 - c2
-		u34 = c1 - c2
-		u35 = c2 + c3
-		u36 = a2 + b1
-		u37 = b1 + b2
-		u38 = b1 + b3
-
-		v32 = k4 - k5 + k6
-		v33 = k3 - v35
-		v34 = k9 + v35
-		v35 = k7 - k8
-		v36 = k8 + k6
-
-		m1  = (c1 + u33) * (k1 + v34)
-		m2  = (b2 + u36) * (k2 - v32)
-		m3  = (b3 + u36) * (k3 - v32)
-		m4  = (u33 - c3) * (v33 - k9)
-		m5  = (a1 - u34) * k1
-		m6  = (a1 + u37) * k2
-		m7  = (a1 + u35 + u38) * k3
-		m8  = a2 * (k1 + v32)
-		m9  = a3 * (k2 + v34)
-		m10 = b1 * k4
-		m11 = c2 * k7
-		m12 = u34 * (k1 + k7)
-		m13 = u37 * (k4 - k2)
-		m14 = u36 * v32
-		m15 = b2 * k6
-		m16 = u33 * v34
-		m17 = c2 * k8
-		m18 = (b3 - u35) * k6
-		m19 = (c1 + u32) * k8
-		m20 = u38 * (k4 - k3 + v36)
-		m21 = u35 * (k6 + v33)
-		m22 = (c2 + u32) * v36
-
-
-		t32 = m17 - t35 - m22 - m18
-		t33 = m18 + t34
-		t34 = m16 - m17 + m11
-		t35 = m14 - m10
-		t36 = m10 + m11
-
-		r1 = m12 + m5 + t36
-		r2 = m19 + m8 + t32
-		r3 = m1 - t33 - m22 - m12 + m19
-		r4 = m6 - m10 + m11 + m13
-		r5 = m17 + m13 + m15 + m2 + t35
-		r6 = m9 - t34 + m15
-		r7 = m7 - t36 - m21 + m22 + m20
-		r8 = m3 - t32 + m20
-		r9 = m21 + m4 + t33
-{-# SPECIALIZE makarovMult :: Matrix3 Int -> Matrix3 Int -> Matrix3 Int #-}
-{-# SPECIALIZE makarovMult :: Matrix3 Integer -> Matrix3 Integer -> Matrix3 Integer #-}
-
+-- | Multiplicate matrices by 23 multiplications and 68 additions.
+-- It becomes faster than usual multiplication (which requires 27 multiplications and 18 additions),
+-- when matrix's elements are large (several hundred digits) integers.
+--
+-- An algorithm follows
+-- /J. Laderman./ A noncommutative algorithm for multiplying 3 × 3 matrices using 23 multiplications. Bull. Amer. Math. Soc., 82:126–128, 1976.
+--
+-- We were able to reduce the number of additions from 98 to 68 by sofisticated choice of intermediate variables.
 ladermanMult :: Num t => Matrix3 t -> Matrix3 t -> Matrix3 t
 ladermanMult
 	(Matrix3 a11 a12 a13 a21 a22 a23 a31 a32 a33)
 	(Matrix3 b11 b12 b13 b21 b22 b23 b31 b32 b33)
 	= Matrix3 c11 c12 c13 c21 c22 c23 c31 c32 c33 where
-			m1 = (a11 + a12 + a13 - a21 - a22 - a32 - a33)* (b22)
-			m2 = (a11 - a21)* (-b12 + b22)
-			m3 = (a22)* (-b11 + b12 + b21 - b22 - b23 - b31 + b33)
-			m4 = (-a11 + a21 + a22)* (b11 - b12 + b22)
-			m5 = (a21 + a22)* (-b11 + b12)
-			m6 = (a11)* (b11)
-			m7 = (-a11 + a31 + a32)* (b11 - b13 + b23)
-			m8 = (-a11 + a31)* (b13 - b23)
-			m9 = (a31 + a32)* (-b11 + b13)
-			m10 = (a11 + a12 + a13 - a22 - a23 - a31 - a32)* (b23)
-			m11 = (a32)* (-b11 + b13 + b21 - b22 - b23 - b31 + b32)
-			m12 = (-a13 + a32 + a33)* (b22 + b31 - b32)
-			m13 = (a13 - a33)* (b22 - b32)
-			m14 = (a13)* (b31)
-			m15 = (a32 + a33)* (-b31 + b32)
-			m16 = (-a13 + a22 + a23)* (b23 + b31 - b33)
-			m17 = (a13 - a23)* (b23 - b33)
-			m18 = (a22 + a23)* (-b31 + b33)
-			m19 = (a12)* (b21)
-			m20 = (a23)* (b32)
-			m21 = (a21)* (b13)
-			m22 = (a31)* (b12)
-			m23 = (a33)* (b33)
+		t33 = t37 + a12 - a32
+		t34 = a13 - a23
+		t35 = a13 - a33
+		t36 = a31 - a11
+		t37 = a11 - a22
 
-			c11 = m6 + m14 + m19
-			c12 = m1 + m4 + m5 + m6 + m12 + m14 + m15
-			c13 = m6 + m7 + m9 + m10 + m14 + m16 + m18
-			c21 = m2 + m3 + m4 + m6 + m14 + m16 + m17
-			c22 = m2 + m4 + m5 + m6 + m20
-			c23 = m14 + m16 + m17 + m18 + m21
-			c31 = m6 + m7 + m8 + m11 + m12 + m13 + m14
-			c32 = m12 + m13 + m14 + m15 + m22
-			c33 = m6 + m7 + m8 + m9 + m23
-{-# SPECIALIZE ladermanMult :: Matrix3 Int -> Matrix3 Int -> Matrix3 Int #-}
+		u33 = b21 - b11 - b23 - b31
+		u34 = b22 - b12
+		u35 = b22 - b32
+		u36 = b33 - b31
+		u37 = b13 - b23
+
+		m1 = (t35 + t33 - a21) * b22
+		m2 = (a11 - a21) * u34
+		m3 = a22 * (u33 + b33 - u34)
+		m4 = (a21 - t37) * (b11 + u34)
+		m5 = (a22 + a21) * (b12 - b11)
+		m6 = a11 * b11
+		m7 = (t36 + a32) * (b11 - u37)
+		m8 = t36 * u37
+		m9 = (a31 + a32) * (b13 - b11)
+		m10 = (t33 - a31 + t34) * b23
+		m11 = a32 * (u33 + b13 - u35)
+		m12 = (a32 - t35) * (b31 + u35)
+		m13 = t35 * u35
+		m14 = a13 * b31
+		m15 = (a33 + a32) * (b32 - b31)
+		m16 = (a22 - t34) * (b23 - u36)
+		m17 = t34 * (b23 - b33)
+		m18 = (a23 + a22) * u36
+		m19 = a12 * b21
+		m20 = a23 * b32
+		m21 = a21 * b13
+		m22 = a31 * b12
+		m23 = a33 * b33
+
+		v33 = m12 + m14
+		v34 = m16 + m14
+		v35 = m4 + m6
+		v36 = m7 + m6
+		v37 = v33 + m15
+		v38 = v35 + m5
+		v39 = v34 + m18
+		v40 = v36 + m9
+
+		c11 = m6 + m19 + m14
+		c12 = v38 + v37 + m1
+		c13 = v40 + v39 + m10
+		c21 = v35 + v34 + m3 + m2 + m17
+		c22 = v38 + m20 + m2
+		c23 = v39 + m21 + m17
+		c31 = v36 + v33 + m8 + m13 + m11
+		c32 = v37 + m22 + m13
+		c33 = v40 + m23 + m8
 {-# SPECIALIZE ladermanMult :: Matrix3 Integer -> Matrix3 Integer -> Matrix3 Integer #-}
+
+-- | Multiplicate matrices under assumption that multiplication of elements is commutative.
+-- Requires 22 multiplications and 66 additions.
+-- It becomes faster than usual multiplication (which requires 27 multiplications and 18 additions),
+-- when matrix's elements are large (several hundred digits) integers.
+--
+-- An algorithm follows
+-- /O. M. Makarov./ An algorithm for multiplication of 3 × 3 matrices. Zh. Vychisl. Mat. i Mat. Fiz., 26(2):293–294, 320, 1986.
+--
+-- We were able to reduce the number of additions from 105 to 66 by sofisticated choice of intermediate variables.
+makarovMult :: Num t => Matrix3 t -> Matrix3 t -> Matrix3 t
+makarovMult
+	(Matrix3 k1 b1 c1 k2 b2 c2 k3 b3 c3)
+	(Matrix3 a1 a2 a3 k4 k5 k6 k7 k8 k9)
+	= Matrix3 c11 c12 c13 c21 c22 c23 c31 c32 c33 where
+		t32 = c3 + c2
+		t33 = b3 + b1
+		t34 = c1 - c2
+		t35 = b2 + b1
+
+		u32 = k4 + k6 - k5
+		u33 = k9 + k7 - k8
+		u34 = k6 + k8
+
+		m1 = (t34 + a3) * (u33 + k1)
+		m2 = (t35 + a2) * (k2 - u32)
+		m3 = (t33 + a2) * (k3 - u32)
+		m4 = (a3 - t32) * (k3 - u33)
+		m5 = (a1 - t34) * k1
+		m6 = (t35 + a1) * k2
+		m7 = (t33 + t32 + a1) * k3
+		m8 = a2 * (k1 + u32)
+		m9 = a3 * (u33 + k2)
+		m10 = b1 * k4
+		m11 = c2 * k7
+		m12 = t34 * (k7 + k1)
+		m13 = t35 * (k4 - k2)
+		m14 = (b1 + a2) * u32
+		m15 = b2 * k6
+		m16 = (a3 - c2) * u33
+		m17 = c2 * k8
+		m18 = (b3 - t32) * k6
+		m19 = (c3 + c1 - t33) * k8
+		m20 = t33 * (u34 + k4 - k3)
+		m21 = t32 * (u34 + k3 - k7)
+		m22 = (t32 - t33) * u34
+
+		v32 = v38 - v35
+		v33 = v35 - v36
+		v34 = m19 - m22
+		v35 = m17 - m18
+		v36 = m14 - m10
+		v37 = m11 + m10
+		v38 = m16 + m11
+		v39 = m20 + m22
+		v40 = m15 + m17
+
+		c11 = v37 + m5 + m12
+		c12 = v34 + v33 + m8
+		c13 = v34 + m1 - m12 - v32
+		c21 = m6 + m13 + m11 - m10
+		c22 = v40 + v36 + m2 + m13
+		c23 = v40 + m9 - v38
+		c31 = v39 + m7 - m21 - v37
+		c32 = v39 + m3 - v33
+		c33 = v32 + m4 + m21
+{-# SPECIALIZE makarovMult :: Matrix3 Integer -> Matrix3 Integer -> Matrix3 Integer #-}
 
 -- |Compute the determinant of a matrix.
 det :: (Num t, Ord t) => Matrix3 t -> t

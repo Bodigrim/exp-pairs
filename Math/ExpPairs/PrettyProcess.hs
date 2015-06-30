@@ -14,6 +14,7 @@ This module uses memoization extensively.
 -}
 {-# LANGUAGE LambdaCase      #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Math.ExpPairs.PrettyProcess
 	( prettify,
 		uglify,

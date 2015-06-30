@@ -103,7 +103,7 @@ nub :: Ord a => [a] -> [a]
 nub = toList . S.fromList
 
 suspicious :: Forms -> [IntSet]
-suspicious fs@(Forms _ exprs) = if null maxSusp then [] else map fst (concat $ take 3 maxSusp) where
+suspicious fs@(Forms _ exprs) = if null maxSusp then [] else map fst (concat $ take 2 maxSusp) where
 	subexprs = map (S.map absExpr . S.filter nonTrivial . subsets) (toList exprs)
 	maxSusp = groupBy ((==) `on` snd) . sortBy (comparing snd) . map (id &&& substitutionWeight fs) . toList . f $ subexprs
 	f :: [Set Expr] -> Set Expr
@@ -114,7 +114,7 @@ substitutionWeight:: Forms -> Expr -> Int
 substitutionWeight (Forms _ exprs) newExpr = size * count where
 	newExprNeg = flipSign newExpr
 	size = IS.size newExpr - 1
-	count = 1 - (IM.size $ IM.filter (\expr -> newExpr    `IS.isSubsetOf` expr || newExprNeg `IS.isSubsetOf` expr) exprs)
+	count = 1 - IM.size (IM.filter (\expr -> newExpr    `IS.isSubsetOf` expr || newExprNeg `IS.isSubsetOf` expr) exprs)
 
 substitute :: Char -> Forms -> Expr -> Forms
 substitute ch (Forms ids exprs) newExpr = Forms ids' exprs' where
@@ -143,9 +143,9 @@ main = do
 		[ ('t', makarov1)
 		, ('u', makarov2)
 		, ('v', makarov3)
-		-- , ('t', laderman1)
-		-- , ('u', laderman2)
-		-- , ('v', laderman3)
+		, ('t', laderman1)
+		, ('u', laderman2)
+		, ('v', laderman3)
 		]
 	let weightBefore = map (weight . snd) before
 	let after = map (uncurry optimize) before
@@ -153,12 +153,6 @@ main = do
 	mapM_ (print . pretty) after
 	putStrLn $ show weightBefore ++ " = " ++ show (sum weightBefore)
 	putStrLn $ show weightAfter  ++ " = " ++ show (sum weightAfter)
-
-{-
-[44,30,31,27,28,42] = 202
-[33,18,17,20,22,30] = 140
-[31,18,17,19,19,30] = 134
--}
 
 makarov1 :: Forms
 makarov1 = [r|
@@ -221,9 +215,9 @@ c13 = m1 - m11 - m12 - m16 + m17 - m18 + m19 - m22
 c21 = m6 - m10 + m11 + m13
 c22 = m2 - m10 + m13 + m14 + m15 + m17
 r23 = m9 - m11 + m15 - m16 + m17
-r31 = m7 - m10 - m11 + m20 - m21 + m22
-r32 = m3 - m10 + m14 - m17 + m18 + m20 + m22
-r33 = m4 + m11 + m16 - m17 + m18 + m21
+c31 = m7 - m10 - m11 + m20 - m21 + m22
+c32 = m3 - m10 + m14 - m17 + m18 + m20 + m22
+c33 = m4 + m11 + m16 - m17 + m18 + m21
 |]
 
 laderman1 :: Forms
@@ -231,19 +225,19 @@ laderman1 = [r|
 l1 = a11 + a12 + a13 - a21 - a22 - a32 - a33
 l2 = a11 - a21
 l3 = a22
-l4 = -a11 + a21 + a22
+l4 = - a11 + a21 + a22
 l5 = a21 + a22
 l6 = a11
-l7 = -a11 + a31 + a32
-l8 = -a11 + a31
+l7 = - a11 + a31 + a32
+l8 = - a11 + a31
 l9 = a31 + a32
 l10 = a11 + a12 + a13 - a22 - a23 - a31 - a32
 l11 = a32
-l12 = -a13 + a32 + a33
+l12 = - a13 + a32 + a33
 l13 = a13 - a33
 l14 = a13
 l15 = a32 + a33
-l16 = -a13 + a22 + a23
+l16 = - a13 + a22 + a23
 l17 = a13 - a23
 l18 = a22 + a23
 l19 = a12
@@ -256,23 +250,23 @@ l23 = a33
 laderman2 :: Forms
 laderman2 = [r|
 r1 = b22
-r2 = -b12 + b22
-r3 = -b11 + b12 + b21 - b22 - b23 - b31 + b33
+r2 = - b12 + b22
+r3 = - b11 + b12 + b21 - b22 - b23 - b31 + b33
 r4 = b11 - b12 + b22
-r5 = -b11 + b12
+r5 = - b11 + b12
 r6 = b11
 r7 = b11 - b13 + b23
 r8 = b13 - b23
-r9 = -b11 + b13
+r9 = - b11 + b13
 r10 = b23
-r11 = -b11 + b13 + b21 - b22 - b23 - b31 + b32
+r11 = - b11 + b13 + b21 - b22 - b23 - b31 + b32
 r12 = b22 + b31 - b32
 r13 = b22 - b32
 r14 = b31
-r15 = -b31 + b32
+r15 = - b31 + b32
 r16 = b23 + b31 - b33
 r17 = b23 - b33
-r18 = -b31 + b33
+r18 = - b31 + b33
 r19 = b21
 r20 = b32
 r21 = b13
