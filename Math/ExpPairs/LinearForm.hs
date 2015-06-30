@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveFunctor, DeriveFoldable, DeriveGeneric #-}
 {-|
 Module      : Math.ExpPairs.LinearForm
 Description : Linear forms, rational forms and constraints
@@ -20,9 +21,12 @@ module Math.ExpPairs.LinearForm
 	, checkConstraint
 	) where
 
-import Data.List   (intercalate)
-import Data.Ratio  (numerator, denominator)
-import Data.Monoid (Monoid, mempty, mappend)
+import Control.DeepSeq
+import Data.Foldable  (Foldable (..), toList)
+import Data.List      (intercalate)
+import Data.Ratio     (numerator, denominator)
+import Data.Monoid    (Monoid, mempty, mappend)
+import GHC.Generics   (Generic (..))
 
 import Math.ExpPairs.RatioInf
 
@@ -30,7 +34,10 @@ import Math.ExpPairs.RatioInf
 -- First argument of 'LinearForm' stands for a, second for b
 -- and third for c. Linear forms form a monoid by addition.
 data LinearForm t = LinearForm t t t
-	deriving (Eq)
+	deriving (Eq, Functor, Foldable, Generic)
+
+instance NFData t => NFData (LinearForm t) where
+	rnf = rnf . toList
 
 instance (Num t, Eq t, Show t) => Show (LinearForm t) where
 	show (LinearForm a b c) = if (a==0) && (b==0) && (c==0)
@@ -44,23 +51,23 @@ instance (Num t, Eq t, Show t) => Show (LinearForm t) where
 
 instance Num t => Num (LinearForm t) where
 	(LinearForm a b c) + (LinearForm d e f) = LinearForm (a+d) (b+e) (c+f)
-	(*) = undefined
-	negate (LinearForm a b c) = LinearForm (negate a) (negate b) (negate c)
-	abs = undefined
-	signum = undefined
+	(*) = error "Multiplication of LinearForm is undefined"
+	negate = fmap negate
+	abs = error "Absolute value of LinearForm is undefined"
+	signum = error "Signum of LinearForm is undefined"
 	fromInteger n = LinearForm 0 0 (fromInteger n)
 
 instance Num t => Monoid (LinearForm t) where
-	mempty = 0
+	mempty  = 0
 	mappend = (+)
 
 scaleLF :: (Num t, Eq t) => t -> LinearForm t -> LinearForm t
-scaleLF 0 (LinearForm {}) = LinearForm 0 0 0
-scaleLF s (LinearForm a b c) = LinearForm (a*s) (b*s) (c*s)
+scaleLF 0 = const 0
+scaleLF s = fmap (* s)
 
 -- |Evaluate a linear form a*k + b*l + c*m for given k, l and m.
 evalLF :: Num t => (t, t, t) -> LinearForm t -> t
-evalLF (k, l, m) (LinearForm a b c) = a*k+l*b+m*c
+evalLF (k, l, m) (LinearForm a b c) = a * k + l * b + m * c
 
 -- |Substitute linear forms k, l and m into a given linear form
 -- a*k + b*l + c*m to obtain a new linear form.
@@ -69,29 +76,33 @@ substituteLF (k, l, m) (LinearForm a b c) = scaleLF a k + scaleLF b l + scaleLF 
 
 -- | Define a rational form of two variables, equal to the ratio of two 'LinearForm'.
 data RationalForm t = RationalForm (LinearForm t) (LinearForm t)
-	deriving (Show)
+	deriving (Eq, Show, Functor, Foldable, Generic)
+
+instance NFData t => NFData (RationalForm t) where
+	rnf = rnf . toList
 
 instance Num t => Num (RationalForm t) where
-	(+) = undefined
-	(*) = undefined
+	(+) = error "Addition of RationalForm is undefined"
+	(*) = error "Multiplication of RationalForm is undefined"
 	negate (RationalForm a b) = RationalForm (negate a) b
-	abs = undefined
-	signum = undefined
+	abs = error "Absolute value of RationalForm is undefined"
+	signum = error "Signum of RationalForm is undefined"
 	fromInteger n = RationalForm (fromInteger n) 1
 
 instance Num t => Fractional (RationalForm t) where
 	fromRational r = RationalForm (fromInteger $ numerator r) (fromInteger $ denominator r)
 	recip (RationalForm a b) = RationalForm b a
 
+mapTriple :: (a -> b) -> (a, a, a) -> (b, b, b)
+mapTriple f (x, y, z) = (f x, f y, f z)
+
 -- |Evaluate a rational form (a*k + b*l + c*m) \/ (a'*k + b'*l + c'*m)
 -- for given k, l and m.
 evalRF :: (Real t, Num t) => (Integer, Integer, Integer) -> RationalForm t -> RationalInf
-evalRF (k', l', m') (RationalForm num den) = if denom==0 then InfPlus else Finite (numer / denom) where
-	k = fromInteger k'
-	l = fromInteger l'
-	m = fromInteger m'
-	numer = toRational $ evalLF (k, l, m) num
-	denom = toRational $ evalLF (k, l, m) den
+evalRF (k, l, m) (RationalForm num den) = if denom==0 then InfPlus else Finite (numer / denom) where
+	klm = mapTriple fromInteger (k, l, m)
+	numer = toRational $ evalLF klm num
+	denom = toRational $ evalLF klm den
 
 -- |Constants to specify the strictness of 'Constraint'.
 data IneqType
@@ -99,20 +110,21 @@ data IneqType
 	= Strict
 	-- | Non-strict inequality (≥0).
 	| NonStrict
-	deriving (Eq, Show)
+	deriving (Eq, Ord, Show, Enum, Bounded)
 
 -- |A linear constraint of two variables.
 data Constraint t = Constraint (LinearForm t) IneqType
-	deriving (Show)
+	deriving (Eq, Show, Functor, Foldable, Generic)
+
+instance NFData t => NFData (Constraint t) where
+	rnf (Constraint l i) = i `seq` rnf l
 
 -- |Evaluate a rational form of constraint and compare
 -- its value with 0. Strictness depends on the given 'IneqType'.
 checkConstraint :: (Num t, Eq t) => (Integer, Integer, Integer) -> Constraint t -> Bool
-checkConstraint (k', l', m') (Constraint lf ineq)
+checkConstraint (k, l, m) (Constraint lf ineq)
 	= if ineq==NonStrict
 		then signum numer /= -1
 		else signum numer == 1 where
-			k = fromInteger k'
-			l = fromInteger l'
-			m = fromInteger m'
-			numer = evalLF (k, l, m) lf
+			klm = mapTriple fromInteger (k, l, m)
+			numer = evalLF klm lf

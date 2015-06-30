@@ -51,9 +51,9 @@ etalonTauabc a b c d e = Finite (d%e) >= (optimalValue . snd) (tauabc a b c)
 testSuite :: TestTree
 testSuite = testGroup "Kratzel"
 	[ testCase "etalon tauab"
-		(testEtalon 100 (\xs -> etalonTauab (xs!!0) (xs!!1) (xs!!2) (xs!!3)) "tests/etalon-tauab.txt")
+		(testEtalon 100 (\[x1, x2, x3, x4] -> etalonTauab x1 x2 x3 x4) "tests/etalon-tauab.txt")
 	, testCase "etalon tauabc"
-		(testEtalon 100 (\xs -> etalonTauabc (xs!!0) (xs!!1) (xs!!2) (xs!!3) (xs!!4)) "tests/etalon-tauabc.txt")
+		(testEtalon 100 (\[x1, x2, x3, x4, x5] -> etalonTauabc x1 x2 x3 x4 x5) "tests/etalon-tauabc.txt")
 	, SC.testProperty "tauabc compare with 1/(a+b+c)" testAbcCompareLow
 	, QC.testProperty "tauabc compare with 1/(a+b+c)" testAbcCompareLow
 	, SC.testProperty "tauabc compare with 2/(a+b+c)" testAbcCompareHigh

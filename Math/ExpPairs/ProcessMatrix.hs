@@ -44,9 +44,11 @@ process2matrix :: Process -> ProcessMatrix
 process2matrix  A = ProcessMatrix $ Matrix3 1 0 0 1 1 1  2 0 2
 process2matrix BA = ProcessMatrix $ Matrix3 0 1 0 2 0 1  2 0 2
 
+-- | Return process matrix for 'A'-process.
 aMatrix :: ProcessMatrix
 aMatrix = process2matrix A
 
+-- | Return process matrix for 'BA'-process.
 baMatrix :: ProcessMatrix
 baMatrix = process2matrix BA
 

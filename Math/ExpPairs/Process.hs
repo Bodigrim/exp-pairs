@@ -54,12 +54,12 @@ instance Read Path where
 
 instance Ord Path where
 	(Path _ q1) <= (Path _ q2) = cmp q1 q2 where
-		cmp (A:p1) (A:p2) = cmp p1 p2
+		cmp (A:p1)  (A:p2)  = cmp p1 p2
 		cmp (BA:p1) (BA:p2) = cmp p2 p1
-		cmp (A:_) (BA:_) = True
-		cmp (BA:_) (A:_) = False
-		cmp [] _ = True
-		cmp _ [] = False
+		cmp (A:_)   (BA:_)  = True
+		cmp (BA:_)  (A:_)   = False
+		cmp []      _       = True
+		cmp _       []      = False
 
 -- | Path consisting of a single process 'A'.
 aPath :: Path
