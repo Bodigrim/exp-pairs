@@ -31,6 +31,7 @@ module Math.ExpPairs.Kratzel
 	, tauabc
 	) where
 
+import Control.Arrow
 import Data.Ratio ((%))
 import Data.Ord   (comparing)
 import Data.List  (minimumBy)
@@ -48,13 +49,17 @@ data TauabTheorem
 	| Kr512a
 	-- | Theorem 5.12, case b)
 	| Kr512b
-	deriving (Show)
+	deriving (Eq, Ord, Enum, Bounded, Show)
+
+divideResult :: Real a => a -> (b, OptimizeResult) -> (b, OptimizeResult)
+divideResult d = second (\o -> o {optimalValue = optimalValue o / Finite (toRational d)})
 
 -- |Compute Θ(a, b) for given a and b.
 tauab :: Integer -> Integer -> (TauabTheorem, OptimizeResult)
-tauab a' b' = minimumBy (comparing (optimalValue . snd)) [kr511a, kr511b, kr512a, kr512b] where
-	a = a'%1
-	b = b'%1
+tauab a' b' = divideResult d $ minimumBy (comparing (optimalValue . snd)) [kr511a, kr511b, kr512a, kr512b] where
+	d = gcd a' b'
+	a = a'%d
+	b = b'%d
 	kr511a = (Kr511a, optimize
 		[RationalForm (LinearForm 2 2 (-1)) (LinearForm 0 0 (a+b))]
 		[Constraint (LinearForm (-2*b) (2*a) (-a)) NonStrict])
@@ -96,15 +101,17 @@ data TauabcTheorem
 	| Kr66
 	-- | In certain cases Θ(a, b, c) = Θ(a, b).
 	| Tauab TauabTheorem
-	deriving (Show)
+	deriving (Eq, Ord, Show)
 
 -- |Compute Θ(a, b, c) for given a, b and c.
 tauabc :: Integer -> Integer -> Integer -> (TauabcTheorem, OptimizeResult)
-tauabc 1 1 1 = (Kolesnik, simulateOptimize $ 43%96)
-tauabc a' b' c' = minimumBy (comparing (optimalValue . snd)) [kr61, kr62, kr63, kr64, kr65, kr66] where
-	a = a'%1
-	b = b'%1
-	c = c'%1
+tauabc a' b' c'
+	| a'==b' && a'==c' = divideResult a' (Kolesnik, simulateOptimize $ 43%96)
+tauabc a' b' c' = divideResult d $ minimumBy (comparing (optimalValue . snd)) [kr61, kr62, kr63, kr64, kr65, kr66] where
+	d = gcd a' b'
+	a = a'%d
+	b = b'%d
+	c = c'%d
 	kr61
 		| c<a+b = (Kr61, simulateOptimize $ 2/(a+b+c))
 		| optimalValue optRes < Finite (recip c) = (Kr61, simulateOptimize $ 1/c)

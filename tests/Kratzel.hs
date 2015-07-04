@@ -29,9 +29,10 @@ testAbCompareHigh (Positive a') (Positive b') = optimalValue (snd $ tauab a b) <
 
 
 testAbcMonotonic :: Positive Integer -> Positive Integer -> Positive Integer -> Positive Integer -> Positive Integer -> Positive Integer -> Bool
-testAbcMonotonic (Positive a') (Positive b') (Positive c') (Positive d') (Positive e') (Positive f') =  (a==d && b==e && c==f) || zabc >= zdef where
+testAbcMonotonic (Positive a') (Positive b') (Positive c') (Positive d') (Positive e') (Positive f') = (a==d && b==e && c==f) || theoremAbc==Kr64 || zabc >= zdef where
 	[a, d, b, e, c, f] = sort [a', b', c', d', e', f']
-	zabc = optimalValue $ snd $ tauabc a b c
+	(theoremAbc, resultAbc) = tauabc a b c
+	zabc = optimalValue resultAbc
 	zdef = optimalValue $ snd $ tauabc d e f
 
 testAbcCompareLow :: Positive Integer -> Positive Integer -> Positive Integer -> Bool
