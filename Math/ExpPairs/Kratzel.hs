@@ -56,10 +56,12 @@ divideResult d = second (\o -> o {optimalValue = optimalValue o / Finite (toRati
 
 -- |Compute Θ(a, b) for given a and b.
 tauab :: Integer -> Integer -> (TauabTheorem, OptimizeResult)
-tauab a' b' = divideResult d $ minimumBy (comparing (optimalValue . snd)) [kr511a, kr511b, kr512a, kr512b] where
-	d = gcd a' b'
-	a = a'%d
-	b = b'%d
+tauab a' b'
+	| d /= 1 = divideResult d $ tauab (a'`div` d) (b' `div` d) where
+			d = gcd a' b'
+tauab a' b' = minimumBy (comparing (optimalValue . snd)) [kr511a, kr511b, kr512a, kr512b] where
+	a = toRational a'
+	b = toRational b'
 	kr511a = (Kr511a, optimize
 		[RationalForm (LinearForm 2 2 (-1)) (LinearForm 0 0 (a+b))]
 		[Constraint (LinearForm (-2*b) (2*a) (-a)) NonStrict])
@@ -106,12 +108,13 @@ data TauabcTheorem
 -- |Compute Θ(a, b, c) for given a, b and c.
 tauabc :: Integer -> Integer -> Integer -> (TauabcTheorem, OptimizeResult)
 tauabc a' b' c'
-	| a'==b' && a'==c' = divideResult a' (Kolesnik, simulateOptimize $ 43%96)
-tauabc a' b' c' = divideResult d $ minimumBy (comparing (optimalValue . snd)) [kr61, kr62, kr63, kr64, kr65, kr66] where
-	d = gcd a' b'
-	a = a'%d
-	b = b'%d
-	c = c'%d
+	| d /= 1 = divideResult d $ tauabc (a'`div` d) (b' `div` d) (c' `div` d) where
+			d = gcd (gcd a' b') c'
+tauabc 1 1 1 = (Kolesnik, simulateOptimize $ 43%96)
+tauabc a' b' c' = minimumBy (comparing (optimalValue . snd)) [kr61, kr62, kr63, kr64, kr65, kr66] where
+	a = toRational a'
+	b = toRational b'
+	c = toRational c'
 	kr61
 		| c<a+b = (Kr61, simulateOptimize $ 2/(a+b+c))
 		| optimalValue optRes < Finite (recip c) = (Kr61, simulateOptimize $ 1/c)
