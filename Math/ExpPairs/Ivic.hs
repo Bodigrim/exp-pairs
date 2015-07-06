@@ -61,17 +61,8 @@ lemma82_f s
 	| s<=57%62  = 98/(31-32*s)
 	| otherwise =	 5/(1-s)
 
--- Ivic, (8.97)
--- R << T V^{-2f(sigma)} + T^alpha1 V^beta1 + T^alpha2 V^beta2
---
--- If a<1 then T^a V^b << T V^{b+(a-1)/muS}
---
--- (8.97) implies that alpha1 <= 1 for S >= 1/2
--- and that alpha2 <= 1 for S >= 2/3 or S >= 5/8 and
---          (4S-2)k + (8S-6)l + 2S-1 >=0
-
 -- | Compute maximal m(σ) such that ∫_1^T |ζ(σ+it)|^m(σ) dt ≪ T^(1+ε).
--- See equation (8.97) in Ivić2003.
+-- See equation (8.97) in Ivić2003. Further justification will be published elsewhere.
 mOnS :: Rational -> OptimizeResult
 mOnS s
 	| s < 1%2 = simulateOptimize 0
@@ -113,20 +104,20 @@ mOnS s
 reverseMOnS :: Rational -> RationalInf -> Rational
 reverseMOnS prec m = reverseMOnS' from to where
 	from = 1 % 2
-	to   = 1 % 1
+	to   = 1
 	reverseMOnS' a b
 		| b-a < prec = a
 		| optimalValue (mOnS ((a+b)/2)) > m = reverseMOnS' a ((a+b)/2)
 		| otherwise = reverseMOnS' ((a+b)/2) b
 
--- | Check whether ∫_1^T 	Π |ζ(n_i*σ+it)|^m_i dt ≪ T^(1+ε) for a given list of pairs [(n_1, m_1), ...] and fixed σ.
+-- | Check whether ∫_1^T 	Π_i |ζ(n_i*σ+it)|^m_i dt ≪ T^(1+ε) for a given list of pairs [(n_1, m_1), ...] and fixed σ.
 checkAbscissa :: [(Rational, Rational)] -> Rational -> Bool
 checkAbscissa xs s = sum rs < Finite 1 where
 	qs = map (\(n,m) -> optimalValue (mOnS (n*s)) / Finite m) xs
 	rs = map (\q -> 1/q) qs
 
 -- | Find for a given precision and list of pairs [(n_1, m_1), ...] the minimal σ
--- such that ∫_1^T 	Π |ζ(n_i*σ+it)|^m_i dt ≪ T^(1+ε).
+-- such that ∫_1^T 	Π_i|ζ(n_i*σ+it)|^m_i dt ≪ T^(1+ε).
 findMinAbscissa :: Rational -> [(Rational, Rational)] -> Rational
 findMinAbscissa prec xs = searchMinAbscissa' from to where
 	from = 1 % 2 / minimum (map fst xs)
