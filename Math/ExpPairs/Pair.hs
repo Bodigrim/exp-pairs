@@ -12,6 +12,10 @@ of two points (0, 1), (1\/2, 1\/2) and a triangle with vertices in (1\/6, 2\/3),
 
 Below /A/ and /B/ stands for van der Corput's processes. See "Math.ExpPairs.Process" for explanations.
 -}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+
 module Math.ExpPairs.Pair
 	( Triangle (..)
 	, InitPair' (..)
@@ -20,7 +24,9 @@ module Math.ExpPairs.Pair
 	, initPairToValue
 	) where
 
+import Data.Maybe
 import Data.Ratio ((%))
+import Text.PrettyPrint.Leijen
 
 -- |Vertices of the triangle of initial exponent pairs.
 data Triangle
@@ -38,6 +44,9 @@ data Triangle
 	| Hux05
 	deriving (Show, Bounded, Enum, Eq, Ord)
 
+instance Pretty Triangle where
+	pretty = text . show
+
 -- |Type to hold an initial exponent pair.
 data InitPair' t
 	-- |Usual van der Corput exponent pair
@@ -50,24 +59,23 @@ data InitPair' t
 	-- Exactly
 	-- 'Mix' a b = a * 'Corput16' + b * 'HuxW87b1' + (1-a-b) * 'Hux05'
 	| Mix t t
-	deriving (Eq)
+	deriving (Eq, Show)
 
 -- |Exponent pair built from rational fractions of
 -- 'Corput16', 'HuxW87b1' and 'Hux05'
 type InitPair = InitPair' Rational
 
-instance (Show t, Num t, Eq t) => Show (InitPair' t) where
-	show Corput01 = "(0, 1)"
-	show Corput12 = "(1/2, 1/2)"
-	show (Mix r1 r2) =
-		s1 ++ (if s1/="" && (s2/=""||s3/="") then " + " else "")
-		++ s2 ++ (if s2/="" && s3/="" then " + " else "") ++ s3
-		where
-			r3 = 1 - r1 - r2
-			f r t = if r==0 then "" else (if r==1 then "" else show r ++ " * ") ++ show t
-			s1 = f r1 Corput16
-			s2 = f r2 HuxW87b1
-			s3 = f r3 Hux05
+instance Pretty Rational where
+	pretty = rational
+
+instance (Pretty t, Num t, Eq t) => Pretty (InitPair' t) where
+	pretty Corput01 = parens (rational 0     <> comma <+> rational 1)
+	pretty Corput12 = parens (rational (1%2) <> comma <+> rational (1%2))
+	pretty (Mix r1 r2) = cat $ punctuate plus $ mapMaybe f [(r1, Corput16), (r2, HuxW87b1), (1 - r1 - r2, Hux05)] where
+		plus = space <> char '+' <> space
+		f (0, _) = Nothing
+		f (1, t) = Just (pretty t)
+		f (r, t) = Just (pretty r <+> char '*' <+> pretty t)
 
 sect :: Integer
 sect = 30

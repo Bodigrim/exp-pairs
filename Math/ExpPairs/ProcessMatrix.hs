@@ -20,6 +20,7 @@ module Math.ExpPairs.ProcessMatrix
 
 import Data.Monoid           (Monoid, mempty, mappend)
 import Data.Function.Memoize (deriveMemoizable)
+import Text.PrettyPrint.Leijen
 
 import Math.ExpPairs.Matrix3
 
@@ -31,10 +32,13 @@ data Process
 	| BA
 	deriving (Eq, Show, Read, Ord, Enum)
 
+instance Pretty Process where
+	pretty = text . show
+
 deriveMemoizable ''Process
 
 newtype ProcessMatrix = ProcessMatrix (Matrix3 Integer)
-	deriving (Eq, Num, Show)
+	deriving (Eq, Num, Show, Pretty)
 
 instance Monoid ProcessMatrix where
 	mempty = 1

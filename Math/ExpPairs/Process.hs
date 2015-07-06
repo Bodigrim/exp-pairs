@@ -34,14 +34,14 @@ import Math.ExpPairs.PrettyProcess
 -- > show (mconcat $ replicate 10 aPath) == "A^10"
 --
 data Path = Path !ProcessMatrix ![Process]
-	deriving (Eq, Generic)
+	deriving (Eq, Show, Generic)
 
 instance Monoid Path where
 	mempty  = memptydefault
 	mappend = mappenddefault
 
-instance Show Path where
-	show (Path _ l) = show (pretty (prettify l)) -- ++ "\n" ++ Mx.prettyMatrix m
+instance Pretty Path where
+	pretty (Path _ l) = pretty (prettify l)
 
 instance Read Path where
 	readsPrec _ zs = [reads' zs] where

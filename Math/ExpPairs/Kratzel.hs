@@ -35,6 +35,7 @@ import Control.Arrow
 import Data.Ratio ((%))
 import Data.Ord   (comparing)
 import Data.List  (minimumBy)
+import Text.PrettyPrint.Leijen
 
 import Math.ExpPairs
 
@@ -50,6 +51,9 @@ data TauabTheorem
 	-- | Theorem 5.12, case b)
 	| Kr512b
 	deriving (Eq, Ord, Enum, Bounded, Show)
+
+instance Pretty TauabTheorem where
+	pretty = text . show
 
 divideResult :: Real a => a -> (b, OptimizeResult) -> (b, OptimizeResult)
 divideResult d = second (\o -> o {optimalValue = optimalValue o / Finite (toRational d)})
@@ -104,6 +108,10 @@ data TauabcTheorem
 	-- | In certain cases Θ(a, b, c) = Θ(a, b).
 	| Tauab TauabTheorem
 	deriving (Eq, Ord, Show)
+
+instance Pretty TauabcTheorem where
+	pretty (Tauab t) = pretty t
+	pretty t         = pretty (show t)
 
 -- |Compute Θ(a, b, c) for given a, b and c.
 tauabc :: Integer -> Integer -> Integer -> (TauabcTheorem, OptimizeResult)

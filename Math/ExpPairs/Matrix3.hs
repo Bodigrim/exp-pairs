@@ -24,10 +24,12 @@ module Math.ExpPairs.Matrix3
 	) where
 
 import Prelude hiding (foldl1)
-import Data.Foldable  (Foldable (..), toList)
-import GHC.Generics   (Generic (..))
-import Data.List      (transpose)
+
 import Control.DeepSeq
+import Data.Foldable  (Foldable (..), toList)
+import Data.List      (transpose)
+import GHC.Generics   (Generic (..))
+import Text.PrettyPrint.Leijen
 
 -- |Three-component vector.
 data Vector3 t = Vector3 {
@@ -58,7 +60,7 @@ data Matrix3 t = Matrix3 {
 	a32 :: !t,
 	a33 :: !t
 	}
-	deriving (Eq, Functor, Foldable, Generic)
+	deriving (Eq, Show, Functor, Foldable, Generic)
 
 instance NFData t => NFData (Matrix3 t) where
 	rnf = rnf . toList
@@ -295,12 +297,11 @@ normalize a = case foldl1 gcd a of
 	0 -> a
 	d -> fmap (`div` d) a
 
-instance Show t => Show (Matrix3 t) where
-	show = unlines . map unwords . pad . fmap show where
-		pad (Matrix3 {..}) = map (zipWith padCell ls) table where
+instance Pretty t => Pretty (Matrix3 t) where
+	pretty = vsep . map hsep . pad . fmap pretty where
+		pad (Matrix3 {..}) = map (zipWith fill ls) table where
 			table = [[a11, a12, a13], [a21, a22, a23], [a31, a32, a33]]
-			ls = map (maximum . map length) (transpose table)
-			padCell l xs = replicate (l - length xs) ' ' ++ xs
+			ls = map (maximum . map (length . show)) (transpose table)
 
 -- |Multiplicate a matrix by a vector (considered as a column).
 multCol :: Num t => Matrix3 t -> Vector3 t -> Vector3 t

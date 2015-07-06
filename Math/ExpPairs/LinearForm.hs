@@ -23,10 +23,11 @@ module Math.ExpPairs.LinearForm
 
 import Control.DeepSeq
 import Data.Foldable  (Foldable (..), toList)
-import Data.List      (intercalate)
-import Data.Ratio     (numerator, denominator)
+import Data.Maybe     (mapMaybe)
 import Data.Monoid    (Monoid, mempty, mappend)
+import Data.Ratio     (numerator, denominator)
 import GHC.Generics   (Generic (..))
+import Text.PrettyPrint.Leijen
 
 import Math.ExpPairs.RatioInf
 
@@ -34,20 +35,18 @@ import Math.ExpPairs.RatioInf
 -- First argument of 'LinearForm' stands for a, second for b
 -- and third for c. Linear forms form a monoid by addition.
 data LinearForm t = LinearForm t t t
-	deriving (Eq, Functor, Foldable, Generic)
+	deriving (Eq, Show, Functor, Foldable, Generic)
 
 instance NFData t => NFData (LinearForm t) where
 	rnf = rnf . toList
 
-instance (Num t, Eq t, Show t) => Show (LinearForm t) where
-	show (LinearForm a b c) = if (a==0) && (b==0) && (c==0)
-		then "0"
-		else "(" ++ intercalate " + " (filter (/=[]) $
-			[if a/= 0 then show a ++ "k" else []] ++
-			[if b/= 0 then show b ++ "l" else []] ++
-			[if c/= 0 then show c ++ "m" else []] ) ++ ")" -- where
-			-- show' :: Rational -> String
-			-- show' z = if denominator z==1 then show (numerator z) else show z
+instance (Num t, Eq t, Pretty t) => Pretty (LinearForm t) where
+	pretty (LinearForm 0 0 0) = char '0'
+	pretty (LinearForm a b c) = cat $ punctuate plus $ mapMaybe f [(a, 'k'), (b, 'l'), (c, 'm')] where
+		plus = space <> char '+' <> space
+		f (0, _) = Nothing
+		f (1, t) = Just (char t)
+		f (r, t) = Just (pretty r <+> char '*' <+> char t)
 
 instance Num t => Num (LinearForm t) where
 	(LinearForm a b c) + (LinearForm d e f) = LinearForm (a+d) (b+e) (c+f)
@@ -77,6 +76,9 @@ substituteLF (k, l, m) (LinearForm a b c) = scaleLF a k + scaleLF b l + scaleLF 
 -- | Define a rational form of two variables, equal to the ratio of two 'LinearForm'.
 data RationalForm t = RationalForm (LinearForm t) (LinearForm t)
 	deriving (Eq, Show, Functor, Foldable, Generic)
+
+instance (Num t, Eq t, Pretty t) => Pretty (RationalForm t) where
+	pretty (RationalForm l1 l2) = parens (pretty l1) </> parens (pretty l2)
 
 instance NFData t => NFData (RationalForm t) where
 	rnf = rnf . toList
@@ -112,9 +114,16 @@ data IneqType
 	| NonStrict
 	deriving (Eq, Ord, Show, Enum, Bounded)
 
+instance Pretty IneqType where
+	pretty Strict    = text ">"
+	pretty NonStrict = text ">="
+
 -- |A linear constraint of two variables.
 data Constraint t = Constraint (LinearForm t) IneqType
 	deriving (Eq, Show, Functor, Foldable, Generic)
+
+instance (Num t, Eq t, Pretty t) => Pretty (Constraint t) where
+	pretty (Constraint lf ineq) = pretty lf <+> pretty ineq <+> int 0
 
 instance NFData t => NFData (Constraint t) where
 	rnf (Constraint l i) = i `seq` rnf l

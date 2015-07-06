@@ -32,10 +32,13 @@ module Math.ExpPairs
 	, RationalInf
 	) where
 
-import Data.Ratio  ((%), numerator, denominator)
-import Data.Ord    (comparing)
-import Data.List   (minimumBy)
-import Data.Monoid (mempty, mappend)
+import Data.Function (on)
+import Data.Ratio    ((%), numerator, denominator)
+import Data.Ord      (comparing)
+import Data.List     (minimumBy)
+import Data.Monoid   (mempty, mappend)
+import Text.PrettyPrint.Leijen
+import Text.Printf
 
 import Math.ExpPairs.LinearForm
 import Math.ExpPairs.Process
@@ -75,17 +78,18 @@ data OptimizeResult = OptimizeResult {
 	-- achieved.
 	optimalPath  :: Path
 	}
+	deriving (Show)
 
-instance Show OptimizeResult where
-	show (OptimizeResult r' ip p) = show' r' ++ "\n" ++ show ip ++ "\t" ++ show p where
-		show' (Finite r) = show (fromRational r :: Double) ++ " = " ++ show r
-		show' r = show r
+instance Pretty OptimizeResult where
+	pretty (OptimizeResult r' ip p) = pretty' r' <$> pretty ip </> pretty p where
+		pretty' r@(Finite rr) = text (printf "%.6f" (fromRational rr :: Double)) <+> equals <+> pretty r
+		pretty' r = pretty r
 
 instance Eq OptimizeResult where
-	a==b = optimalValue a == optimalValue b
+	(==) = (==) `on` optimalValue
 
 instance Ord OptimizeResult where
-	compare a b = compare (optimalValue a) (optimalValue b)
+	compare = compare `on` optimalValue
 
 -- |Wrap 'Rational' into 'OptimizeResult'.
 simulateOptimize :: Rational -> OptimizeResult
