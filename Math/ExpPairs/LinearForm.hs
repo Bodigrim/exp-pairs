@@ -50,9 +50,9 @@ instance (Num t, Eq t, Pretty t) => Pretty (LinearForm t) where
 
 instance Num t => Num (LinearForm t) where
 	(LinearForm a b c) + (LinearForm d e f) = LinearForm (a+d) (b+e) (c+f)
-	(*) = error "Multiplication of LinearForm is undefined"
+	(*)    = error "Multiplication of LinearForm is undefined"
 	negate = fmap negate
-	abs = error "Absolute value of LinearForm is undefined"
+	abs    = error "Absolute value of LinearForm is undefined"
 	signum = error "Signum of LinearForm is undefined"
 	fromInteger n = LinearForm 0 0 (fromInteger n)
 

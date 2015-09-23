@@ -7,9 +7,35 @@ import Test.SmallCheck.Series
 import Control.Monad
 import Control.Applicative
 
+import Math.ExpPairs.LinearForm
 import Math.ExpPairs.ProcessMatrix
 import Math.ExpPairs.Pair (InitPair' (..))
 import Math.ExpPairs.Matrix3 as M3 (Matrix3, fromList, Vector3 (..))
+
+instance Arbitrary a => Arbitrary (LinearForm a) where
+	arbitrary = LinearForm <$> arbitrary <*> arbitrary <*> arbitrary
+
+instance (Monad m, Serial m a) => Serial m (LinearForm a) where
+	series = cons3 LinearForm
+
+instance Arbitrary a => Arbitrary (RationalForm a) where
+	arbitrary = RationalForm <$> arbitrary <*> arbitrary
+
+instance (Monad m, Serial m a) => Serial m (RationalForm a) where
+	series = cons2 RationalForm
+
+instance Arbitrary a => Arbitrary (Constraint a) where
+	arbitrary = Constraint <$> arbitrary <*> arbitrary
+
+instance (Monad m, Serial m a) => Serial m (Constraint a) where
+	series = cons2 Constraint
+
+instance Arbitrary IneqType where
+	arbitrary = fmap f arbitrary where
+		f x = if x then Strict else NonStrict
+
+instance Monad m => Serial m IneqType where
+	series = cons0 Strict \/ cons0 NonStrict
 
 instance Arbitrary Process where
 	arbitrary = fmap f arbitrary where

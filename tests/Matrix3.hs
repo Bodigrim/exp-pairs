@@ -50,7 +50,7 @@ testMultCol m v@(M3.Vector3 v1 v2 v3) = a==a' && b==b' && c==c' where
 	[a', b', c'] = M.toList $ toM m * M.fromList 3 1 [v1, v2, v3]
 
 testSuite :: TestTree
-testSuite = testGroup "LinearForm"
+testSuite = testGroup "Matrix3"
 	[ QC.testProperty "plus"      $ testOp (+) (+)
 	, QC.testProperty "minus"     $ testOp (-) (-)
 	, QC.testProperty "mult"      $ testOp (*) (*)
