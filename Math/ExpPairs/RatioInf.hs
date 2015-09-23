@@ -48,20 +48,25 @@ instance Integral t => Num (RatioInf t) where
 	_ + InfMinus = InfMinus
 	_ + InfPlus  = InfPlus
 	(Finite a) + (Finite b) = Finite (a+b)
+	{-# SPECIALIZE (+) :: RationalInf -> RationalInf -> RationalInf #-}
 
 	fromInteger = Finite . fromInteger
+	{-# SPECIALIZE fromInteger :: Integer -> RationalInf #-}
 
 	signum InfMinus   = Finite (-1)
 	signum InfPlus    = Finite 1
 	signum (Finite r) = Finite (signum r)
+	{-# SPECIALIZE signum :: RationalInf -> RationalInf #-}
 
 	abs InfMinus   = InfPlus
 	abs InfPlus    = InfPlus
 	abs (Finite r) = Finite (abs r)
+	{-# SPECIALIZE abs :: RationalInf -> RationalInf #-}
 
 	negate InfMinus   = InfPlus
 	negate InfPlus    = InfMinus
 	negate (Finite r) = Finite (negate r)
+	{-# SPECIALIZE negate :: RationalInf -> RationalInf #-}
 
 	InfMinus * InfMinus = InfMinus
 	InfMinus * InfPlus  = InfMinus
@@ -89,8 +94,11 @@ instance Integral t => Num (RatioInf t) where
 
 	Finite a * Finite b = Finite (a * b)
 
+	{-# SPECIALIZE (*) :: RationalInf -> RationalInf -> RationalInf #-}
+
 instance Integral t => Fractional (RatioInf t) where
 	fromRational = Finite . fromRational
+	{-# SPECIALIZE fromRational :: Rational -> RationalInf #-}
 
 	InfMinus / InfMinus = error "Cannot divide infinity by infinity"
 	InfMinus / InfPlus  = error "Cannot divide infinity by infinity"
@@ -112,7 +120,10 @@ instance Integral t => Fractional (RatioInf t) where
 	Finite _ / Finite 0 = error "Cannot divide finite value by zero"
 	Finite a / Finite b = Finite (a/b)
 
+	{-# SPECIALIZE (/) :: RationalInf -> RationalInf -> RationalInf #-}
+
 instance Integral t => Real (RatioInf t) where
 	toRational (Finite r) = toRational r
 	toRational InfPlus    = error "Cannot map infinity into Rational"
 	toRational InfMinus   = error "Cannot map infinity into Rational"
+	{-# SPECIALIZE toRational :: RationalInf -> Rational #-}
