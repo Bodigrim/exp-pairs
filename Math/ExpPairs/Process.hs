@@ -9,18 +9,22 @@ Portability : TemplateHaskell
 
 Provides types for sequences of /A/- and /B/-processes of van der Corput. A good account on this topic can be found in /Graham S. W.,  Kolesnik G. A./ Van Der Corput's Method of Exponential Sums, Cambridge University Press, 1991, especially Ch. 5.
 -}
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveGeneric, CPP #-}
 module Math.ExpPairs.Process
-	( Process ()
-	, Path (Path)
-	, aPath
-	, baPath
-	, evalPath
-	, lengthPath
-	) where
+  ( Process ()
+  , Path (Path)
+  , aPath
+  , baPath
+  , evalPath
+  , lengthPath
+  ) where
 
 import GHC.Generics             (Generic)
+#if __GLASGOW_HASKELL__ < 710
 import Generics.Deriving.Monoid (Monoid, mempty, memptydefault, mappend, mappenddefault)
+#else
+import Generics.Deriving.Monoid (memptydefault, mappenddefault)
+#endif
 import Text.PrettyPrint.Leijen
 
 
@@ -34,32 +38,32 @@ import Math.ExpPairs.PrettyProcess
 -- > show (mconcat $ replicate 10 aPath) == "A^10"
 --
 data Path = Path !ProcessMatrix ![Process]
-	deriving (Eq, Show, Generic)
+  deriving (Eq, Show, Generic)
 
 instance Monoid Path where
-	mempty  = memptydefault
-	mappend = mappenddefault
+  mempty  = memptydefault
+  mappend = mappenddefault
 
 instance Pretty Path where
-	pretty (Path _ l) = pretty (prettify l)
+  pretty (Path _ l) = pretty (prettify l)
 
 instance Read Path where
-	readsPrec _ zs = [reads' zs] where
-		reads' ('A':xs) = (aPath `mappend` path, ys) where
-			(path, ys) = reads' xs
-		reads' ('B':'A':xs) = (baPath `mappend` path, ys) where
-			(path, ys) = reads' xs
-		reads' ('B':xs) = (baPath, xs)
-		reads' xs = (mempty, xs)
+  readsPrec _ zs = [reads' zs] where
+    reads' ('A':xs) = (aPath `mappend` path, ys) where
+      (path, ys) = reads' xs
+    reads' ('B':'A':xs) = (baPath `mappend` path, ys) where
+      (path, ys) = reads' xs
+    reads' ('B':xs) = (baPath, xs)
+    reads' xs = (mempty, xs)
 
 instance Ord Path where
-	(Path _ q1) <= (Path _ q2) = cmp q1 q2 where
-		cmp (A:p1)  (A:p2)  = cmp p1 p2
-		cmp (BA:p1) (BA:p2) = cmp p2 p1
-		cmp (A:_)   (BA:_)  = True
-		cmp (BA:_)  (A:_)   = False
-		cmp []      _       = True
-		cmp _       []      = False
+  (Path _ q1) <= (Path _ q2) = cmp q1 q2 where
+    cmp (A:p1)  (A:p2)  = cmp p1 p2
+    cmp (BA:p1) (BA:p2) = cmp p2 p1
+    cmp (A:_)   (BA:_)  = True
+    cmp (BA:_)  (A:_)   = False
+    cmp []      _       = True
+    cmp _       []      = False
 
 -- | Path consisting of a single process 'A'.
 aPath :: Path

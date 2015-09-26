@@ -9,16 +9,18 @@ Portability : TemplateHaskell
 
 Provides types for sequences of /A/- and /B/-processes of van der Corput. A good account on this topic can be found in /Graham S. W.,  Kolesnik G. A./ Van Der Corput's Method of Exponential Sums, Cambridge University Press, 1991, especially Ch. 5.
 -}
-{-# LANGUAGE TemplateHaskell, BangPatterns, GeneralizedNewtypeDeriving  #-}
+{-# LANGUAGE TemplateHaskell, BangPatterns, GeneralizedNewtypeDeriving, CPP  #-}
 module Math.ExpPairs.ProcessMatrix
-	( Process (..)
-	, ProcessMatrix ()
-	, aMatrix
-	, baMatrix
-	, evalMatrix
-	) where
+  ( Process (..)
+  , ProcessMatrix ()
+  , aMatrix
+  , baMatrix
+  , evalMatrix
+  ) where
 
+#if __GLASGOW_HASKELL__ < 710
 import Data.Monoid           (Monoid, mempty, mappend)
+#endif
 import Data.Function.Memoize (deriveMemoizable)
 import Text.PrettyPrint.Leijen
 
@@ -26,23 +28,23 @@ import Math.ExpPairs.Matrix3
 
 -- | Since B^2 = id, B 'Corput16' = 'Corput16', B 'Hux05' = 'Hux05' and B 'HuxW87b1' = ???, the sequence of /A/- and /B/-processes, applied to 'initPairs' can be rewritten as a sequence of 'A' and 'BA'.
 data Process
-	-- | /A/-process
-	= A
-	-- | /BA/-process
-	| BA
-	deriving (Eq, Show, Read, Ord, Enum)
+  -- | /A/-process
+  = A
+  -- | /BA/-process
+  | BA
+  deriving (Eq, Show, Read, Ord, Enum)
 
 instance Pretty Process where
-	pretty = text . show
+  pretty = text . show
 
 deriveMemoizable ''Process
 
 newtype ProcessMatrix = ProcessMatrix (Matrix3 Integer)
-	deriving (Eq, Num, Show, Pretty)
+  deriving (Eq, Num, Show, Pretty)
 
 instance Monoid ProcessMatrix where
-	mempty = 1
-	mappend (ProcessMatrix a) (ProcessMatrix b) = ProcessMatrix $ normalize $ a * b
+  mempty = 1
+  mappend (ProcessMatrix a) (ProcessMatrix b) = ProcessMatrix $ normalize $ a * b
 
 process2matrix :: Process -> ProcessMatrix
 process2matrix  A = ProcessMatrix $ Matrix3 1 0 0 1 1 1  2 0 2
@@ -60,6 +62,6 @@ baMatrix = process2matrix BA
 -- to a given point in two-dimensional projective space.
 evalMatrix :: Num t => ProcessMatrix -> (t, t, t) -> (t, t, t)
 evalMatrix (ProcessMatrix m) (a,b,c) = (a',b',c') where
-	m' = fmap fromInteger m
-	(Vector3 a' b' c') = multCol m' (Vector3 a b c)
+  m' = fmap fromInteger m
+  (Vector3 a' b' c') = multCol m' (Vector3 a b c)
 

@@ -20,9 +20,9 @@ testm :: M.Matrix Integer
 testm = toM testm3
 
 main = defaultMain [
-	bgroup "mult" [ bench "usualMult"    $ nf (testm3 *) testm3
-								, bench "makarovMult"  $ nf (testm3 `M3.makarovMult`) testm3
-								, bench "ladermanMult" $ nf (testm3 `M3.ladermanMult`) testm3
-								, bench "Data.Matrix"  $ nf (testm *) testm
-								]
-	]
+  bgroup "mult" [ bench "usualMult"    $ nf (testm3 *) testm3
+                , bench "makarovMult"  $ nf (testm3 `M3.makarovMult`) testm3
+                , bench "ladermanMult" $ nf (testm3 `M3.ladermanMult`) testm3
+                , bench "Data.Matrix"  $ nf (testm *) testm
+                ]
+  ]

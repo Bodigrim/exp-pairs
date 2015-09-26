@@ -17,12 +17,12 @@ Below /A/ and /B/ stands for van der Corput's processes. See "Math.ExpPairs.Proc
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Math.ExpPairs.Pair
-	( Triangle (..)
-	, InitPair' (..)
-	, InitPair
-	, initPairs
-	, initPairToValue
-	) where
+  ( Triangle (..)
+  , InitPair' (..)
+  , InitPair
+  , initPairs
+  , initPairToValue
+  ) where
 
 import Data.Maybe
 import Data.Ratio ((%))
@@ -30,52 +30,52 @@ import Text.PrettyPrint.Leijen
 
 -- |Vertices of the triangle of initial exponent pairs.
 data Triangle
-	-- |Usual van der Corput exponent pair
-	-- (1\/6, 2\/3) = /AB/(0, 1).
-	= Corput16
-	-- |An exponent pair (2\/13, 35\/52) from /Huxley M. N./
-	-- `Exponential sums and the Riemann zeta function'
-	-- \/\/ Proceedings of the International Number
-	-- Theory Conference held at Universite Laval in 1987, Walter de Gruyter, 1989, P. 417-423.
-	| HuxW87b1
-	-- | An exponent pair (32\/205, 269\/410) from /Huxley M. N./
-	-- `Exponential sums and the Riemann zeta function V' \/\/
+  -- |Usual van der Corput exponent pair
+  -- (1\/6, 2\/3) = /AB/(0, 1).
+  = Corput16
+  -- |An exponent pair (2\/13, 35\/52) from /Huxley M. N./
+  -- `Exponential sums and the Riemann zeta function'
+  -- \/\/ Proceedings of the International Number
+  -- Theory Conference held at Universite Laval in 1987, Walter de Gruyter, 1989, P. 417-423.
+  | HuxW87b1
+  -- | An exponent pair (32\/205, 269\/410) from /Huxley M. N./
+  -- `Exponential sums and the Riemann zeta function V' \/\/
   -- Proc. Lond. Math. Soc., 2005, Vol. 90, no. 1., P. 1--41.
-	| Hux05
-	deriving (Show, Bounded, Enum, Eq, Ord)
+  | Hux05
+  deriving (Show, Bounded, Enum, Eq, Ord)
 
 instance Pretty Triangle where
-	pretty = text . show
+  pretty = text . show
 
 -- |Type to hold an initial exponent pair.
 data InitPair' t
-	-- |Usual van der Corput exponent pair
-	-- (0, 1).
-	= Corput01
-	-- |Usual van der Corput exponent pair
-	-- (1\/2, 1\/2) = /B/(0, 1).
-	| Corput12
-	-- |Point from the interior of 'Triangle'.
-	-- Exactly
-	-- 'Mix' a b = a * 'Corput16' + b * 'HuxW87b1' + (1-a-b) * 'Hux05'
-	| Mix t t
-	deriving (Eq, Show)
+  -- |Usual van der Corput exponent pair
+  -- (0, 1).
+  = Corput01
+  -- |Usual van der Corput exponent pair
+  -- (1\/2, 1\/2) = /B/(0, 1).
+  | Corput12
+  -- |Point from the interior of 'Triangle'.
+  -- Exactly
+  -- 'Mix' a b = a * 'Corput16' + b * 'HuxW87b1' + (1-a-b) * 'Hux05'
+  | Mix t t
+  deriving (Eq, Show)
 
 -- |Exponent pair built from rational fractions of
 -- 'Corput16', 'HuxW87b1' and 'Hux05'
 type InitPair = InitPair' Rational
 
 instance Pretty Rational where
-	pretty = rational
+  pretty = rational
 
 instance (Pretty t, Num t, Eq t) => Pretty (InitPair' t) where
-	pretty Corput01 = parens (rational 0     <> comma <+> rational 1)
-	pretty Corput12 = parens (rational (1%2) <> comma <+> rational (1%2))
-	pretty (Mix r1 r2) = cat $ punctuate plus $ mapMaybe f [(r1, Corput16), (r2, HuxW87b1), (1 - r1 - r2, Hux05)] where
-		plus = space <> char '+' <> space
-		f (0, _) = Nothing
-		f (1, t) = Just (pretty t)
-		f (r, t) = Just (pretty r <+> char '*' <+> pretty t)
+  pretty Corput01 = parens (rational 0     <> comma <+> rational 1)
+  pretty Corput12 = parens (rational (1%2) <> comma <+> rational (1%2))
+  pretty (Mix r1 r2) = cat $ punctuate plus $ mapMaybe f [(r1, Corput16), (r2, HuxW87b1), (1 - r1 - r2, Hux05)] where
+    plus = space <> char '+' <> space
+    f (0, _) = Nothing
+    f (1, t) = Just (pretty t)
+    f (r, t) = Just (pretty r <+> char '*' <+> pretty t)
 
 sect :: Integer
 sect = 30
@@ -92,10 +92,10 @@ initPairToValue :: InitPair -> (Rational, Rational)
 initPairToValue Corput01 = (0, 1)
 initPairToValue Corput12 = (1%2, 1%2)
 initPairToValue (Mix r1 r2) = (x, y) where
-	r3 = 1 - r1 - r2
-	(x1, y1) = (1%6, 2%3)
-	(x2, y2) = ( 2 %  13,  35 %  52)
-	(x3, y3) = (32 % 205, 269 % 410)
-	x = x1*r1 + x2*r2 + x3*r3
-	y = y1*r1 + y2*r2 + y3*r3
+  r3 = 1 - r1 - r2
+  (x1, y1) = (1%6, 2%3)
+  (x2, y2) = ( 2 %  13,  35 %  52)
+  (x3, y3) = (32 % 205, 269 % 410)
+  x = x1*r1 + x2*r2 + x3*r3
+  y = y1*r1 + y2*r2 + y3*r3
 
