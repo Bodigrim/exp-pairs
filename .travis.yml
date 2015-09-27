@@ -13,3 +13,4 @@ deploy:
     secure: HyyrFipAMQ+OjDdQrIdGRsrAzd4HsRG+QnRbDtButTAP0SP2xQzBQ7HXpaEKgwvt9iHeISo/oXubRZlOc0KifzSl0LRb62pCqOEhM7dyH/6hGv/8qgXIKnDakQ8XcRASdme/nYkShpbm++7CIadV2OmETx3yQRfmJPVptkJnx78=
   on:
     repo: Bodigrim/exp-pairs
+sudo: false
