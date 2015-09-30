@@ -39,6 +39,16 @@ library
 test-suite tests
   type:                exitcode-stdio-1.0
   main-is:             Tests.hs
+  other-modules:       Etalon,
+                       Instances,
+                       Ivic,
+                       Kratzel,
+                       LinearForm,
+                       Matrix3,
+                       MenzerNowak,
+                       Pair,
+                       PrettyProcess,
+                       RatioInf
   build-depends:       base >=4 && <5,
                        tasty >=0.7,
                        tasty-quickcheck,

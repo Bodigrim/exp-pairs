@@ -114,7 +114,7 @@ data IneqType
   = Strict
   -- | Non-strict inequality (≥0).
   | NonStrict
-  deriving (Eq, Ord, Show, Enum, Bounded)
+  deriving (Eq, Ord, Show, Enum, Bounded, Generic)
 
 instance Pretty IneqType where
   pretty Strict    = text ">"

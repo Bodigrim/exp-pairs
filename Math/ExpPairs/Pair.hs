@@ -12,6 +12,7 @@ of two points (0, 1), (1\/2, 1\/2) and a triangle with vertices in (1\/6, 2\/3),
 
 Below /A/ and /B/ stands for van der Corput's processes. See "Math.ExpPairs.Process" for explanations.
 -}
+{-# LANGUAGE DeriveGeneric        #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
@@ -26,6 +27,7 @@ module Math.ExpPairs.Pair
 
 import Data.Maybe
 import Data.Ratio ((%))
+import GHC.Generics (Generic (..))
 import Text.PrettyPrint.Leijen
 
 -- |Vertices of the triangle of initial exponent pairs.
@@ -42,7 +44,7 @@ data Triangle
   -- `Exponential sums and the Riemann zeta function V' \/\/
   -- Proc. Lond. Math. Soc., 2005, Vol. 90, no. 1., P. 1--41.
   | Hux05
-  deriving (Show, Bounded, Enum, Eq, Ord)
+  deriving (Show, Bounded, Enum, Eq, Ord, Generic)
 
 instance Pretty Triangle where
   pretty = text . show
@@ -59,7 +61,7 @@ data InitPair' t
   -- Exactly
   -- 'Mix' a b = a * 'Corput16' + b * 'HuxW87b1' + (1-a-b) * 'Hux05'
   | Mix t t
-  deriving (Eq, Show)
+  deriving (Eq, Show, Generic)
 
 -- |Exponent pair built from rational fractions of
 -- 'Corput16', 'HuxW87b1' and 'Hux05'

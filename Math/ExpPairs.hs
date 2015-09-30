@@ -14,7 +14,7 @@ A. V. Lelechenko, Linear programming over exponent pairs. Acta Univ. Sapientiae,
 A set of useful applications can be found in
 "Math.ExpPairs.Ivic", "Math.ExpPairs.Kratzel" and "Math.ExpPairs.MenzerNowak".
 -}
-{-# LANGUAGE CPP #-}
+{-# LANGUAGE CPP  #-}
 
 module Math.ExpPairs
   ( optimize

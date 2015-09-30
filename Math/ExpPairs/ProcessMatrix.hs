@@ -9,7 +9,7 @@ Portability : TemplateHaskell
 
 Provides types for sequences of /A/- and /B/-processes of van der Corput. A good account on this topic can be found in /Graham S. W.,  Kolesnik G. A./ Van Der Corput's Method of Exponential Sums, Cambridge University Press, 1991, especially Ch. 5.
 -}
-{-# LANGUAGE TemplateHaskell, BangPatterns, GeneralizedNewtypeDeriving, CPP  #-}
+{-# LANGUAGE TemplateHaskell, BangPatterns, GeneralizedNewtypeDeriving, CPP, DeriveGeneric #-}
 module Math.ExpPairs.ProcessMatrix
   ( Process (..)
   , ProcessMatrix ()
@@ -22,6 +22,7 @@ module Math.ExpPairs.ProcessMatrix
 import Data.Monoid           (Monoid, mempty, mappend)
 #endif
 import Data.Function.Memoize (deriveMemoizable)
+import GHC.Generics          (Generic (..))
 import Text.PrettyPrint.Leijen
 
 import Math.ExpPairs.Matrix3
@@ -32,7 +33,7 @@ data Process
   = A
   -- | /BA/-process
   | BA
-  deriving (Eq, Show, Read, Ord, Enum)
+  deriving (Eq, Show, Read, Ord, Enum, Generic)
 
 instance Pretty Process where
   pretty = text . show

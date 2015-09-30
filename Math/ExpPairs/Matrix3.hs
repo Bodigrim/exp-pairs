@@ -42,6 +42,9 @@ data Vector3 t = Vector3 {
 instance NFData t => NFData (Vector3 t) where
   rnf = rnf . toList
 
+instance Pretty t => Pretty (Vector3 t) where
+  pretty (Vector3 x y z) = pretty x <+> pretty y <+> pretty z
+
 -- |Matrix of order 3. Instances of 'Num' and 'Fractional'
 -- are given in terms of the multiplicative group of matrices,
 -- not the additive one. E. g.,
