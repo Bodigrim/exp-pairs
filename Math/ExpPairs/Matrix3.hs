@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns, RecordWildCards, DeriveFunctor, DeriveFoldable, DeriveGeneric #-}
+{-# LANGUAGE RecordWildCards, DeriveFunctor, DeriveFoldable, DeriveGeneric #-}
 {-|
 Module      : Math.ExpPairs.Matrix3
 Description : Implements matrices of order 3
@@ -13,7 +13,6 @@ Can be used instead of "Data.Matrix" to reduce overhead and simplify code.
 -}
 module Math.ExpPairs.Matrix3
   ( Matrix3 (..)
-  , Vector3 (..)
   , fromList
   , toList
   , det
@@ -30,20 +29,6 @@ import Data.Foldable  (Foldable (..), toList)
 import Data.List      (transpose)
 import GHC.Generics   (Generic (..))
 import Text.PrettyPrint.Leijen
-
--- |Three-component vector.
-data Vector3 t = Vector3 {
-  a1 :: !t,
-  a2 :: !t,
-  a3 :: !t
-  }
-  deriving (Eq, Show, Functor, Foldable, Generic)
-
-instance NFData t => NFData (Vector3 t) where
-  rnf = rnf . toList
-
-instance Pretty t => Pretty (Vector3 t) where
-  pretty (Vector3 x y z) = pretty x <+> pretty y <+> pretty z
 
 -- |Matrix of order 3. Instances of 'Num' and 'Fractional'
 -- are given in terms of the multiplicative group of matrices,
@@ -307,9 +292,10 @@ instance Pretty t => Pretty (Matrix3 t) where
       ls = map (maximum . map (length . show)) (transpose table)
 
 -- |Multiplicate a matrix by a vector (considered as a column).
-multCol :: Num t => Matrix3 t -> Vector3 t -> Vector3 t
-multCol Matrix3 {..} Vector3 {..} = Vector3 {
-  a1 = a11 * a1 + a12 * a2 + a13 * a3,
-  a2 = a21 * a1 + a22 * a2 + a23 * a3,
-  a3 = a31 * a1 + a32 * a2 + a33 * a3
-  }
+multCol :: Num t => Matrix3 t -> (t, t, t) -> (t, t, t)
+multCol Matrix3 {..} (a1, a2, a3) = (
+  a11 * a1 + a12 * a2 + a13 * a3,
+  a21 * a1 + a22 * a2 + a23 * a3,
+  a31 * a1 + a32 * a2 + a33 * a3
+  )
+{-# INLINE multCol #-}

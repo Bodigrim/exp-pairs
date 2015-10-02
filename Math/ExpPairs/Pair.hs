@@ -15,6 +15,7 @@ Below /A/ and /B/ stands for van der Corput's processes. See "Math.ExpPairs.Proc
 {-# LANGUAGE DeriveGeneric        #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE TypeSynonymInstances #-}
+
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Math.ExpPairs.Pair
@@ -23,10 +24,11 @@ module Math.ExpPairs.Pair
   , InitPair
   , initPairs
   , initPairToValue
+  , initPairToProjValue
   ) where
 
 import Data.Maybe
-import Data.Ratio ((%))
+import Data.Ratio
 import GHC.Generics (Generic (..))
 import Text.PrettyPrint.Leijen
 
@@ -60,7 +62,7 @@ data InitPair' t
   -- |Point from the interior of 'Triangle'.
   -- Exactly
   -- 'Mix' a b = a * 'Corput16' + b * 'HuxW87b1' + (1-a-b) * 'Hux05'
-  | Mix t t
+  | Mix !t !t
   deriving (Eq, Show, Generic)
 
 -- |Exponent pair built from rational fractions of
@@ -91,8 +93,6 @@ initPairs = Corput01 : Corput12 : [Mix (r1%sect) (r2%sect) | r1<-[0..sect], r2<-
 -- |Convert initial exponent pair from its symbolic representation
 -- as 'InitPair' to pair of rationals.
 initPairToValue :: InitPair -> (Rational, Rational)
-initPairToValue Corput01 = (0, 1)
-initPairToValue Corput12 = (1%2, 1%2)
 initPairToValue (Mix r1 r2) = (x, y) where
   r3 = 1 - r1 - r2
   (x1, y1) = (1%6, 2%3)
@@ -100,4 +100,23 @@ initPairToValue (Mix r1 r2) = (x, y) where
   (x3, y3) = (32 % 205, 269 % 410)
   x = x1*r1 + x2*r2 + x3*r3
   y = y1*r1 + y2*r2 + y3*r3
+--initPairToValue (Mix r1 r2) = (13 % 1230 * r1 - 6 % 2665 * r2 + 32 % 205, 13 % 1230 * r1 + 181 % 10660 * r2 + 269 % 410)
+initPairToValue Corput01 = (0, 1)
+initPairToValue Corput12 = (1%2, 1%2)
 
+-- | Same as 'initPairToValue', but immediately convert from Q^2 to PN^3.
+initPairToProjValue :: InitPair -> (Integer, Integer, Integer)
+initPairToProjValue (Mix r1 r2) = (k `div` d , l `div` d, m `div` d)
+  where
+    dr1 = denominator r1
+    dr2 = denominator r2
+    m = 31980 * dr1 * dr2
+    k = 338 * numerator r1 * dr2 -  72 * numerator r2 * dr1 +  4992 * dr1 * dr2
+    l = 338 * numerator r1 * dr2 + 543 * numerator r2 * dr1 + 20982 * dr1 * dr2
+
+    d = k `gcd` l `gcd` m
+
+initPairToProjValue Corput01 = (0, 1, 1)
+initPairToProjValue Corput12 = (1, 1, 2)
+
+{-# INLINABLE initPairToProjValue #-}

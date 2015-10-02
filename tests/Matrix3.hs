@@ -44,9 +44,9 @@ testNormalize a m = (M3.normalize m' == m') && (a==0 || a>0 && m'==m'' || a<0 &&
   m' = M3.normalize m
   m'' = M3.normalize (m * fromInteger a)
 
-testMultCol :: M3.Matrix3 Integer -> M3.Vector3 Integer -> Bool
-testMultCol m v@(M3.Vector3 v1 v2 v3) = a==a' && b==b' && c==c' where
-  (M3.Vector3 a b c) = M3.multCol m v
+testMultCol :: M3.Matrix3 Integer -> (Integer, Integer, Integer) -> Bool
+testMultCol m v@(v1, v2, v3) = a==a' && b==b' && c==c' where
+  (a, b, c) = M3.multCol m v
   [a', b', c'] = M.toList $ toM m * M.fromList 3 1 [v1, v2, v3]
 
 testSuite :: TestTree

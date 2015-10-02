@@ -36,7 +36,7 @@ import Math.ExpPairs.RatioInf
 -- |Define an affine linear form of two variables: a*k + b*l + c*m.
 -- First argument of 'LinearForm' stands for a, second for b
 -- and third for c. Linear forms form a monoid by addition.
-data LinearForm t = LinearForm t t t
+data LinearForm t = LinearForm !t !t !t
   deriving (Eq, Show, Functor, Foldable, Generic)
 
 instance NFData t => NFData (LinearForm t) where
@@ -69,6 +69,7 @@ scaleLF s = fmap (* s)
 -- |Evaluate a linear form a*k + b*l + c*m for given k, l and m.
 evalLF :: Num t => (t, t, t) -> LinearForm t -> t
 evalLF (k, l, m) (LinearForm a b c) = a * k + l * b + m * c
+{-# INLINE evalLF #-}
 
 -- |Substitute linear forms k, l and m into a given linear form
 -- a*k + b*l + c*m to obtain a new linear form.
@@ -99,6 +100,7 @@ instance Num t => Fractional (RationalForm t) where
 
 mapTriple :: (a -> b) -> (a, a, a) -> (b, b, b)
 mapTriple f (x, y, z) = (f x, f y, f z)
+{-# INLINE mapTriple #-}
 
 -- |Evaluate a rational form (a*k + b*l + c*m) \/ (a'*k + b'*l + c'*m)
 -- for given k, l and m.
@@ -121,7 +123,7 @@ instance Pretty IneqType where
   pretty NonStrict = text ">="
 
 -- |A linear constraint of two variables.
-data Constraint t = Constraint (LinearForm t) IneqType
+data Constraint t = Constraint !(LinearForm t) !IneqType
   deriving (Eq, Show, Functor, Foldable, Generic)
 
 instance (Num t, Eq t, Pretty t) => Pretty (Constraint t) where
@@ -132,10 +134,11 @@ instance NFData t => NFData (Constraint t) where
 
 -- |Evaluate a rational form of constraint and compare
 -- its value with 0. Strictness depends on the given 'IneqType'.
-checkConstraint :: (Num t, Eq t) => (Integer, Integer, Integer) -> Constraint t -> Bool
-checkConstraint (k, l, m) (Constraint lf ineq)
-  = if ineq==NonStrict
-    then signum numer /= -1
-    else signum numer == 1 where
-      klm = mapTriple fromInteger (k, l, m)
-      numer = evalLF klm lf
+checkConstraint :: (Num t, Ord t) => (Integer, Integer, Integer) -> Constraint t -> Bool
+checkConstraint (k, l, m) (Constraint lf ineq) = case ineq of
+  NonStrict -> numer >= 0
+  Strict    -> numer >  0
+  where
+    klm   = mapTriple fromInteger (k, l, m)
+    numer = evalLF klm lf
+{-# SPECIALIZE checkConstraint :: (Integer, Integer, Integer) -> Constraint Rational -> Bool #-}

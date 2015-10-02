@@ -34,8 +34,8 @@ module Math.ExpPairs
   , RationalInf
   ) where
 
+import Control.Arrow hiding ((<+>))
 import Data.Function (on)
-import Data.Ratio    ((%), numerator, denominator)
 import Data.Ord      (comparing)
 import Data.List     (minimumBy)
 #if __GLASGOW_HASKELL__ < 710
@@ -50,17 +50,9 @@ import Math.ExpPairs.Process
 import Math.ExpPairs.Pair
 import Math.ExpPairs.RatioInf
 
-fracs2proj :: (Rational, Rational) -> (Integer, Integer, Integer)
-fracs2proj (q, r) = (k, l, m) where
-  dq = denominator q
-  dr = denominator r
-  m = lcm dq dr
-  k = numerator q * (m `div` dq)
-  l = numerator r * (m `div` dr)
-
 evalFunctional :: [InitPair] -> [InitPair] -> [RationalForm Rational] -> [Constraint Rational] -> Path -> (RationalInf, InitPair)
 evalFunctional corners interiors rfs cons path = if null rs then (InfPlus, undefined) else minimumBy (comparing fst) rs where
-  applyPath ips = map (evalPath path . fracs2proj . initPairToValue) ips `zip` ips
+  applyPath  = map (evalPath path . initPairToProjValue &&& id)
   corners'   = applyPath corners
   interiors' = applyPath interiors
 
@@ -71,7 +63,7 @@ evalFunctional corners interiors rfs cons path = if null rs then (InfPlus, undef
 
 checkMConstraints :: Path -> [Constraint Rational] -> Bool
 checkMConstraints path = all (\con -> any (\p -> checkConstraint (evalPath path p) con ) triangleT) where
-  triangleT = map fracs2proj [ (0%1,1%1), (0%1,1%2), (1%2,1%2)]
+  triangleT = [(0, 1, 1), (0, 1, 2), (1, 1, 2)]
 
 -- |Container for the result of optimization.
 data OptimizeResult = OptimizeResult {

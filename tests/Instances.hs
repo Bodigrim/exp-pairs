@@ -13,7 +13,7 @@ import GHC.Generics          (Generic (..))
 import Math.ExpPairs.LinearForm
 import Math.ExpPairs.ProcessMatrix
 import Math.ExpPairs.Pair (InitPair' (..))
-import Math.ExpPairs.Matrix3 as M3 (Matrix3, fromList, Vector3 (..))
+import Math.ExpPairs.Matrix3 as M3 (Matrix3, fromList)
 
 instance Arbitrary a => Arbitrary (LinearForm a) where
   arbitrary = LinearForm <$> arbitrary <*> arbitrary <*> arbitrary
@@ -92,6 +92,3 @@ instance (Num a, Ord a, Arbitrary a) => Arbitrary (Positive a) where
 instance (Arbitrary a) => Arbitrary (M3.Matrix3 a) where
   arbitrary = M3.fromList <$> vectorOf 9 arbitrary
   shrink = genericShrink
-
-instance (Arbitrary a) => Arbitrary (M3.Vector3 a) where
-  arbitrary = (\[a,b,c] -> M3.Vector3 a b c) <$> vectorOf 3 arbitrary

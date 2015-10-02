@@ -62,7 +62,7 @@ baMatrix = process2matrix BA
 -- |Apply a projective transformation, defined by 'Path',
 -- to a given point in two-dimensional projective space.
 evalMatrix :: Num t => ProcessMatrix -> (t, t, t) -> (t, t, t)
-evalMatrix (ProcessMatrix m) (a,b,c) = (a',b',c') where
-  m' = fmap fromInteger m
-  (Vector3 a' b' c') = multCol m' (Vector3 a b c)
+evalMatrix (ProcessMatrix m) = multCol (fmap fromInteger m)
+{-# INLINABLE evalMatrix #-}
+{-# SPECIALIZE evalMatrix :: ProcessMatrix -> (Integer, Integer, Integer) -> (Integer, Integer, Integer) #-}
 
