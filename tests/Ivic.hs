@@ -1,7 +1,6 @@
 module Ivic where
 
 import Data.Ratio
-import Data.List
 import Math.ExpPairs
 import Math.ExpPairs.Ivic
 
@@ -10,66 +9,71 @@ import Test.Tasty.SmallCheck as SC
 import Test.Tasty.QuickCheck as QC
 import Test.Tasty.HUnit
 
-import Instances (Ratio01 (..))
+import Instances
 import Etalon (testEtalon)
 
-testZetaOnS1 :: Ratio01 Rational -> Ratio01 Rational -> Bool
-testZetaOnS1 (Ratio01 a') (Ratio01 b') = a==b || za>=zb where
-  [a,b] = sort $ map (\n -> (n-1%2)*6) [a', b']
-  [za, zb] = map (optimalValue . zetaOnS) [a,b]
+fromMinus3To3 :: Rational -> Rational
+fromMinus3To3 n = (n - 1 % 2) * 6
 
-testZetaOnS2 :: Ratio01 Rational -> Ratio01 Rational -> Bool
-testZetaOnS2 (Ratio01 a') (Ratio01 b') = a==b || za>zb where
-  [a,b] = sort [a', b']
-  [za, zb] = map (optimalValue . zetaOnS) [a,b]
+fromHalfToOne :: Rational -> Rational
+fromHalfToOne n = n / 2 + 1 % 2
+
+testZetaOnS1 :: Sorted (Ratio01 Rational, Ratio01 Rational) -> Bool
+testZetaOnS1 (Sorted (Ratio01 a', Ratio01 b')) = a == b || za >= zb where
+  [ a,  b] = map fromMinus3To3 [a', b']
+  [za, zb] = map (optimalValue . zetaOnS) [a, b]
+
+-- May fail due to the granularity of 'sect'.
+testZetaOnS2 :: Sorted (Ratio01 Rational, Ratio01 Rational) -> Bool
+testZetaOnS2 (Sorted (Ratio01 a, Ratio01 b)) = a == b || za > zb where
+  [za, zb] = map (optimalValue . zetaOnS) [a, b]
 
 testZetaOnSsym :: Ratio01 Rational -> Bool
-testZetaOnSsym (Ratio01 a') = (toRational . abs) (za-za') == abs (a-1%2) where
-  a = (a'-1%2)*6
-  za = optimalValue $ zetaOnS a
-  za' = optimalValue $ zetaOnS (1-a)
+testZetaOnSsym (Ratio01 a') = (toRational . abs) (za - za') == abs (a - 1 % 2) where
+  a   = fromMinus3To3 a'
+  za  = optimalValue $ zetaOnS a
+  za' = optimalValue $ zetaOnS (1 - a)
 
 testZetaOnSZero :: Ratio01 Rational -> Bool
-testZetaOnSZero (Ratio01 a') = a<1 || optimalValue (zetaOnS a) == 0 where
-  a = (a'-1%2)*6
+testZetaOnSZero (Ratio01 a') = a < 1 || optimalValue (zetaOnS a) == 0 where
+  a = fromMinus3To3 a'
 
-testMOnS1 :: Ratio01 Rational -> Ratio01 Rational -> Bool
-testMOnS1 (Ratio01 a') (Ratio01 b') = a==b || za<=zb where
-  [a,b] = sort $ map (\n -> (n-1%2)*6) [a', b']
-  [za, zb] = map (optimalValue . mOnS) [a,b]
+testMOnS1 :: Sorted (Ratio01 Rational, Ratio01 Rational) -> Bool
+testMOnS1 (Sorted (Ratio01 a', Ratio01 b')) = a == b || za <= zb where
+  [ a,  b] = map fromMinus3To3 [a', b']
+  [za, zb] = map (optimalValue . mOnS) [a, b]
 
-testMOnS2 :: Ratio01 Rational -> Ratio01 Rational -> Bool
-testMOnS2 (Ratio01 a') (Ratio01 b') = a==b || za<zb where
-  [a,b] = sort $ map (\n -> n/2+1%2) [a', b']
-  [za, zb] = map (optimalValue . mOnS) [a,b]
+testMOnS2 :: Sorted (Ratio01 Rational, Ratio01 Rational) -> Bool
+testMOnS2 (Sorted (Ratio01 a', Ratio01 b')) = a == b || za < zb where
+  [ a,  b] = map fromHalfToOne [a', b']
+  [za, zb] = map (optimalValue . mOnS) [a, b]
 
 testMOnSZero :: Ratio01 Rational -> Bool
-testMOnSZero (Ratio01 a') = a>=1%2 || (optimalValue . mOnS) a == 0 where
-  a = (a'-1%2)*6
+testMOnSZero (Ratio01 a') = a >= 1%2 || (optimalValue . mOnS) a == 0 where
+  a = fromMinus3To3 a'
 
 testMOnSInf :: Ratio01 Rational -> Bool
-testMOnSInf (Ratio01 a') = a<1 || (optimalValue . mOnS) a == InfPlus where
-  a = (a'-1%2)*6
+testMOnSInf (Ratio01 a') = a < 1 || (optimalValue . mOnS) a == InfPlus where
+  a = fromMinus3To3 a'
 
 testZetaReverse :: Ratio01 Rational -> Bool
-testZetaReverse (Ratio01 s') = abs (s-t) <= 5%1000 where
+testZetaReverse (Ratio01 s') = abs (s - t) <= 5 % 1000 where
   s = s' / 2
   zs = zetaOnS s
   t = toRational $ optimalValue $ reverseZetaOnS $ toRational $ optimalValue zs
 
 -- Convexity tests - they fail and it is OK
-testZetaConvex :: Ratio01 Rational -> Ratio01 Rational -> Ratio01 Rational -> Bool
-testZetaConvex (Ratio01 a') (Ratio01 b') (Ratio01 c') = a==b || b==c || zb <= k * Finite b + l where
-  [a,b,c] = sort [a', b', c']
-  [za, zb, zc] = map (optimalValue . zetaOnS) [a,b,c]
-  k = (za-zc) / Finite (a-c)
+testZetaConvex :: Sorted (Ratio01 Rational, Ratio01 Rational, Ratio01 Rational) -> Bool
+testZetaConvex (Sorted (Ratio01 a, Ratio01 b, Ratio01 c)) = a == b || b == c || zb <= k * Finite b + l where
+  [za, zb, zc] = map (optimalValue . zetaOnS) [a, b, c]
+  k = (za - zc) / Finite (a - c)
   l = za - k * Finite a
 
 -- Ivic, Th. 8.1, p. 205
-testMConvex :: Ratio01 Rational -> Ratio01 Rational -> Ratio01 Rational -> Bool
-testMConvex (Ratio01 a') (Ratio01 b') (Ratio01 c') = a==b || b==c || za==InfPlus || zc==InfPlus
+testMConvex :: Sorted (Ratio01 Rational, Ratio01 Rational, Ratio01 Rational) -> Bool
+testMConvex (Sorted (Ratio01 a', Ratio01 b', Ratio01 c')) = a==b || b==c || za==InfPlus || zc==InfPlus
   || zb>= za*zc*Finite(c-a)/(zc*Finite(c-b) + za*Finite(b-a)) where
-    [a,b,c] = sort $ map (\n -> n/2+1%2) [a', b', c']
+    [a,b,c] = map fromHalfToOne [a', b', c']
     [za, zb, zc] = map (optimalValue . mOnS) [a,b,c] :: [RationalInf]
 
 etalonZetaOnS :: Integer -> Integer -> Integer -> Integer -> Bool

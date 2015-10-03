@@ -1,12 +1,10 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, DeriveGeneric, CPP #-}
-module Instances (Ratio01 (..), Positive (..)) where
+module Instances (Ratio01 (..), Positive (..), Sorted(..)) where
 
 import Test.QuickCheck hiding (Positive)
 import Test.SmallCheck.Series
-#if __GLASGOW_HASKELL__ < 710
 import Control.Applicative
-#endif
 import Control.Monad
 import GHC.Generics          (Generic (..))
 
@@ -53,7 +51,7 @@ instance Monad m => Serial m Process where
   series = cons0 A \/ cons0 BA
 
 newtype Ratio01 t = Ratio01 t
-  deriving (Generic)
+  deriving (Eq, Ord, Generic)
 
 instance (Ord t, Fractional t, Arbitrary t) => Arbitrary (Ratio01 t) where
   arbitrary = (Ratio01 . ratio01) <$> arbitrary
@@ -92,3 +90,77 @@ instance (Num a, Ord a, Arbitrary a) => Arbitrary (Positive a) where
 instance (Arbitrary a) => Arbitrary (M3.Matrix3 a) where
   arbitrary = M3.fromList <$> vectorOf 9 arbitrary
   shrink = genericShrink
+
+suchThatSerial :: Series m a -> (a -> Bool) -> Series m a
+suchThatSerial s p = s >>= \x -> if p x then pure x else empty
+
+cons5 :: (Serial m a, Serial m b, Serial m c, Serial m d, Serial m e) =>
+         (a->b->c->d->e->f) -> Series m f
+cons5 f = decDepth $
+  f <$> series
+    <~> series
+    <~> series
+    <~> series
+    <~> series
+
+instance (Serial m a, Serial m b, Serial m c, Serial m d, Serial m e) => Serial m (a,b,c,d,e) where
+  series = cons5 (,,,,)
+
+cons6 :: (Serial m a, Serial m b, Serial m c, Serial m d, Serial m e, Serial m f) =>
+         (a->b->c->d->e->f->g) -> Series m g
+cons6 f = decDepth $
+  f <$> series
+    <~> series
+    <~> series
+    <~> series
+    <~> series
+    <~> series
+
+instance (Serial m a, Serial m b, Serial m c, Serial m d, Serial m e, Serial m f) => Serial m (a,b,c,d,e,f) where
+  series = cons6 (,,,,,)
+
+liftM6  :: (Monad m) => (a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> r) -> m a1 -> m a2 -> m a3 -> m a4 -> m a5 -> m a6 -> m r
+liftM6 f m1 m2 m3 m4 m5 m6 = do { x1 <- m1; x2 <- m2; x3 <- m3; x4 <- m4; x5 <- m5; x6 <- m6; return (f x1 x2 x3 x4 x5 x6) }
+
+instance (Arbitrary a, Arbitrary b, Arbitrary c, Arbitrary d, Arbitrary e, Arbitrary f)
+      => Arbitrary (a,b,c,d,e,f)
+ where
+  arbitrary = liftM6 (,,,,,) arbitrary arbitrary arbitrary arbitrary arbitrary arbitrary
+
+  shrink (u, v, w, x, y, z) =
+    [ (u', v', w', x', y', z')
+    | (u', (v', (w', (x', (y', z'))))) <- shrink (u, (v, (w, (x, (y, z))))) ]
+
+newtype Sorted t = Sorted t
+  deriving (Show, Generic)
+
+instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t)) where
+  arbitrary = Sorted <$> (arbitrary `suchThat` uncurry (<=))
+
+instance (Ord t, Serial m t) => Serial m (Sorted (t, t)) where
+  series = Sorted <$> (series `suchThatSerial` uncurry (<=))
+
+instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t)) where
+  arbitrary = Sorted <$> (arbitrary `suchThat` (\(a, b, c) -> a <= b && b <= c))
+
+instance (Ord t, Serial m t) => Serial m (Sorted (t, t, t)) where
+  series = Sorted <$> (series `suchThatSerial` (\(a, b, c) -> a <= b && b <= c))
+
+instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t)) where
+  arbitrary = Sorted <$> (arbitrary `suchThat` (\(a, b, c, d) -> a <= b && b <= c && c <= d))
+
+instance (Ord t, Serial m t) => Serial m (Sorted (t, t, t, t)) where
+  series = Sorted <$> (series `suchThatSerial` (\(a, b, c, d) -> a <= b && b <= c && c <= d))
+
+instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t, t)) where
+  arbitrary = Sorted <$> (arbitrary `suchThat` (\(a, b, c, d, e) -> a <= b && b <= c && c <= d && d <= e))
+
+instance (Ord t, Serial m t) => Serial m (Sorted (t, t, t, t, t)) where
+  series = Sorted <$> (series `suchThatSerial` (\(a, b, c, d, e) -> a <= b && b <= c && c <= d && d <= e))
+
+instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t, t, t)) where
+  arbitrary = Sorted <$> (arbitrary `suchThat` (\(a, b, c, d, e, f) -> a <= b && b <= c && c <= d && d <= e && e <= f))
+
+instance (Ord t, Serial m t) => Serial m (Sorted (t, t, t, t, t, t)) where
+  series = Sorted <$> (series `suchThatSerial` (\(a, b, c, d, e, f) -> a <= b && b <= c && c <= d && d <= e && e <= f))
+
