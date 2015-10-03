@@ -34,7 +34,7 @@ library
                        wl-pprint >=1.2,
                        deepseq >=1.3
   default-language:    Haskell2010
-  ghc-options:         -Wall
+  ghc-options:         -Wall -fno-warn-type-defaults
 
 test-suite tests
   type:                exitcode-stdio-1.0
@@ -62,4 +62,4 @@ test-suite tests
                        random
   hs-source-dirs:      tests
   default-language:    Haskell2010
-  ghc-options:         -Wall
+  ghc-options:         -Wall -fno-warn-type-defaults
