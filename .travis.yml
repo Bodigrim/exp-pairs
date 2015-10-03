@@ -5,7 +5,7 @@ ghc:
 install:
   - cabal install --only-dependencies --enable-tests --constraint mtl==2.1.2
 script:
-  - cabal configure --enable-tests && cabal build && dist/build/tests/tests
+  - cabal configure --enable-tests && cabal build && dist/build/tests/tests --smallcheck-depth=20 --quickcheck-tests=1000
 deploy:
   provider: hackage
   username: Bodigrim
