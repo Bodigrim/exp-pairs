@@ -20,13 +20,8 @@ module Math.ExpPairs.Process
   ) where
 
 import GHC.Generics             (Generic)
-#if __GLASGOW_HASKELL__ < 710
-import Generics.Deriving.Monoid (Monoid, mempty, memptydefault, mappend, mappenddefault)
-#else
-import Generics.Deriving.Monoid (memptydefault, mappenddefault)
-#endif
-import Text.PrettyPrint.Leijen
-
+import Data.Monoid
+import Text.PrettyPrint.Leijen hiding ((<>))
 
 import Math.ExpPairs.ProcessMatrix
 import Math.ExpPairs.PrettyProcess
@@ -41,17 +36,17 @@ data Path = Path !ProcessMatrix ![Process]
   deriving (Eq, Show, Generic)
 
 instance Monoid Path where
-  mempty  = memptydefault
-  mappend = mappenddefault
+  mempty  = Path mempty mempty
+  mappend (Path m1 p1) (Path m2 p2) = Path (m1 <> m2) (p1 <> p2)
 
 instance Pretty Path where
   pretty (Path _ l) = pretty (prettify l)
 
 instance Read Path where
   readsPrec _ zs = [reads' zs] where
-    reads' ('A':xs) = (aPath `mappend` path, ys) where
+    reads' ('A':xs) = (aPath <> path, ys) where
       (path, ys) = reads' xs
-    reads' ('B':'A':xs) = (baPath `mappend` path, ys) where
+    reads' ('B':'A':xs) = (baPath <> path, ys) where
       (path, ys) = reads' xs
     reads' ('B':xs) = (baPath, xs)
     reads' xs = (mempty, xs)

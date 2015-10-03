@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 {-|
 Module      : Math.ExpPairs.RatioInf
 Description : Rational numbers with infinities

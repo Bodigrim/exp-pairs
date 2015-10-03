@@ -23,7 +23,7 @@ module Math.ExpPairs.Ivic
   , reverseMBigOnHalf
   ) where
 
-import Data.Ratio ((%))
+import Data.Ratio
 import Data.List  (minimumBy)
 import Data.Ord   (comparing)
 

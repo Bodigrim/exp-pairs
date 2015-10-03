@@ -88,7 +88,7 @@ sect = 30
 -- 'Corput01', 'Corput12' and 496 = sum [1..31] 'Mix'-points,
 -- which forms a uniform net over 'Triangle'.
 initPairs :: [InitPair]
-initPairs = Corput01 : Corput12 : [Mix (r1%sect) (r2%sect) | r1<-[0..sect], r2<-[0..sect-r1]]
+initPairs = Corput01 : Corput12 : [Mix (r1 % sect) (r2 % sect) | r1 <- [0 .. sect], r2 <- [0 .. sect - r1]]
 
 -- |Convert initial exponent pair from its symbolic representation
 -- as 'InitPair' to pair of rationals.

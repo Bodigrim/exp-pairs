@@ -38,10 +38,8 @@ import Control.Arrow hiding ((<+>))
 import Data.Function (on)
 import Data.Ord      (comparing)
 import Data.List     (minimumBy)
-#if __GLASGOW_HASKELL__ < 710
-import Data.Monoid   (mempty, mappend)
-#endif
-import Text.PrettyPrint.Leijen hiding ((<$>))
+import Data.Monoid
+import Text.PrettyPrint.Leijen hiding ((<$>), (<>))
 import qualified Text.PrettyPrint.Leijen as PP
 import Text.Printf
 
@@ -51,18 +49,23 @@ import Math.ExpPairs.Pair
 import Math.ExpPairs.RatioInf
 
 evalFunctional :: [InitPair] -> [InitPair] -> [RationalForm Rational] -> [Constraint Rational] -> Path -> (RationalInf, InitPair)
-evalFunctional corners interiors rfs cons path = if null rs then (InfPlus, undefined) else minimumBy (comparing fst) rs where
-  applyPath  = map (evalPath path . initPairToProjValue &&& id)
-  corners'   = applyPath corners
-  interiors' = applyPath interiors
+evalFunctional corners interiors rfs cons path = case rs of
+  [] -> (InfPlus, undefined)
+  _  -> minimumBy (comparing fst) rs
+  where
+    applyPath  = map (evalPath path . initPairToProjValue &&& id)
+    corners'   = applyPath corners
+    interiors' = applyPath interiors
 
-  predicate (p, _) = all (checkConstraint p) cons
-  qs = if all predicate corners' then corners' else filter predicate interiors'
+    predicate (p, _) = all (checkConstraint p) cons
+    qs = if all predicate corners'
+          then corners'
+          else filter predicate interiors'
 
-  rs = map (\(p, ip) -> (maximum $ map (evalRF p) rfs, ip)) qs
+    rs = map (first $ \p -> maximum (map (evalRF p) rfs)) qs
 
 checkMConstraints :: Path -> [Constraint Rational] -> Bool
-checkMConstraints path = all (\con -> any (\p -> checkConstraint (evalPath path p) con ) triangleT) where
+checkMConstraints path = all (\con -> any (\p -> checkConstraint (evalPath path p) con) triangleT) where
   triangleT = [(0, 1, 1), (0, 1, 2), (1, 1, 2)]
 
 -- |Container for the result of optimization.
@@ -115,13 +118,13 @@ optimize' rfs cons ret@(OptimizeResult r _ path)
     cons0 = if r0==InfPlus then cons else cons ++ map (consBuilder r0) rfs
 
     retA@(OptimizeResult r1 ip1 _) = if checkMConstraints patha cons0 && r1' < r0 then branchA else ret0 where
-      patha  = path `mappend` aPath
+      patha  = path <> aPath
       branchA@(OptimizeResult r1' _ _) = optimize' rfs cons (OptimizeResult r0 ip0 patha)
 
     cons1 = if r1==r0  then cons0 else cons ++ map (consBuilder r1) rfs
 
     retBA = if checkMConstraints pathba cons1 && r2' < r1 then branchB else retA where
-      pathba  = path `mappend` baPath
+      pathba  = path <> baPath
       branchB@(OptimizeResult r2' _ _) = optimize' rfs cons (OptimizeResult r1 ip1 pathba)
 
     consBuilder rr (RationalForm num den) = Constraint (substituteLF (num, den, 1) (LinearForm (-1) (toRational rr) 0)) Strict
