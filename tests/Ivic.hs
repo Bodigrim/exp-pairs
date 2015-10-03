@@ -88,13 +88,17 @@ testSuite = testGroup "Ivic"
     (testEtalon 100 (\(a:b:c:d:_) -> etalonZetaOnS a b c d) "tests/etalon-zetaOnS.txt")
   , testCase "etalon mOnS"
     (testEtalon 100 (\(a:b:c:d:_) -> etalonMOnS a b c d) "tests/etalon-mOnS.txt")
-  , SC.testProperty "zetaOnS monotonic" testZetaOnS1
+  , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
+      SC.testProperty "zetaOnS monotonic" testZetaOnS1
   , QC.testProperty "zetaOnS monotonic" testZetaOnS1
-  , SC.testProperty "zetaOnS strict monotonic" testZetaOnS2
+  , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
+      SC.testProperty "zetaOnS strict monotonic" testZetaOnS2
   , QC.testProperty "zetaOnS strict monotonic" testZetaOnS2
-  , SC.testProperty "mOnS monotonic" testMOnS1
+  , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
+      SC.testProperty "mOnS monotonic" testMOnS1
   , QC.testProperty "mOnS monotonic" testMOnS1
-  , SC.testProperty "mOnS strict monotonic" testMOnS2
+  , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
+      SC.testProperty "mOnS strict monotonic" testMOnS2
   , QC.testProperty "mOnS strict monotonic" testMOnS2
   , SC.testProperty "zetaOnS reverse" testZetaReverse
   , QC.testProperty "zetaOnS reverse" testZetaReverse

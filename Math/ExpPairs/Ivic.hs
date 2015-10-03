@@ -49,6 +49,7 @@ reverseZetaOnS :: Rational -> OptimizeResult
 reverseZetaOnS mu
   | mu >= 1%2   = simulateOptimize 0
   | mu > zetaOnHalf = optimize [RationalForm (LinearForm 1 (-1) 1) 1] [Constraint (LinearForm 0 (-2) (1+2*mu)) NonStrict]
+  | mu == zetaOnHalf = simulateOptimize (1 % 2)
   | otherwise = optRes {optimalValue = negate $ optimalValue optRes} where
   optRes = optimize [RationalForm (LinearForm 1 (-1) 0) 1] [Constraint (LinearForm 1 0 (-mu)) NonStrict, Constraint (LinearForm (-1) 1 (-1%2)) NonStrict]
 

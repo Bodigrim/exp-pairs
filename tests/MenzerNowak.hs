@@ -34,6 +34,7 @@ testSuite = testGroup "MenzerNowak"
   , QC.testProperty "compare with tauab" testCompareLow
   , SC.testProperty "compare with 1" testCompareHigh
   , QC.testProperty "compare with 1" testCompareHigh
-  , SC.testProperty "monotonic" testMonotonic
+  , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
+      SC.testProperty "monotonic" testMonotonic
   , QC.testProperty "monotonic" testMonotonic
   ]

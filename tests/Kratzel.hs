@@ -29,7 +29,7 @@ testAbCompareHigh (Sorted (Positive a, Positive b))
 
 testAbcMonotonic :: Sorted (Positive Integer, Positive Integer, Positive Integer, Positive Integer, Positive Integer, Positive Integer) -> Bool
 testAbcMonotonic (Sorted (Positive a, Positive d, Positive b, Positive e, Positive c, Positive f))
-  = (a == d && b == e && c == f) || theoremAbc == Kr64 || zabc >= zdef
+  = (a == d && b == e && c == f) || theoremAbc `elem` [Kolesnik, Kr64] || zabc >= zdef
     where
       (theoremAbc, resultAbc) = tauabc a b c
       zabc = optimalValue resultAbc
@@ -59,11 +59,14 @@ testSuite = testGroup "Kratzel"
   , QC.testProperty "tauabc compare with 1/(a+b+c)" testAbcCompareLow
   , SC.testProperty "tauabc compare with 2/(a+b+c)" testAbcCompareHigh
   , QC.testProperty "tauabc compare with 2/(a+b+c)" testAbcCompareHigh
+  , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 3)) $
+      SC.testProperty "tauabc monotonic" testAbcMonotonic
   , QC.testProperty "tauabc monotonic" testAbcMonotonic
   , SC.testProperty "tauab compare with 1/2(a+b)" testAbCompareLow
   , QC.testProperty "tauab compare with 1/2(a+b)" testAbCompareLow
   , SC.testProperty "tauab compare with 1/(a+b)" testAbCompareHigh
   , QC.testProperty "tauab compare with 1/(a+b)" testAbCompareHigh
-  , SC.testProperty "tauab monotonic" testAbMonotonic
+  , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
+      SC.testProperty "tauab monotonic" testAbMonotonic
   , QC.testProperty "tauab monotonic" testAbMonotonic
   ]
