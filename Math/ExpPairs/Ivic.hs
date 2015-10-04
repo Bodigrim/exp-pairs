@@ -107,9 +107,11 @@ reverseMOnS prec m = reverseMOnS' from to where
   from = 1 % 2
   to   = 1
   reverseMOnS' a b
-    | b-a < prec = a
-    | optimalValue (mOnS ((a+b)/2)) > m = reverseMOnS' a ((a+b)/2)
-    | otherwise = reverseMOnS' ((a+b)/2) b
+    | b - a < prec = c
+    | optimalValue (mOnS c) > m = reverseMOnS' a c
+    | otherwise = reverseMOnS' c b
+    where
+      c = (numerator a + numerator b) % (denominator a + denominator b)
 
 -- | Check whether ∫_1^T   Π_i |ζ(n_i*σ+it)|^m_i dt ≪ T^(1+ε) for a given list of pairs [(n_1, m_1), ...] and fixed σ.
 checkAbscissa :: [(Rational, Rational)] -> Rational -> Bool
@@ -124,9 +126,11 @@ findMinAbscissa prec xs = searchMinAbscissa' from to where
   from = 1 % 2 / minimum (map fst xs)
   to   = 1 % 1
   searchMinAbscissa' a b
-    | b-a < prec = a
-    | checkAbscissa xs ((a+b)/2) = searchMinAbscissa' a ((a+b)/2)
-    | otherwise = searchMinAbscissa' ((a+b)/2) b
+    | b - a < prec = b
+    | checkAbscissa xs c = searchMinAbscissa' a c
+    | otherwise = searchMinAbscissa' c b
+    where
+      c = (numerator a + numerator b) % (denominator a + denominator b)
 
 -- | Compute minimal M(A) such that ∫_1^T |ζ(1/2+it)|^A dt ≪ T^(M(A)+ε).
 -- See Ch. 8 in Ivić2003. Further justification will be published elsewhere.
