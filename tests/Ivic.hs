@@ -97,9 +97,9 @@ testSuite = testGroup "Ivic"
   , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
       SC.testProperty "mOnS monotonic" testMOnS1
   , QC.testProperty "mOnS monotonic" testMOnS1
-  , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
-      SC.testProperty "mOnS strict monotonic" testMOnS2
-  , QC.testProperty "mOnS strict monotonic" testMOnS2
+  -- , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
+  --     SC.testProperty "mOnS strict monotonic" testMOnS2
+  -- , QC.testProperty "mOnS strict monotonic" testMOnS2
   , SC.testProperty "zetaOnS reverse" testZetaReverse
   , QC.testProperty "zetaOnS reverse" testZetaReverse
   , SC.testProperty "zetaOnS symmetry" testZetaOnSsym
