@@ -23,9 +23,9 @@ testZetaOnS1 (Sorted (Ratio01 a', Ratio01 b')) = a == b || za >= zb where
   [ a,  b] = map fromMinus3To3 [a', b']
   [za, zb] = map (optimalValue . zetaOnS) [a, b]
 
--- May fail due to the granularity of 'sect'.
+-- Strict comparison without 3e-4 may fail due to the granularity of 'sect'.
 testZetaOnS2 :: Sorted (Ratio01 Rational, Ratio01 Rational) -> Bool
-testZetaOnS2 (Sorted (Ratio01 a, Ratio01 b)) = a == b || za > zb where
+testZetaOnS2 (Sorted (Ratio01 a, Ratio01 b)) = a == b || za + 5e-4 > zb where
   [za, zb] = map (optimalValue . zetaOnS) [a, b]
 
 testZetaOnSsym :: Ratio01 Rational -> Bool
@@ -97,9 +97,9 @@ testSuite = testGroup "Ivic"
   , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
       SC.testProperty "mOnS monotonic" testMOnS1
   , QC.testProperty "mOnS monotonic" testMOnS1
-  -- , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
-  --     SC.testProperty "mOnS strict monotonic" testMOnS2
-  -- , QC.testProperty "mOnS strict monotonic" testMOnS2
+  , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
+      SC.testProperty "mOnS strict monotonic" testMOnS2
+  , QC.testProperty "mOnS strict monotonic" testMOnS2
   , SC.testProperty "zetaOnS reverse" testZetaReverse
   , QC.testProperty "zetaOnS reverse" testZetaReverse
   , SC.testProperty "zetaOnS symmetry" testZetaOnSsym
@@ -110,10 +110,6 @@ testSuite = testGroup "Ivic"
   , QC.testProperty "mOnS below s=1/2" testMOnSZero
   , SC.testProperty "mOnS above s=1" testMOnSInf
   , QC.testProperty "mOnS above s=1" testMOnSInf
-  -- , SC.testProperty "mOnS convex" testMConvex
-  -- , QC.testProperty "mOnS convex" testMConvex
-  -- , SC.testProperty "zetaOnS convex" testZetaConvex
-  -- , QC.testProperty "zetaOnS convex" testZetaConvex
   ]
 
 

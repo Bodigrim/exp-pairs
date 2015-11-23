@@ -29,7 +29,7 @@ testAbCompareHigh (Sorted (Positive a, Positive b))
 
 testAbcMonotonic :: Sorted (Positive Integer, Positive Integer, Positive Integer, Positive Integer, Positive Integer, Positive Integer) -> Bool
 testAbcMonotonic (Sorted (Positive a, Positive d, Positive b, Positive e, Positive c, Positive f))
-  = (a == d && b == e && c == f) || theoremAbc `elem` [Kolesnik, Kr64] || zabc >= zdef
+  = (a == d && b == e && c == f) || theoremAbc `elem` [Kolesnik, Kr64, Kr65] || zabc >= zdef
     where
       (theoremAbc, resultAbc) = tauabc a b c
       zabc = optimalValue resultAbc
