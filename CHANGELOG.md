@@ -11,5 +11,5 @@ Version 0.1.3.0
 ----------------
 
 New functions in Math.ExpPairs.Ivic: reverseMOnS, checkAbscissa, findMinAbscissa, mBigOnHalf, reverseMBigOnHalf.
-Fast mastrix multiplication via Makarov and Laderman algorithms.
+Fast matrix multiplication via Makarov and Laderman algorithms.
 Rewrite from the scratch pretty printer of processes.
