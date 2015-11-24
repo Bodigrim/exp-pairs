@@ -6,9 +6,13 @@ import Test.QuickCheck hiding (Positive)
 import Test.SmallCheck.Series
 import Control.Applicative
 import Control.Monad
+#if __GLASGOW_HASKELL__ < 710
+import Data.Foldable
+#endif
 import GHC.Generics          (Generic (..))
 
 import Math.ExpPairs.LinearForm
+import Math.ExpPairs.Process
 import Math.ExpPairs.ProcessMatrix
 import Math.ExpPairs.Pair (InitPair' (..))
 import Math.ExpPairs.Matrix3 as M3 (Matrix3, fromList)
@@ -163,3 +167,9 @@ instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t, t, t)) where
 instance (Ord t, Serial m t) => Serial m (Sorted (t, t, t, t, t, t)) where
   series = Sorted <$> (series `suchThatSerial` (\(a, b, c, d, e, f) -> a <= b && b <= c && c <= d && d <= e && e <= f))
 
+
+instance Arbitrary Path where
+  arbitrary = foldMap (\x -> if x then aPath else baPath) <$> (arbitrary :: Gen [Bool])
+
+instance Monad m => Serial m Path where
+  series = foldMap (\x -> if x then aPath else baPath) <$> (series :: Monad m => Series m [Bool])

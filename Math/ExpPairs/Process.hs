@@ -27,11 +27,7 @@ import Math.ExpPairs.ProcessMatrix
 import Math.ExpPairs.PrettyProcess
 
 -- | Holds a list of 'Process' and a matrix of projective
--- transformation, which they define. It also provides a fancy 'Show'
--- instance. E. g.,
---
--- > show (mconcat $ replicate 10 aPath) == "A^10"
---
+-- transformation, which they define.
 data Path = Path !ProcessMatrix ![Process]
   deriving (Eq, Show, Generic)
 
@@ -52,13 +48,14 @@ instance Read Path where
     reads' xs = (mempty, xs)
 
 instance Ord Path where
-  (Path _ q1) <= (Path _ q2) = cmp q1 q2 where
-    cmp (A:p1)  (A:p2)  = cmp p1 p2
-    cmp (BA:p1) (BA:p2) = cmp p2 p1
-    cmp (A:_)   (BA:_)  = True
-    cmp (BA:_)  (A:_)   = False
-    cmp []      _       = True
-    cmp _       []      = False
+  compare (Path _ x) (Path _ y) = cmp x y where
+    cmp     []      []  = EQ
+    cmp ( A:u) ( A:v) = cmp u v
+    cmp (BA:u) (BA:v) = cmp v u
+    cmp ( A:_)     _  = LT
+    cmp (BA:_)     _  = GT
+    cmp     _  ( A:_) = GT
+    cmp     _  (BA:_) = LT
 
 -- | Path consisting of a single process 'A'.
 aPath :: Path
