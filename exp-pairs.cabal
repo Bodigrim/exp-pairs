@@ -9,7 +9,7 @@ author:              Andrew Lelechenko
 maintainer:          andrew.lelechenko@gmail.com
 category:            Math
 build-type:          Simple
-extra-source-files:  CHANGELOG.md
+extra-source-files:  CHANGELOG.md, tests/*.txt
 cabal-version:       >=1.10
 
 source-repository head
