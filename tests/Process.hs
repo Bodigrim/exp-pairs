@@ -23,7 +23,7 @@ testSuite = testGroup "Process"
   [ adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `min` 13)) $
       SC.testProperty "read . show == id" testReadShow
   , QC.testProperty "read . show == id" testReadShow
-  , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `min` 13)) $
+  , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `min` 8)) $
       SC.testProperty "Ord of Processes" testOrd
   , QC.testProperty "Ord of Processes" testOrd
   ]
