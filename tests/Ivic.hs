@@ -9,6 +9,8 @@ import Test.Tasty.SmallCheck as SC
 import Test.Tasty.QuickCheck as QC
 import Test.Tasty.HUnit
 
+import Debug.Trace
+
 import Instances
 import Etalon (testEtalon)
 
@@ -56,25 +58,31 @@ testMOnSInf :: Ratio01 Rational -> Bool
 testMOnSInf (Ratio01 a') = a < 1 || (optimalValue . mOnS) a == InfPlus where
   a = fromMinus3To3 a'
 
-testZetaReverse :: Ratio01 Rational -> Bool
-testZetaReverse (Ratio01 s') = abs (s - t) <= 5 % 1000 where
-  s = s' / 2
+testZetaReverse1 :: Ratio01 Rational -> Bool
+testZetaReverse1 (Ratio01 s') = if t <= s + 2e-2 && s <= t + 2e-3 then True else trace (show $ fromRational $ s-t) False where
+  s = fromHalfToOne s'
   zs = zetaOnS s
   t = toRational $ optimalValue $ reverseZetaOnS $ toRational $ optimalValue zs
 
--- Convexity tests - they fail and it is OK
-testZetaConvex :: Sorted (Ratio01 Rational, Ratio01 Rational, Ratio01 Rational) -> Bool
-testZetaConvex (Sorted (Ratio01 a, Ratio01 b, Ratio01 c)) = a == b || b == c || zb <= k * Finite b + l where
-  [za, zb, zc] = map (optimalValue . zetaOnS) [a, b, c]
-  k = (za - zc) / Finite (a - c)
-  l = za - k * Finite a
+testZetaReverse2 :: Ratio01 Rational -> Bool
+testZetaReverse2 (Ratio01 s') = if t <= s + 1e-10 && s <= t + 4e-3 then True else trace (show $ fromRational $ s-t) False where
+  s = s' * 32 / 205
+  zs = reverseZetaOnS s
+  t = toRational $ optimalValue $ zetaOnS $ toRational $ optimalValue zs
 
--- Ivic, Th. 8.1, p. 205
-testMConvex :: Sorted (Ratio01 Rational, Ratio01 Rational, Ratio01 Rational) -> Bool
-testMConvex (Sorted (Ratio01 a', Ratio01 b', Ratio01 c')) = a==b || b==c || za==InfPlus || zc==InfPlus
-  || zb>= za*zc*Finite(c-a)/(zc*Finite(c-b) + za*Finite(b-a)) where
-    [a,b,c] = map fromHalfToOne [a', b', c']
-    [za, zb, zc] = map (optimalValue . mOnS) [a,b,c] :: [RationalInf]
+testMOnSReverse1 :: Ratio01 Rational -> Bool
+testMOnSReverse1 (Ratio01 s') =
+  if t <= s + 4e-2 && s <= t + 1e-3 then True else trace (show $ fromRational $ s-t) False
+  where
+    s = fromHalfToOne s'
+    zs = mOnS s
+    t = toRational $ reverseMOnS 1e-3 $ optimalValue zs
+
+testMOnSReverse2 :: Ratio01 Rational -> Bool
+testMOnSReverse2 (Ratio01 s') = s' == 0 || if recip t <= recip s + 1e-3 && recip s <= recip t + 1e-3 then True else trace (show $ fromRational $ recip s - recip t) False where
+  s = 4 * recip s'
+  zs = reverseMOnS 1e-3 (Finite s)
+  t = toRational $ optimalValue $ mOnS $ toRational zs
 
 etalonZetaOnS :: Integer -> Integer -> Integer -> Integer -> Bool
 etalonZetaOnS a b c d = Finite (c%d) >= optimalValue (zetaOnS $ a%b)
@@ -100,8 +108,19 @@ testSuite = testGroup "Ivic"
   , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
       SC.testProperty "mOnS strict monotonic" testMOnS2
   , QC.testProperty "mOnS strict monotonic" testMOnS2
-  , SC.testProperty "zetaOnS reverse" testZetaReverse
-  , QC.testProperty "zetaOnS reverse" testZetaReverse
+
+  , SC.testProperty "reverseZetaOnS . zetaOnS == id" testZetaReverse1
+  , QC.testProperty "reverseZetaOnS . zetaOnS == id" testZetaReverse1
+  , SC.testProperty "zetaOnS . reverseZetaOnS == id" testZetaReverse2
+  , QC.testProperty "zetaOnS . reverseZetaOnS == id" testZetaReverse2
+
+  , SC.testProperty "reverseMOnS . mOnS == id" testMOnSReverse1
+  , adjustOption (\(QC.QuickCheckTests n) -> QC.QuickCheckTests (n `min` 400)) $
+      QC.testProperty "reverseMOnS . mOnS == id" testMOnSReverse1
+  , SC.testProperty "mOnS . reverseMOnS == id" testMOnSReverse2
+  , adjustOption (\(QC.QuickCheckTests n) -> QC.QuickCheckTests (n `min` 400)) $
+      QC.testProperty "mOnS . reverseMOnS == id" testMOnSReverse2
+
   , SC.testProperty "zetaOnS symmetry" testZetaOnSsym
   , QC.testProperty "zetaOnS symmetry" testZetaOnSsym
   , SC.testProperty "zetaOnS above s=1" testZetaOnSZero

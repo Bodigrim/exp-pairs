@@ -98,20 +98,38 @@ mOnS s
     x2' = optimize [RationalForm numer denom] cons
     x2 = x2' {optimalValue = negate $ optimalValue x2'}
 
+data Choice = Least | Median | Greatest
+
+binarySearch :: (Rational -> Bool) -> Choice -> Rational -> Rational -> Rational -> Rational
+binarySearch predicate choice precision = go
+  where
+    go a b
+      | b - a < precision = case choice of
+                            Least    -> a
+                            Median   -> c
+                            Greatest -> b
+      | predicate c = go a c
+      | otherwise   = go c b
+      where
+        c = (numerator a + numerator b) % (denominator a + denominator b)
+
+mOnSTwoThird :: RationalInf
+mOnSTwoThird = optimalValue $ mOnS $ 2 % 3
+
 -- | Try to reverse 'mOnS': for a given precision and m compute minimal possible σ.
 -- Implementation is usual try-and-divide search, so performance is very poor.
 -- Sometimes, when 'mOnS' gets especially lucky exponent pair, 'reverseMOnS' can miss
 -- real σ and returns bigger value.
 reverseMOnS :: Rational -> RationalInf -> Rational
-reverseMOnS prec m = reverseMOnS' from to where
-  from = 1 % 2
-  to   = 1
-  reverseMOnS' a b
-    | b - a < prec = c
-    | optimalValue (mOnS c) > m = reverseMOnS' a c
-    | otherwise = reverseMOnS' c b
-    where
-      c = (numerator a + numerator b) % (denominator a + denominator b)
+reverseMOnS _ InfPlus = 1
+reverseMOnS _ (Finite m)
+  | m <= 4 = 1 % 2
+  | m <= 8 = 3 % 4 - recip m
+reverseMOnS prec m
+  | m < mOnSTwoThird = go (5 % 8) (2 % 3)
+  | otherwise        = go (2 % 3) 1
+  where
+    go = binarySearch (\c -> optimalValue (mOnS c) > m) Median prec
 
 -- | Check whether ∫_1^T   Π_i |ζ(n_i*σ+it)|^m_i dt ≪ T^(1+ε) for a given list of pairs [(n_1, m_1), ...] and fixed σ.
 checkAbscissa :: [(Rational, Rational)] -> Rational -> Bool
@@ -122,15 +140,7 @@ checkAbscissa xs s = sum rs < Finite 1 where
 -- | Find for a given precision and list of pairs [(n_1, m_1), ...] the minimal σ
 -- such that ∫_1^T   Π_i|ζ(n_i*σ+it)|^m_i dt ≪ T^(1+ε).
 findMinAbscissa :: Rational -> [(Rational, Rational)] -> Rational
-findMinAbscissa prec xs = searchMinAbscissa' from to where
-  from = 1 % 2 / minimum (map fst xs)
-  to   = 1 % 1
-  searchMinAbscissa' a b
-    | b - a < prec = b
-    | checkAbscissa xs c = searchMinAbscissa' a c
-    | otherwise = searchMinAbscissa' c b
-    where
-      c = (numerator a + numerator b) % (denominator a + denominator b)
+findMinAbscissa prec xs = binarySearch (checkAbscissa xs) Greatest prec (1 % 2 / minimum (map fst xs)) 1
 
 -- | Compute minimal M(A) such that ∫_1^T |ζ(1/2+it)|^A dt ≪ T^(M(A)+ε).
 -- See Ch. 8 in Ivić2003. Further justification will be published elsewhere.
