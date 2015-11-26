@@ -6,7 +6,7 @@ import Math.ExpPairs.Ivic
 
 import Test.Tasty
 import Test.Tasty.SmallCheck as SC
-import Test.Tasty.QuickCheck as QC
+import Test.Tasty.QuickCheck as QC hiding (Positive)
 import Test.Tasty.HUnit
 
 import Debug.Trace
@@ -84,6 +84,19 @@ testMOnSReverse2 (Ratio01 s') = s' == 0 || if recip t <= recip s + 1e-3 && recip
   zs = reverseMOnS 1e-3 (Finite s)
   t = toRational $ optimalValue $ mOnS $ toRational zs
 
+testMBigOnHalfReverse1 :: Positive Rational -> Bool
+testMBigOnHalfReverse1 (Positive s') = if recip t <= recip s + 2e-3 && recip s <= recip t + 1e-10 then True else trace (show $ fromRational $ recip s - recip t) False where
+  s = s' + 4
+  zs = mBigOnHalf s
+  t = toRational $ optimalValue $ reverseMBigOnHalf $ toRational $ optimalValue zs
+
+testMBigOnHalfReverse2 :: Positive Rational -> Bool
+testMBigOnHalfReverse2 (Positive s') = if recip t <= recip s + 2e-3 && recip s <= recip t + 1e-10 then True else trace (show $ fromRational $ recip s - recip t) False where
+  s = s' + 1
+  zs = reverseMBigOnHalf s
+  t = toRational $ optimalValue $ mBigOnHalf $ toRational $ optimalValue zs
+
+
 etalonZetaOnS :: Integer -> Integer -> Integer -> Integer -> Bool
 etalonZetaOnS a b c d = Finite (c%d) >= optimalValue (zetaOnS $ a%b)
 
@@ -115,11 +128,16 @@ testSuite = testGroup "Ivic"
   , QC.testProperty "zetaOnS . reverseZetaOnS == id" testZetaReverse2
 
   , SC.testProperty "reverseMOnS . mOnS == id" testMOnSReverse1
-  , adjustOption (\(QC.QuickCheckTests n) -> QC.QuickCheckTests (n `min` 400)) $
+  , adjustOption (\(QC.QuickCheckTests n) -> QC.QuickCheckTests (n `min` 100)) $
       QC.testProperty "reverseMOnS . mOnS == id" testMOnSReverse1
   , SC.testProperty "mOnS . reverseMOnS == id" testMOnSReverse2
-  , adjustOption (\(QC.QuickCheckTests n) -> QC.QuickCheckTests (n `min` 400)) $
+  , adjustOption (\(QC.QuickCheckTests n) -> QC.QuickCheckTests (n `min` 100)) $
       QC.testProperty "mOnS . reverseMOnS == id" testMOnSReverse2
+
+  , SC.testProperty "reverseMBigOnHalf . mBigOnHalf == id" testMBigOnHalfReverse1
+  , QC.testProperty "reverseMBigOnHalf . mBigOnHalf == id" testMBigOnHalfReverse1
+  , SC.testProperty "mBigOnHalf . reverseMBigOnHalf == id" testMBigOnHalfReverse2
+  , QC.testProperty "mBigOnHalf . reverseMBigOnHalf == id" testMBigOnHalfReverse2
 
   , SC.testProperty "zetaOnS symmetry" testZetaOnSsym
   , QC.testProperty "zetaOnS symmetry" testZetaOnSsym
