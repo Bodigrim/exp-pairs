@@ -50,7 +50,7 @@ import Math.ExpPairs.RatioInf
 
 evalFunctional :: [InitPair] -> [InitPair] -> [RationalForm Rational] -> [Constraint Rational] -> Path -> (RationalInf, InitPair)
 evalFunctional corners interiors rfs cons path = case rs of
-  [] -> (InfPlus, undefined)
+  [] -> (InfPlus, error "evalFunctional: cannot find any exponential pair, which satisfies constraints")
   _  -> minimumBy (comparing fst) rs
   where
     applyPath  = map (evalPath path . initPairToProjValue &&& id)
@@ -58,9 +58,10 @@ evalFunctional corners interiors rfs cons path = case rs of
     interiors' = applyPath interiors
 
     predicate (p, _) = all (checkConstraint p) cons
-    qs = if all predicate corners'
-          then corners'
-          else filter predicate interiors'
+    qs
+      | all predicate corners' = corners'
+      | any predicate corners' = filter predicate interiors'
+      | otherwise              = []
 
     rs = map (first $ \p -> maximum (map (evalRF p) rfs)) qs
 

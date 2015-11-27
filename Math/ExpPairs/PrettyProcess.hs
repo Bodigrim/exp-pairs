@@ -110,7 +110,7 @@ prettify' = \case
 
     bcs = takeWhile (not . null . snd) $ iterate bcf ([head xs], tail xs)
 
-    bcf (_, [])    = undefined
+    bcf (_, [])    = error "prettify': unexpected second argument of bcf"
     bcf (zs, y:ys) = (zs++[y], ys)
 
     f (bs, cs) = PPWL (Sequence bsP csP) (bsW + csW) where

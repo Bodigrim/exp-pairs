@@ -83,7 +83,7 @@ instance (Num t, Ord t) => Num (Matrix3 t) where
 
   negate = fmap negate
 
-  abs = undefined
+  abs = error "abs of Matrix3 is undefined"
 
   signum = diag . signum . det
 

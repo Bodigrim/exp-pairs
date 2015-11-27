@@ -61,7 +61,7 @@ divideResult d = second (\o -> o {optimalValue = optimalValue o / Finite (toRati
 -- |Compute Θ(a, b) for given a and b.
 tauab :: Integer -> Integer -> (TauabTheorem, OptimizeResult)
 tauab a' b'
-  | d /= 1 = divideResult d $ tauab (a'`div` d) (b' `div` d) where
+  | d /= 1 = divideResult d $ tauab (a' `div` d) (b' `div` d) where
       d = gcd a' b'
 tauab a' b' = minimumBy (comparing (optimalValue . snd)) [kr511a, kr511b, kr512a, kr512b] where
   a = toRational a'
@@ -116,7 +116,7 @@ instance Pretty TauabcTheorem where
 -- |Compute Θ(a, b, c) for given a, b and c.
 tauabc :: Integer -> Integer -> Integer -> (TauabcTheorem, OptimizeResult)
 tauabc a' b' c'
-  | d /= 1 = divideResult d $ tauabc (a'`div` d) (b' `div` d) (c' `div` d) where
+  | d /= 1 = divideResult d $ tauabc (a' `div` d) (b' `div` d) (c' `div` d) where
       d = gcd (gcd a' b') c'
 tauabc 1 1 1 = (Kolesnik, simulateOptimize $ 43%96)
 tauabc a' b' c' = minimumBy (comparing (optimalValue . snd)) [kr61, kr62, kr63, kr64, kr65, kr66] where
