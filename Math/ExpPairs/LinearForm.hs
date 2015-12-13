@@ -12,6 +12,7 @@ Provides types for rational forms (to hold objective functions in "Math.ExpPairs
 -}
 module Math.ExpPairs.LinearForm
   ( LinearForm (..)
+  , scaleLF
   , evalLF
   , substituteLF
   , RationalForm (..)
@@ -77,11 +78,12 @@ substituteLF :: (Eq t, Num t) => (LinearForm t, LinearForm t, LinearForm t) -> L
 substituteLF (k, l, m) (LinearForm a b c) = scaleLF a k + scaleLF b l + scaleLF c m
 
 -- | Define a rational form of two variables, equal to the ratio of two 'LinearForm'.
-data RationalForm t = RationalForm (LinearForm t) (LinearForm t)
+data RationalForm t = (LinearForm t) :/: (LinearForm t)
   deriving (Eq, Show, Functor, Foldable, Generic)
+infix 5 :/:
 
 instance (Num t, Eq t, Pretty t) => Pretty (RationalForm t) where
-  pretty (RationalForm l1 l2) = parens (pretty l1) </> parens (pretty l2)
+  pretty (l1 :/: l2) = parens (pretty l1) </> parens (pretty l2)
 
 instance NFData t => NFData (RationalForm t) where
   rnf = rnf . toList
@@ -89,14 +91,14 @@ instance NFData t => NFData (RationalForm t) where
 instance Num t => Num (RationalForm t) where
   (+) = error "Addition of RationalForm is undefined"
   (*) = error "Multiplication of RationalForm is undefined"
-  negate (RationalForm a b) = RationalForm (negate a) b
+  negate (a :/: b) = negate a :/: b
   abs = error "Absolute value of RationalForm is undefined"
   signum = error "Signum of RationalForm is undefined"
-  fromInteger n = RationalForm (fromInteger n) 1
+  fromInteger n = fromInteger n :/: 1
 
 instance Num t => Fractional (RationalForm t) where
-  fromRational r = RationalForm (fromInteger $ numerator r) (fromInteger $ denominator r)
-  recip (RationalForm a b) = RationalForm b a
+  fromRational r = (fromInteger $ numerator r) :/: (fromInteger $ denominator r)
+  recip (a :/: b) = b :/: a
 
 mapTriple :: (a -> b) -> (a, a, a) -> (b, b, b)
 mapTriple f (x, y, z) = (f x, f y, f z)
@@ -105,7 +107,7 @@ mapTriple f (x, y, z) = (f x, f y, f z)
 -- |Evaluate a rational form (a*k + b*l + c*m) \/ (a'*k + b'*l + c'*m)
 -- for given k, l and m.
 evalRF :: (Real t, Num t) => (Integer, Integer, Integer) -> RationalForm t -> RationalInf
-evalRF (k, l, m) (RationalForm num den) = if denom==0 then InfPlus else Finite (numer / denom) where
+evalRF (k, l, m) (num :/: den) = if denom==0 then InfPlus else Finite (numer / denom) where
   klm = mapTriple fromInteger (k, l, m)
   numer = toRational $ evalLF klm num
   denom = toRational $ evalLF klm den

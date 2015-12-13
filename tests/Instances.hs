@@ -25,11 +25,11 @@ instance (Monad m, Serial m a) => Serial m (LinearForm a) where
   series = cons3 LinearForm
 
 instance Arbitrary a => Arbitrary (RationalForm a) where
-  arbitrary = RationalForm <$> arbitrary <*> arbitrary
+  arbitrary = (:/:) <$> arbitrary <*> arbitrary
   shrink = genericShrink
 
 instance (Monad m, Serial m a) => Serial m (RationalForm a) where
-  series = cons2 RationalForm
+  series = cons2 (:/:)
 
 instance Arbitrary a => Arbitrary (Constraint a) where
   arbitrary = Constraint <$> arbitrary <*> arbitrary

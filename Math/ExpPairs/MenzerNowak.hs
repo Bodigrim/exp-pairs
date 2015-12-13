@@ -21,17 +21,14 @@ module Math.ExpPairs.MenzerNowak
   ( menzerNowak
   ) where
 
-import Data.Ratio    ((%))
-
 import Math.ExpPairs
 
 -- |Compute Θ(a, b) for given a and b.
 menzerNowak :: Integer -> Integer -> OptimizeResult
 menzerNowak a' b' = optimize
-  [
-    RationalForm (LinearForm 1 1 0) (LinearForm (a+b) 0 (a+b)),
-    RationalForm (LinearForm 1 0 0) (LinearForm (a+b) (-a) a)
-  ]
-  [] where
-    a = a'%1
-    b = b'%1
+  [ K 1 + L 1 :/: K (a + b) + M (a + b)
+  , K 1       :/: K (a + b) - L a + M a
+  ] []
+  where
+    a = fromInteger a'
+    b = fromInteger b'

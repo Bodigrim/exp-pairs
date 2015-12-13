@@ -14,7 +14,8 @@ A. V. Lelechenko, Linear programming over exponent pairs. Acta Univ. Sapientiae,
 A set of useful applications can be found in
 "Math.ExpPairs.Ivic", "Math.ExpPairs.Kratzel" and "Math.ExpPairs.MenzerNowak".
 -}
-{-# LANGUAGE CPP  #-}
+{-# LANGUAGE CPP             #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 module Math.ExpPairs
   ( optimize
@@ -24,14 +25,20 @@ module Math.ExpPairs
   , optimalPath
   , simulateOptimize
   , simulateOptimize'
-  , LinearForm (..)
+  , LinearForm
   , RationalForm (..)
-  , IneqType (..)
-  , Constraint (..)
+  , IneqType
+  , Constraint
   , InitPair
   , Path
   , RatioInf (..)
   , RationalInf
+  , pretty
+  , pattern K
+  , pattern L
+  , pattern M
+  , (>.), (>=.), (<.), (<=.)
+  , scaleLF
   ) where
 
 import Control.Arrow hiding ((<+>))
@@ -47,6 +54,26 @@ import Math.ExpPairs.LinearForm
 import Math.ExpPairs.Process
 import Math.ExpPairs.Pair
 import Math.ExpPairs.RatioInf
+
+pattern K n = LinearForm n 0 0
+pattern L n = LinearForm 0 n 0
+pattern M n = LinearForm 0 0 n
+
+(>.) :: Num t => LinearForm t -> LinearForm t -> Constraint t
+lf1 >. lf2  = Constraint (lf1 - lf2) Strict
+infix 5 >.
+
+(>=.) :: Num t => LinearForm t -> LinearForm t -> Constraint t
+lf1 >=. lf2 = Constraint (lf1 - lf2) NonStrict
+infix 5 >=.
+
+(<.) :: Num t => LinearForm t -> LinearForm t -> Constraint t
+lf1 <. lf2  = Constraint (lf2 - lf1) Strict
+infix 5 <.
+
+(<=.) :: Num t => LinearForm t -> LinearForm t -> Constraint t
+lf1 <=. lf2 = Constraint (lf2 - lf1) NonStrict
+infix 5 <=.
 
 evalFunctional :: [InitPair] -> [InitPair] -> [RationalForm Rational] -> [Constraint Rational] -> Path -> (RationalInf, InitPair)
 evalFunctional corners interiors rfs cons path = case rs of
@@ -128,5 +155,5 @@ optimize' rfs cons ret@(OptimizeResult r _ path)
       pathba  = path <> baPath
       branchB@(OptimizeResult r2' _ _) = optimize' rfs cons (OptimizeResult r1 ip1 pathba)
 
-    consBuilder rr (RationalForm num den) = Constraint (substituteLF (num, den, 1) (LinearForm (-1) (toRational rr) 0)) Strict
+    consBuilder rr (num :/: den) = (substituteLF (num, den, 1) (L (toRational rr) - K 1)) >. 0
 

@@ -35,8 +35,8 @@ zetaOnS :: Rational -> OptimizeResult
 zetaOnS s
   | s >= 1  = simulateOptimize 0
   | s >= 1%2 = optimize
-    [RationalForm (LinearForm 1 1 (-s)) 2]
-    [Constraint (LinearForm (-1) 1 (-s)) NonStrict]
+    [K 1 + L 1 - M s :/: 2]
+    [L 1 >=. K 1 + M s]
   | otherwise = optRes {optimalValue = r} where
     optRes = zetaOnS (1-s)
     r = Finite (1%2 - s) + optimalValue optRes
@@ -48,10 +48,10 @@ zetaOnHalf = 32%205
 reverseZetaOnS :: Rational -> OptimizeResult
 reverseZetaOnS mu
   | mu >= 1%2   = simulateOptimize 0
-  | mu > zetaOnHalf = optimize [RationalForm (LinearForm 1 (-1) 1) 1] [Constraint (LinearForm 0 (-2) (1+2*mu)) NonStrict]
+  | mu > zetaOnHalf = optimize [K 1 - L 1 + M 1 :/: 1] [M (1 + 2 * mu) >=. L 2]
   | mu == zetaOnHalf = simulateOptimize (1 % 2)
   | otherwise = optRes {optimalValue = negate $ optimalValue optRes} where
-  optRes = optimize [RationalForm (LinearForm 1 (-1) 0) 1] [Constraint (LinearForm 1 0 (-mu)) NonStrict, Constraint (LinearForm (-1) 1 (-1%2)) NonStrict]
+  optRes = optimize [K 1 - L 1 :/: 1] [K 1 >=. M mu, L 2 >=. K 2 + 1]
 
 lemma82_f :: Rational -> Rational
 lemma82_f s
@@ -77,25 +77,16 @@ mOnS s
     beta1  = -12/(1+2*s)
     x1 = optRes {optimalValue = Finite $ (1-alpha1)/muS - beta1}
 
-    --alpha2 = 4*(1-s)*(k+l)/((2*m+4*l)*s-m+2*k-2*l)
-    --beta2  = -4*(m+2*k+2*l)/((2*m+4*l)*s-m+2*k-2*l)
-    --ratio = (1-alpha2)/muS - beta2
-    --numer = numerator ratio
-    --denom = denominator ratio
-    numer = LinearForm
-      (-4*s + (-8*muS + 2))
-      (-8*s + (-8*muS + 6))
-      (-2*s + (-4*muS + 1))
-    denom = LinearForm
-      (2*muS)
-      (4*muS*s - 2*muS)
-      (2*muS*s - muS)
+    -- alpha2 = 4*(1-s)*(k+l)/((2*m+4*l)*s-m+2*k-2*l)
+    -- beta2  = -4*(m+2*k+2*l)/((2*m+4*l)*s-m+2*k-2*l)
+    -- numer % denom = (1-alpha2)/muS - beta2
+    t     = scaleLF s (L 4 + 2) - 1 + K 2 - L 2
+    numer = t - scaleLF (4 * (1-s)) (K 1 + L 1) + scaleLF (4 * muS) (K 2 + L 2 + 1)
+    denom = scaleLF muS t
 
-    cons = if s >= 2%3 then [] else [Constraint
-      (LinearForm (4*s-2) (8*s-6) (2*s-1)) NonStrict
-      ]
+    cons = if s >= 2%3 then [] else [scaleLF s (K 4 + L 8 + 2) >=. K 2 + L 6 + 1]
 
-    x2' = optimize [RationalForm numer denom] cons
+    x2' = optimize [- numer :/: denom] cons
     x2 = x2' {optimalValue = negate $ optimalValue x2'}
 
 data Choice = Least | Median | Greatest
@@ -148,16 +139,16 @@ mBigOnHalf :: Rational -> OptimizeResult
 mBigOnHalf a
   | a < 4     = simulateOptimize 1
   | a < 12    = simulateOptimize $ 1+(a-4)/8
-  | a > 41614060315296730740083860226662 % 2636743270445733804969041895717 = simulateOptimize $ 1 + 32*(a-6)/205
+  | a > 41614060315296730740083860226662 % 2636743270445733804969041895717 = simulateOptimize $ 1 + (a - 6) * zetaOnHalf
   | otherwise = if Finite x >= optimalValue optRes
     then simulateOptimize x
     else optRes where
-      optRes = optimize [RationalForm (LinearForm 1 1 0) (LinearForm 1 0 0)]
-        [Constraint (LinearForm (4-a) 4 2) NonStrict]
+      optRes = optimize [K 1 + L 1 :/: K 1]
+        [K (4 - a) + L 4 + 2 >=. 0]
       x = 1 + 32*(a-6)/205
 -- Constant 41614060315296730740083860226662 % 2636743270445733804969041895717
 -- is produced by
--- optimize [RationalForm (LinearForm 4 4 2) (LinearForm 1 0 0)] [Constraint (LinearForm (-64) (-77) 64) Strict]
+-- optimize [K 4 + L 4 + 2 :/: K 1] [64 >. K 64 + L 77]
 
 -- | Try to reverse 'mBigOnHalf': for a given M(A) find maximal possible A.
 -- Sometimes, when 'mBigOnHalf' gets especially lucky exponent pair, 'reverseMBigOnHalf' can miss
@@ -168,7 +159,5 @@ reverseMBigOnHalf m
   | otherwise = if Finite a <= optimalValue optRes
     then simulateOptimize a
     else optRes where
-    a = (m-1)*205/32 + 6
-    optRes = optimize [RationalForm (LinearForm 4 4 2) (LinearForm 1 0 0)] [Constraint (LinearForm (1-m) 1 0) NonStrict]
-
-
+    a = (m - 1) / zetaOnHalf + 6
+    optRes = optimize [K 4 + L 4 + 2 :/: K 1] [K (1 - m) + L 1 >=. 0]
