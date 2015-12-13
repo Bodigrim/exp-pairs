@@ -59,7 +59,7 @@ newtype Ratio01 t = Ratio01 t
 
 instance (Ord t, Fractional t, Arbitrary t) => Arbitrary (Ratio01 t) where
   arbitrary = Ratio01 <$> (arbitrary `suchThat` (\x -> 0 <= x && x <= 1))
-  shrink = genericShrink
+  shrink (Ratio01 y) = Ratio01 <$> filter (\x -> 0 <= x && x <= 1) (shrink y)
 
 instance (Ord t, Fractional t, Serial m t) => Serial m (Ratio01 t) where
   series = Ratio01 <$> (series `suchThatSerial` (\x -> 0 <= x && x <= 1))
