@@ -43,6 +43,8 @@ deriveMemoizable ''Process
 newtype ProcessMatrix = ProcessMatrix (Matrix3 Integer)
   deriving (Eq, Num, Show, Pretty)
 
+deriveMemoizable ''ProcessMatrix
+
 instance Monoid ProcessMatrix where
   mempty = 1
   mappend (ProcessMatrix a) (ProcessMatrix b) = ProcessMatrix $ normalize $ a * b

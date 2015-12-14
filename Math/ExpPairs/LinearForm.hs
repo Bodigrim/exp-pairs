@@ -34,7 +34,7 @@ import Text.PrettyPrint.Leijen
 
 import Math.ExpPairs.RatioInf
 
--- |Define an affine linear form of two variables: a*k + b*l + c*m.
+-- |Define an affine linear form of three variables: a*k + b*l + c*m.
 -- First argument of 'LinearForm' stands for a, second for b
 -- and third for c. Linear forms form a monoid by addition.
 data LinearForm t = LinearForm !t !t !t
@@ -89,15 +89,15 @@ instance NFData t => NFData (RationalForm t) where
   rnf = rnf . toList
 
 instance Num t => Num (RationalForm t) where
-  (+) = error "Addition of RationalForm is undefined"
-  (*) = error "Multiplication of RationalForm is undefined"
+  (+)              = error "Addition of RationalForm is undefined"
+  (*)              = error "Multiplication of RationalForm is undefined"
   negate (a :/: b) = negate a :/: b
-  abs = error "Absolute value of RationalForm is undefined"
-  signum = error "Signum of RationalForm is undefined"
-  fromInteger n = fromInteger n :/: 1
+  abs              = error "Absolute value of RationalForm is undefined"
+  signum           = error "Signum of RationalForm is undefined"
+  fromInteger n    = fromInteger n :/: 1
 
 instance Num t => Fractional (RationalForm t) where
-  fromRational r = (fromInteger $ numerator r) :/: (fromInteger $ denominator r)
+  fromRational r = fromInteger (numerator r) :/: fromInteger (denominator r)
   recip (a :/: b) = b :/: a
 
 mapTriple :: (a -> b) -> (a, a, a) -> (b, b, b)

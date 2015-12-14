@@ -16,6 +16,7 @@ A set of useful applications can be found in
 -}
 {-# LANGUAGE CPP             #-}
 {-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Math.ExpPairs
   ( optimize
@@ -49,6 +50,7 @@ import Data.Monoid
 import Text.PrettyPrint.Leijen hiding ((<$>), (<>))
 import qualified Text.PrettyPrint.Leijen as PP
 import Text.Printf
+import Data.Function.Memoize (deriveMemoizable)
 
 import Math.ExpPairs.LinearForm
 import Math.ExpPairs.Process
@@ -107,6 +109,8 @@ data OptimizeResult = OptimizeResult {
   optimalPath  :: Path
   }
   deriving (Show)
+
+deriveMemoizable ''OptimizeResult
 
 instance Pretty OptimizeResult where
   pretty (OptimizeResult r' ip p) = pretty' r' PP.<$> pretty ip </> pretty p where

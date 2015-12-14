@@ -110,7 +110,10 @@ mOnSTwoThird = optimalValue $ mOnS $ 2 % 3
 -- | Try to reverse 'mOnS': for a given precision and m compute minimal possible σ.
 -- Implementation is usual try-and-divide search, so performance is very poor.
 -- Sometimes, when 'mOnS' gets especially lucky exponent pair, 'reverseMOnS' can miss
--- real σ and returns bigger value.
+-- real σ and returns significantly bigger value.
+--
+-- For integer m>=4 this function corresponds to the multidimensional Dirichlet problem
+-- and returns σ from error term O(x^{σ+ε}). See Ch. 13 in Ivić2003.
 reverseMOnS :: Rational -> RationalInf -> Rational
 reverseMOnS _ InfPlus = 1
 reverseMOnS _ (Finite m)
@@ -120,7 +123,7 @@ reverseMOnS prec m
   | m < mOnSTwoThird = go (5 % 8) (2 % 3)
   | otherwise        = go (2 % 3) 1
   where
-    go = binarySearch (\c -> optimalValue (mOnS c) > m) Median prec
+    go = binarySearch (\c -> optimalValue (mOnS c) > m) Greatest prec
 
 -- | Check whether ∫_1^T   Π_i |ζ(n_i*σ+it)|^m_i dt ≪ T^(1+ε) for a given list of pairs [(n_1, m_1), ...] and fixed σ.
 checkAbscissa :: [(Rational, Rational)] -> Rational -> Bool

@@ -14,6 +14,7 @@ Below /A/ and /B/ stands for van der Corput's processes. See "Math.ExpPairs.Proc
 -}
 {-# LANGUAGE DeriveGeneric        #-}
 {-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE TemplateHaskell      #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
@@ -31,6 +32,7 @@ import Data.Maybe
 import Data.Ratio
 import GHC.Generics (Generic (..))
 import Text.PrettyPrint.Leijen
+import Data.Function.Memoize
 
 -- |Vertices of the triangle of initial exponent pairs.
 data Triangle
@@ -64,6 +66,8 @@ data InitPair' t
   -- 'Mix' a b = a * 'Corput16' + b * 'HuxW87b1' + (1-a-b) * 'Hux05'
   | Mix !t !t
   deriving (Eq, Show, Generic)
+
+deriveMemoizable ''InitPair'
 
 -- |Exponent pair built from rational fractions of
 -- 'Corput16', 'HuxW87b1' and 'Hux05'

@@ -1,4 +1,3 @@
-{-# LANGUAGE RecordWildCards, DeriveFunctor, DeriveFoldable, DeriveGeneric #-}
 {-|
 Module      : Math.ExpPairs.Matrix3
 Description : Implements matrices of order 3
@@ -11,6 +10,13 @@ Portability : POSIX
 Provides types and functions for matrices and vectors of order 3.
 Can be used instead of "Data.Matrix" to reduce overhead and simplify code.
 -}
+
+{-# LANGUAGE DeriveFunctor   #-}
+{-# LANGUAGE DeriveFoldable  #-}
+{-# LANGUAGE DeriveGeneric   #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Math.ExpPairs.Matrix3
   ( Matrix3 (..)
   , fromList
@@ -29,6 +35,7 @@ import Data.Foldable  (Foldable (..), toList)
 import Data.List      (transpose)
 import GHC.Generics   (Generic (..))
 import Text.PrettyPrint.Leijen
+import Data.Function.Memoize (deriveMemoizable)
 
 -- |Matrix of order 3. Instances of 'Num' and 'Fractional'
 -- are given in terms of the multiplicative group of matrices,
@@ -299,3 +306,5 @@ multCol Matrix3 {..} (a1, a2, a3) = (
   a31 * a1 + a32 * a2 + a33 * a3
   )
 {-# INLINE multCol #-}
+
+deriveMemoizable ''Matrix3

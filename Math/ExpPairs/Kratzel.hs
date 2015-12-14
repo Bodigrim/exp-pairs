@@ -24,20 +24,30 @@ and for
 He also provided a set of theorems to estimate Θ(a, b) and Θ(a, b, c).
 
 -}
+
+{-# LANGUAGE TemplateHaskell #-}
+
 module Math.ExpPairs.Kratzel
   ( TauabTheorem (..)
   , tauab
   , TauabcTheorem (..)
   , tauabc
+  , tauA
+  , TauabcdTheorem (..)
+  , tauabcd
   ) where
 
-import Control.Arrow
-import Data.Ratio ((%))
+import Control.Arrow hiding ((<+>))
+import Data.Function
+import Data.Maybe
+import Data.Ratio
 import Data.Ord   (comparing)
-import Data.List  (minimumBy)
+import Data.List  (minimumBy, sort)
 import Text.PrettyPrint.Leijen
+import Data.Function.Memoize    (memoize, deriveMemoizable)
 
 import Math.ExpPairs
+import Math.ExpPairs.Ivic
 
 -- |Special type to specify the theorem of Krätzel1988,
 -- which provided the best estimate of Θ(a, b)
@@ -58,28 +68,35 @@ instance Pretty TauabTheorem where
 divideResult :: Real a => a -> (b, OptimizeResult) -> (b, OptimizeResult)
 divideResult d = second (\o -> o {optimalValue = optimalValue o / Finite (toRational d)})
 
+tauab' :: Rational -> Rational -> (TauabTheorem, OptimizeResult)
+tauab' a b = minimumBy (comparing snd) [kr511a, kr511b, kr512a, kr512b]
+  where
+    kr511a = (Kr511a, optimize
+      [K 2 + L 2 - 1 :/: M (a+b)]
+      [L (2 * a) >=. K (2 * b) + M a])
+    kr511b = (Kr511b, optimize
+      [K 1 :/: K b - L a + M a]
+      [K (2 * b) + M a >. L (2 * a)])
+    kr512a = (Kr512a, simulateOptimize r)
+      where
+        r = if 11*a >= 8*b then 19/29/(a+b) else 1%1
+    kr512b = if 11*a >= 8*b then kr512a else (Kr512b, optimize
+      [L 8 - K 11 - 4 :/: L (29 * a) - K (29 * b) + M (4*b-20*a)]
+      [ L (2 * a) >=. K (2 * b) + M a
+      , 4 >. K 29
+      , K 29 + L 29 >. 24
+      ])
+
 -- |Compute Θ(a, b) for given a and b.
 tauab :: Integer -> Integer -> (TauabTheorem, OptimizeResult)
-tauab a' b'
-  | d /= 1 = divideResult d $ tauab (a' `div` d) (b' `div` d) where
-      d = gcd a' b'
-tauab a' b' = minimumBy (comparing (optimalValue . snd)) [kr511a, kr511b, kr512a, kr512b] where
-  a = toRational a'
-  b = toRational b'
-  kr511a = (Kr511a, optimize
-    [K 2 + L 2 - 1 :/: M (a+b)]
-    [L (2 * a) >=. K (2 * b) + M a])
-  kr511b = (Kr511b, optimize
-    [K 1 :/: K b - L a + M a]
-    [K (2 * b) + M a >. L (2 * a)])
-  kr512a = (Kr512a, simulateOptimize r) where
-    r = if 11*a >= 8*b then 19/29/(a+b) else 1%1
-  kr512b = if 11*a >= 8*b then kr512a else (Kr512b, optimize
-    [L 8 - K 11 - 4 :/: L (29 * a) - K (29 * b) + M (4*b-20*a)]
-    [ L (2 * a) >=. K (2 * b) + M a
-    , 4 >. K 29
-    , K 29 + L 29 >. 24
-    ])
+tauab a b
+  | d /= 1 = divideResult d $ tauab (a `div` d) (b `div` d)
+    where
+      d = a `gcd` b
+tauab a b = tauab' a' b'
+  where
+    [a', b'] = sort $ map toRational [a, b]
+
 
 -- |Special type to specify the theorem of Krätzel1988,
 -- which provided the best estimate of Θ(a, b, c)
@@ -110,35 +127,217 @@ instance Pretty TauabcTheorem where
   pretty (Tauab t) = pretty t
   pretty t         = pretty (show t)
 
+tauabc' :: Rational -> Rational -> Rational -> (TauabcTheorem, OptimizeResult)
+tauabc' a b c = minimumBy (comparing snd) [kr61, kr62, kr63, kr64, kr65, kr66]
+  where
+    abc = a + b + c
+    kr61
+      | c<a+b = (Kr61, simulateOptimize $ 2/abc)
+      | optimalValue optRes < Finite (recip c) = (Kr61, simulateOptimize $ 1/c)
+      | otherwise = (Tauab th, optRes)
+      where
+        (th, optRes) = tauab' a b
+    kr62 = (Kr62, optimize
+      [K 2 + L 2 :/: M (a + b + c)]
+      [ L a >=. K (b + c)
+      , M (a + b + c) >=. K (2 * c) + L (2 * c)
+      ])
+    kr63 = (Kr63, optimize
+      [K 4 + L 2 + 3 :/: K (2 * abc) + M (3 * abc)]
+      [scaleLF (2 * a) (K 1 + L 1 + 1) >=. scaleLF (b + c) (K 2 + 1)])
+    kr64 = (Kr64, simulateOptimize r) where
+      r = recip abc * minimum (abc:[2-4*(k-1)%(3*2^k-4) | k<-[1..maxk], (3*2^k-2*k-4)%1 * a >= 2 * (b+c), (3*2^k-8)%1 * (a+b) >= (3*2^k-4*k+4)%1 * c])
+      maxk = 4 `max` floor (logBase 2 (fromRational $ b+c) :: Double)
+    kr65 = (Kr65, simulateOptimize r) where
+      r = if 7*a>=2*(b+c) && 4*(a+b)>=5*c then 3%2/abc else 1%1
+    kr66 = (Kr66, simulateOptimize r) where
+      r = if 18*a>=7*(b+c) && 2*(a+b)>=3*c then 25%17/abc else 1%1
+
 -- |Compute Θ(a, b, c) for given a, b and c.
 tauabc :: Integer -> Integer -> Integer -> (TauabcTheorem, OptimizeResult)
-tauabc a' b' c'
-  | d /= 1 = divideResult d $ tauabc (a' `div` d) (b' `div` d) (c' `div` d) where
-      d = gcd (gcd a' b') c'
 tauabc 1 1 1 = (Kolesnik, simulateOptimize $ 43%96)
-tauabc a' b' c' = minimumBy (comparing (optimalValue . snd)) [kr61, kr62, kr63, kr64, kr65, kr66] where
-  a = toRational a'
-  b = toRational b'
-  c = toRational c'
-  abc = a + b + c
-  kr61
-    | c<a+b = (Kr61, simulateOptimize $ 2/abc)
-    | optimalValue optRes < Finite (recip c) = (Kr61, simulateOptimize $ 1/c)
-    | otherwise = (Tauab th, optRes)
+tauabc a b c
+  | d /= 1 = divideResult d $ tauabc (a `div` d) (b `div` d) (c `div` d)
     where
-      (th, optRes) = tauab a' b'
-  kr62 = (Kr62, optimize
-    [K 2 + L 2 :/: M (a + b + c)]
-    [ L a >=. K (b + c)
-    , M (a + b + c) >=. K (2 * c) + L (2 * c)
-    ])
-  kr63 = (Kr63, optimize
-    [K 4 + L 2 + 3 :/: K (2 * abc) + M (3 * abc)]
-    [scaleLF (2 * a) (K 1 + L 1 + 1) >=. scaleLF (b + c) (K 2 + 1)])
-  kr64 = (Kr64, simulateOptimize r) where
-    r = recip abc * minimum (abc:[2-4*(k-1)%(3*2^k-4) | k<-[1..maxk], (3*2^k-2*k-4)%1 * a >= 2 * (b+c), (3*2^k-8)%1 * (a+b) >= (3*2^k-4*k+4)%1 * c])
-    maxk = 4 `max` floor (logBase 2 (fromRational $ b+c) :: Double)
-  kr65 = (Kr65, simulateOptimize r) where
-    r = if 7*a>=2*(b+c) && 4*(a+b)>=5*c then 3%2/abc else 1%1
-  kr66 = (Kr66, simulateOptimize r) where
-    r = if 18*a>=7*(b+c) && 2*(a+b)>=3*c then 25%17/abc else 1%1
+      d = a `gcd` b `gcd` c
+tauabc a b c = tauabc' a' b' c'
+  where
+    [a', b', c'] = sort $ map toRational [a, b, c]
+
+
+data TauabcdTheorem
+  = HeathBrown
+  | Tauabc TauabcTheorem
+  | Kr611
+  | Kr1992_2
+  | Kr1992_31
+  | Kr1992_32
+  | Kr2010_1a
+  | Kr2010_1b
+  | Kr2010_2
+  | Kr2010_3
+  | CaoZhai
+  deriving (Eq, Ord, Show)
+
+instance Pretty TauabcdTheorem where
+  pretty (Tauabc t) = pretty t
+  pretty t          = pretty (show t)
+
+tauabcd' :: Rational -> Rational -> Rational -> Rational -> (TauabcdTheorem, OptimizeResult)
+tauabcd' a1 a2 a3 a4 = minimumBy (comparing snd) [kr611, kr1992_2, kr1992_31, kr1992_32, kr2010_1a, kr2010_1b, kr2010_2, kr2010_3]
+  where
+    a12 = a1 + a2
+    a123 = a1 + a2 + a3
+    a1234 = a1 + a2 + a3 + a4
+
+    kr611
+      | optimalValue optRes3 < Finite (recip a4) = (Kr611, optimize [form] cons)
+      | otherwise = (Tauabc th3, optRes3)
+      where
+        (th3, optRes3) = tauabc' a1 a2 a3
+        form = K 2 + L 2 + 1 :/: M (a1 + a2 + a3 + a4)                              -- (6.46)
+        cons =
+          [ scaleLF a1 (L 2 - 1) >. K (2 * a4)                                      -- (6.41)
+          , scaleLF a3 (scaleLF a2 (K 2 + L 2) + M a4) <. M ((a1 + a2) * (a2 + a4)) -- (6.42)
+          , scaleLF a1 (K 2 + L 2 + 1) >=. M (a2 + a3)
+          , M (a1 + a2) >=. scaleLF a3 (K 2 + L 2 - 1)
+          ]
+
+    kr1992_2 = (Kr1992_2, optimize [form] cons)
+      where
+        form = K 3 + L 1 + 4 :/: scaleLF a1234 (K 1 + 2)
+        cons =
+          [ scaleLF a4 (K 6 + L 2 + 8) <. scaleLF a1234 (K 2 + 4)
+          , scaleLF a1234 (K 2 + 2) <=. scaleLF a1 (K 6 + L 2 + 8)
+          ]
+
+    kr1992_31 = (Kr1992_31, optimize [form] cons1)
+      where
+        form = K 1 + L 1 + 2 :/: K a1 + L a1 + M a1234
+        cons0 =
+          [ scaleLF a4 (K 1 + L 1 + 2) <. K a1 + L a1 + M a1234
+          , scaleLF a1 (K 2 + L 2 + 2) <=. scaleLF (a2 + a3) (K 2 + 1)
+          ]
+        cons1 = cons0 ++
+          [ L a1 <=. K a2
+          , scaleLF a1 (K 1 + L 1 + 1) >=. K (a2 + a3)
+          ]
+
+    kr1992_32 = (Kr1992_32, simulateOptimize $ if cond then val else 1)
+      where
+        k = 32 % 205
+        l = k + 1 % 2
+        val = (k + l + 2) / ((k + l) * a1 + a1234)
+        cond = (k + l - 2) * a4 < (k + l) * a1 + a1234
+          && 2 * (k + l + 1) * a1 <= (2 * k + l) * (a2 + a3)
+          && l * a1 >= k * a2
+          && (l - k) * (2 * k + 1) * a3 <= (2 * l - 2 * k - 1) * (k + l + 1) * a1 + (2 * k * (k - l + 1) + 1) * a2
+
+    kr2010_1a = (Kr2010_1a, simulateOptimize $ if cond then val else 1)
+      where
+        val = 45 % 19 / a1234
+        cond = 5 * a1 >= a1234 && 9 * a123 >= 34 * a1 && 9 * a12 >= 20 * a1
+
+    kr2010_1b = (Kr2010_1b, simulateOptimize $ if cond then val else 1)
+      where
+        val = 45 / (15 * a1 + 16 * a1234)
+        cond = 5 * a1 <= a1234 && a1234 <= 15%2 * a1 && 2 * a123 >= 9 * a1 && 2 * a12 >= 5 * a1
+
+    kr2010_2 = (Kr2010_2, simulateOptimize $ if cond then val else 1)
+      where
+        val = 35 / (11 * a4 + 16 * a123)
+        cond = 2 * a123 >= 3 * a4 && 34 * a1 >= 9 * a123 && 7 * a12 >= 10 * a3
+
+    kr2010_3 = (Kr2010_3, simulateOptimize $ if cond then val else 1)
+      where
+        val = 235 / (406 * a1 + 81 * a4)
+        cond = a1 == a2 && 2 * a1 == a3 && 29 * a1 >= 11 * a4
+
+
+-- |Compute Θ(a, b, c, d) for given a, b, c and d.
+tauabcd :: Integer -> Integer -> Integer -> Integer -> (TauabcdTheorem, OptimizeResult)
+tauabcd 1 1 1 1 = (HeathBrown, simulateOptimize $ 1%2)
+tauabcd a1 a2 a3 a4
+  | d /= 1 = divideResult d $ tauabcd (a1 `div` d) (a2 `div` d) (a3 `div` d) (a4 `div` d)
+    where
+      d = a1 `gcd` a2 `gcd` a3 `gcd` a4
+tauabcd a1 a2 a3 a4 = tauabcd' a1' a2' a3' a4'
+  where
+    [a1', a2', a3', a4'] = sort $ map toRational [a1, a2, a3, a4]
+
+
+data Theorem
+  = NoTheorem
+  | Ivic
+  | Ab   TauabTheorem
+  | Abc  TauabcTheorem
+  | Abcd TauabcdTheorem
+  deriving (Eq, Ord, Show)
+
+instance Pretty Theorem where
+  pretty NoTheorem = text ""
+  pretty Ivic = text "Ivic"
+  pretty (Ab t) = pretty t
+  pretty (Abc t) = pretty t
+  pretty (Abcd t) = pretty t
+
+data TauAResult
+  = Node Theorem OptimizeResult
+  | Combination TauAResult TauAResult Rational
+  deriving (Show)
+
+instance Pretty TauAResult where
+  pretty (Node th o) = pretty th <+> pretty o
+  pretty (Combination t1 t2 r) = pretty t1 <+> pretty t2 <+> pretty r
+
+
+deriveMemoizable ''Theorem
+deriveMemoizable ''TauabTheorem
+deriveMemoizable ''TauabcTheorem
+deriveMemoizable ''TauabcdTheorem
+deriveMemoizable ''TauAResult
+
+extractValue :: TauAResult -> Rational
+extractValue (Node _ o) = toRational $ optimalValue o
+extractValue (Combination _ _ r1) = r1
+
+instance Eq TauAResult where
+  (==) = (==) `on` extractValue
+
+instance Ord TauAResult where
+  compare = compare `on` extractValue
+
+tauA :: [Integer] -> TauAResult
+tauA = go' . sort
+  where
+    fi :: Integer -> Rational
+    fi = fromIntegral
+
+    go' = memoize go
+
+    go :: [Integer] -> TauAResult
+    go [] = Node NoTheorem (simulateOptimize 0)
+    go [_] = Node NoTheorem (simulateOptimize 0)
+    go [a, b]    = (\(t, o) -> Node (Ab t) o) $ tauab a b
+    go [a, b, c] = (\(t, o) -> Node (Abc t) o) $ tauabc a b c
+    go as@[a,b,c,d] = (\(t, o) -> Node (Abcd t) o) (tauabcd a b c d) `min` go608 as
+    go as@(a:_)
+      | all (== a) as
+      = Node Ivic $ simulateOptimize $ reverseMOnS 1e-6 (fromIntegral $ length as) / fi a
+    go as = go608' as
+
+    go608' = memoize go608
+
+    go608 as = minimum $ mapMaybe f [1 .. length as - 1]
+      where
+        f q = if (alphaV `max` betaV) < 1 / fi (last as)
+          then Just $ Combination alpha beta ret
+          else Nothing
+          where
+            alpha = go' $ take q as
+            alphaV = extractValue alpha
+            beta  = go' $ drop q as
+            betaV = extractValue beta
+            a0 = fi $ head as
+            aq = fi $ as !! q
+            ret = (1 - a0 * aq * alphaV * betaV) / (a0 + aq - a0 * aq * (alphaV + betaV))
