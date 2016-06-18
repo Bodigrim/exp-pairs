@@ -65,7 +65,7 @@ data InitPair' t
   -- Exactly
   -- 'Mix' a b = a * 'Corput16' + b * 'HuxW87b1' + (1-a-b) * 'Hux05'
   | Mix !t !t
-  deriving (Eq, Show, Generic)
+  deriving (Eq, Ord, Show, Generic)
 
 deriveMemoizable ''InitPair'
 
