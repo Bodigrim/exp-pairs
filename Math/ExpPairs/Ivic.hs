@@ -21,6 +21,7 @@ module Math.ExpPairs.Ivic
   , findMinAbscissa
   , mBigOnHalf
   , reverseMBigOnHalf
+  , kolpakova2011
   ) where
 
 import Data.Ratio
@@ -124,6 +125,9 @@ reverseMOnS prec m
   | otherwise        = go (2 % 3) 1
   where
     go = binarySearch (\c -> optimalValue (mOnS c) > m) Greatest prec
+
+kolpakova2011 :: Integer -> Double
+kolpakova2011 k = 1 - 1/3 * 2**(2/3) * (4.45 * fromInteger k)**(-2/3)
 
 -- | Check whether ∫_1^T   Π_i |ζ(n_i*σ+it)|^m_i dt ≪ T^(1+ε) for a given list of pairs [(n_1, m_1), ...] and fixed σ.
 checkAbscissa :: [(Rational, Rational)] -> Rational -> Bool
