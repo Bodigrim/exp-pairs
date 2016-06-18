@@ -1,6 +1,12 @@
 Changes
 =======
 
+Version 0.1.5.0
+----------------
+
+Convenient combinators for linear forms and constraints.
+New experimental functions in Math.ExpPairs.Kratzel: tauabcd and tauA for general multidimensional divisor problems.
+
 Version 0.1.4.0
 ----------------
 
