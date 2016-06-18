@@ -32,9 +32,11 @@ module Math.ExpPairs.Kratzel
   , tauab
   , TauabcTheorem (..)
   , tauabc
-  , tauA
   , TauabcdTheorem (..)
   , tauabcd
+  , Theorem (..)
+  , TauAResult (..)
+  , tauA
   ) where
 
 import Control.Arrow hiding ((<+>))
@@ -165,6 +167,8 @@ tauabc a b c = tauabc' a' b' c'
     [a', b', c'] = sort $ map toRational [a, b, c]
 
 
+-- |Special type to specify the theorem of Krätzel1988,
+-- which provided the best estimate of Θ(a, b, c, d)
 data TauabcdTheorem
   = HeathBrown
   | Tauabc TauabcTheorem
@@ -266,6 +270,8 @@ tauabcd a1 a2 a3 a4 = tauabcd' a1' a2' a3' a4'
     [a1', a2', a3', a4'] = sort $ map toRational [a1, a2, a3, a4]
 
 
+-- |Special type to specify the theorem of Krätzel1988,
+-- which provided the best estimate of Θ(a1, a2...)
 data Theorem
   = NoTheorem
   | Ivic
@@ -281,6 +287,8 @@ instance Pretty Theorem where
   pretty (Abc t) = pretty t
   pretty (Abcd t) = pretty t
 
+-- |Special type to specify the theorem of Krätzel1988,
+-- which provided the best estimate of Θ(a1, a2...)
 data TauAResult
   = Node Theorem OptimizeResult
   | Combination TauAResult TauAResult Rational
@@ -307,6 +315,7 @@ instance Eq TauAResult where
 instance Ord TauAResult where
   compare = compare `on` extractValue
 
+-- | Compute Θ(a1, a2...) for given list [a1, a2...].
 tauA :: [Integer] -> TauAResult
 tauA = go' . sort
   where

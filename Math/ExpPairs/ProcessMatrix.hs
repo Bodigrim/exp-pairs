@@ -40,6 +40,7 @@ instance Pretty Process where
 
 deriveMemoizable ''Process
 
+-- | Sequence of processes, represented as a matrix 3x3.
 newtype ProcessMatrix = ProcessMatrix (Matrix3 Integer)
   deriving (Eq, Num, Show, Pretty)
 

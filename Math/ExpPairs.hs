@@ -34,7 +34,6 @@ module Math.ExpPairs
   , Path
   , RatioInf (..)
   , RationalInf
-  , pretty
   , pattern K
   , pattern L
   , pattern M
@@ -58,22 +57,29 @@ import Math.ExpPairs.Process
 import Math.ExpPairs.Pair
 import Math.ExpPairs.RatioInf
 
+-- | For a given @c@ returns linear form @c * k@
 pattern K n = LinearForm n 0 0
+-- | For a given @c@ returns linear form @c * l@
 pattern L n = LinearForm 0 n 0
+-- | For a given @c@ returns linear form @c * m@
 pattern M n = LinearForm 0 0 n
 
+-- | Build a constraint, which states that the value of the first linear form is greater than the value of the second one.
 (>.) :: Num t => LinearForm t -> LinearForm t -> Constraint t
 lf1 >. lf2  = Constraint (lf1 - lf2) Strict
 infix 5 >.
 
+-- | Build a constraint, which states that the value of the first linear form is greater or equal to the value of the second one.
 (>=.) :: Num t => LinearForm t -> LinearForm t -> Constraint t
 lf1 >=. lf2 = Constraint (lf1 - lf2) NonStrict
 infix 5 >=.
 
+-- | Build a constraint, which states that the value of the first linear form is less than the value of the second one.
 (<.) :: Num t => LinearForm t -> LinearForm t -> Constraint t
 lf1 <. lf2  = Constraint (lf2 - lf1) Strict
 infix 5 <.
 
+-- | Build a constraint, which states that the value of the first linear form is less or equal to the value of the second one.
 (<=.) :: Num t => LinearForm t -> LinearForm t -> Constraint t
 lf1 <=. lf2 = Constraint (lf2 - lf1) NonStrict
 infix 5 <=.

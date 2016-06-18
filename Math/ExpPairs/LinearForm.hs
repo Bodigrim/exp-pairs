@@ -63,6 +63,7 @@ instance Num t => Monoid (LinearForm t) where
   mempty  = 0
   mappend = (+)
 
+-- | Multiply a linear form by a given coefficient.
 scaleLF :: (Num t, Eq t) => t -> LinearForm t -> LinearForm t
 scaleLF 0 = const 0
 scaleLF s = fmap (* s)

@@ -126,6 +126,7 @@ reverseMOnS prec m
   where
     go = binarySearch (\c -> optimalValue (mOnS c) > m) Greatest prec
 
+-- | An estimate of the symmetric multidimensional divisor function from Kolpakova, 2011.
 kolpakova2011 :: Integer -> Double
 kolpakova2011 k = 1 - 1/3 * 2**(2/3) * (4.45 * fromInteger k)**(-2/3)
 
