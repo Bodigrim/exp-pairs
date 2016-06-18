@@ -47,6 +47,7 @@ import Data.Function (on)
 import Data.Ord      (comparing)
 import Data.List     (minimumBy)
 import Data.Monoid
+import Data.Ratio
 import Text.PrettyPrint.Leijen hiding ((<$>), (<>))
 import qualified Text.PrettyPrint.Leijen as PP
 import Text.Printf
@@ -113,9 +114,14 @@ data OptimizeResult = OptimizeResult {
 deriveMemoizable ''OptimizeResult
 
 instance Pretty OptimizeResult where
-  pretty (OptimizeResult r' ip p) = pretty' r' PP.<$> pretty ip </> pretty p where
-    pretty' r@(Finite rr) = text (printf "%.6f" (fromRational rr :: Double)) <+> equals <+> pretty r
-    pretty' r = pretty r
+  pretty (OptimizeResult r' ip p) = pretty1 r' PP.<$>
+    (parens (pretty (k%m) PP.<> comma PP.<> pretty (l%m)) <+> equals <+> pretty p </> pretty ip)
+    where
+      pretty1 r@(Finite rr) = text (printf "%.6f" (fromRational rr :: Double)) <+> equals <+> pretty r
+      pretty1 r = pretty r
+
+      (k, l, m) = evalPath p $ initPairToProjValue ip
+
 
 instance Eq OptimizeResult where
   (==) = (==) `on` optimalValue
