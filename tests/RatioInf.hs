@@ -34,10 +34,14 @@ testConversion a = toRational (Finite a) == a
 
 testSuite :: TestTree
 testSuite = testGroup "RatioInf"
-  [ SC.testProperty "plus"                testPlus
-  , SC.testProperty "minus"               testMinus
-  , SC.testProperty "multiply"            testMultiply
-  , SC.testProperty "divide"              testDivide
+  [ adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
+      SC.testProperty "plus"                testPlus
+  , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
+      SC.testProperty "minus"               testMinus
+  , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
+      SC.testProperty "multiply"            testMultiply
+  , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
+      SC.testProperty "divide"              testDivide
   , SC.testProperty "infplus plus"      $ testInfPlus InfPlus
   , SC.testProperty "infplus minus"     $ testInfPlus InfMinus
   , SC.testProperty "infminus plus"     $ testInfMinus InfPlus

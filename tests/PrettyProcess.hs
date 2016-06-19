@@ -14,7 +14,8 @@ testUglifyPrettify xs = uglify (prettify xs) == xs
 
 testSuite :: TestTree
 testSuite = testGroup "PrettyProcess"
-  [ adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `min` 13)) $
+  [ adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `min` 12)) $
       SC.testProperty "uglify . prettify == id" testUglifyPrettify
-  , QC.testProperty "uglify . prettify == id" testUglifyPrettify
+  , adjustOption (\(QC.QuickCheckTests n) -> QC.QuickCheckTests (n `div` 2)) $
+      QC.testProperty "uglify . prettify == id" testUglifyPrettify
   ]

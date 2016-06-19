@@ -69,7 +69,7 @@ instance Show t => Show (Ratio01 t) where
 
 instance (Ord t, Fractional t, Arbitrary t) => Arbitrary (InitPair' t) where
   arbitrary = f <$> liftM2 (,) arbitrary arbitrary where
-    f :: (Num t, Ord t, Fractional t) => (Ratio01 t, Ratio01 t) -> InitPair' t
+    f :: (Ord t, Fractional t) => (Ratio01 t, Ratio01 t) -> InitPair' t
     f (Ratio01 x, Ratio01 y)
       | 100*x<5   = Corput01
       | 100*x<10  = Corput12
