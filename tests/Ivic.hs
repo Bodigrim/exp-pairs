@@ -79,10 +79,15 @@ testMOnSReverse1 (Ratio01 s') =
     t = toRational $ reverseMOnS 1e-3 $ optimalValue zs
 
 testMOnSReverse2 :: Ratio01 Rational -> Bool
-testMOnSReverse2 (Ratio01 s') = s' == 0 || if recip t <= recip s + 1e-3 && recip s <= recip t + 1e-3 then True else trace (show $ fromRational $ recip s - recip t) False where
-  s = 4 * recip s'
-  zs = reverseMOnS 1e-3 (Finite s)
-  t = toRational $ optimalValue $ mOnS $ toRational zs
+testMOnSReverse2 (Ratio01 s')
+  =  s' == 0
+  || t' == InfPlus || t' == InfMinus
+  || if recip t <= recip s + 1e-3 && recip s <= recip t + 1e-3 then True else trace (show $ fromRational $ recip s - recip t) False
+    where
+      s  = 4 * recip s'
+      zs = reverseMOnS 1e-3 (Finite s)
+      t' = optimalValue $ mOnS $ toRational zs
+      t  = toRational t'
 
 testMBigOnHalfReverse1 :: Positive Rational -> Bool
 testMBigOnHalfReverse1 (Positive s') = if recip t <= recip s + 2e-3 && recip s <= recip t + 1e-10 then True else trace (show $ fromRational $ recip s - recip t) False where

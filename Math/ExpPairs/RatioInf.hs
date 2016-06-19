@@ -126,6 +126,6 @@ instance Integral t => Fractional (RatioInf t) where
 
 instance Integral t => Real (RatioInf t) where
   toRational (Finite r) = toRational r
-  toRational InfPlus    = error "Cannot map infinity into Rational"
-  toRational InfMinus   = error "Cannot map infinity into Rational"
+  toRational InfPlus    = error "Cannot convert positive infinity into Rational"
+  toRational InfMinus   = error "Cannot convert negative infinity into Rational"
   {-# SPECIALIZE toRational :: RationalInf -> Rational #-}
