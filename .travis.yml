@@ -73,9 +73,9 @@ install:
 # any command which exits with a non-zero exit code causes the build to fail.
 script:
  - if [ -f configure.ac ]; then autoreconf -i; fi
- - cabal configure --enable-tests --enable-benchmarks -v2 --ghc-options="-Werror" -f check-bounds # -v2 provides useful information for debugging
+ - cabal configure --enable-tests --enable-benchmarks -v2 -f check-bounds # -v2 provides useful information for debugging
  - cabal build   # this builds all libraries and executables (including tests/benchmarks)
- - cabal test
+ - dist/build/tests/tests --smallcheck-depth=20 --quickcheck-tests=1000
  - cabal sdist   # tests that a source-distribution can be generated
 
 # Check that the resulting source distribution can be built & installed.
