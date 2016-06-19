@@ -246,7 +246,7 @@ makarovMult
 {-# SPECIALIZE makarovMult :: Matrix3 Integer -> Matrix3 Integer -> Matrix3 Integer #-}
 
 -- |Compute the determinant of a matrix.
-det :: (Num t, Ord t) => Matrix3 t -> t
+det :: Num t => Matrix3 t -> t
 det Matrix3 {..} =
   a11 * (a22 * a33 - a32 * a23)
   - a12 * (a21 * a33 - a23 * a31)
