@@ -10,8 +10,6 @@ Portability : POSIX
 Provides types and necessary instances for rational numbers, extended with infinite values. Just use 'RationalInf' instead of 'Rational' from "Data.Ratio".
 -}
 
-{-# LANGUAGE TemplateHaskell #-}
-
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Math.ExpPairs.RatioInf
@@ -21,7 +19,6 @@ module Math.ExpPairs.RatioInf
 
 import Data.Ratio (Ratio, numerator, denominator)
 import Text.PrettyPrint.Leijen
-import Data.Function.Memoize (deriveMemoizable)
 
 -- |Extends a rational type with positive and negative
 -- infinities.
@@ -33,9 +30,6 @@ data RatioInf t
   -- |Positive infinity
   | InfPlus
   deriving (Eq, Ord, Show)
-
-deriveMemoizable ''Ratio
-deriveMemoizable ''RatioInf
 
 -- |Arbitrary-precision rational numbers with positive and negative
 -- infinities.

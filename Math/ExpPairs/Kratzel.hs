@@ -25,8 +25,6 @@ He also provided a set of theorems to estimate Θ(a, b) and Θ(a, b, c).
 
 -}
 
-{-# LANGUAGE TemplateHaskell #-}
-
 module Math.ExpPairs.Kratzel
   ( TauabTheorem (..)
   , tauab
@@ -44,9 +42,11 @@ import Data.Function
 import Data.Maybe
 import Data.Ratio
 import Data.Ord   (comparing)
-import Data.List  (minimumBy, sort)
+import Data.List  (minimumBy, sort, inits, tails)
 import Text.PrettyPrint.Leijen
-import Data.Function.Memoize    (memoize, deriveMemoizable)
+
+import qualified Data.Map as M
+import qualified Data.Set as S
 
 import Math.ExpPairs
 import Math.ExpPairs.Ivic
@@ -299,12 +299,6 @@ instance Pretty TauAResult where
   pretty (Combination t1 t2 r) = pretty t1 <+> pretty t2 <+> pretty r
 
 
-deriveMemoizable ''Theorem
-deriveMemoizable ''TauabTheorem
-deriveMemoizable ''TauabcTheorem
-deriveMemoizable ''TauabcdTheorem
-deriveMemoizable ''TauAResult
-
 extractValue :: TauAResult -> Rational
 extractValue (Node _ o) = toRational $ optimalValue o
 extractValue (Combination _ _ r1) = r1
@@ -317,12 +311,16 @@ instance Ord TauAResult where
 
 -- | Compute Θ(a1, a2...) for given list [a1, a2...].
 tauA :: [Integer] -> TauAResult
-tauA = go' . sort
+tauA ys = (M.!) cache xs
   where
+    xs :: [Integer]
+    xs = sort ys
+
     fi :: Integer -> Rational
     fi = fromIntegral
 
-    go' = memoize go
+    keys  = S.fromList $ concatMap inits (tails xs)
+    cache = M.fromSet go keys
 
     go :: [Integer] -> TauAResult
     go [] = Node NoTheorem (simulateOptimize 0)
@@ -333,9 +331,7 @@ tauA = go' . sort
     go as@(a:_)
       | all (== a) as
       = Node Ivic $ simulateOptimize $ reverseMOnS 1e-6 (fromIntegral $ length as) / fi a
-    go as = go608' as
-
-    go608' = memoize go608
+    go as = go608 as
 
     go608 as = minimum $ mapMaybe f [1 .. length as - 1]
       where
@@ -343,9 +339,9 @@ tauA = go' . sort
           then Just $ Combination alpha beta ret
           else Nothing
           where
-            alpha = go' $ take q as
+            alpha = (M.!) cache $ take q as
             alphaV = extractValue alpha
-            beta  = go' $ drop q as
+            beta  = (M.!) cache $ drop q as
             betaV = extractValue beta
             a0 = fi $ head as
             aq = fi $ as !! q

@@ -5,7 +5,7 @@ Copyright   : (c) Andrew Lelechenko, 2015
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
 Stability   : experimental
-Portability : TemplateHaskell
+Portability : POSIX
 
 Transforms sequences of 'Process' into most compact (by the means of typesetting) representation using brackets and powers.
 E. g., AAAABABABA -> A^4(BA)^3.
@@ -13,17 +13,18 @@ E. g., AAAABABABA -> A^4(BA)^3.
 This module uses memoization extensively.
 -}
 {-# LANGUAGE LambdaCase      #-}
-{-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module Math.ExpPairs.PrettyProcess
   ( prettify,
     uglify,
     PrettyProcess) where
 
-import Data.List                (minimumBy)
+import Data.List                (minimumBy, inits, tails)
 import Data.Ord                 (comparing)
-import Data.Function.Memoize    (memoize, deriveMemoizable)
 import Text.PrettyPrint.Leijen
+
+import qualified Data.Map as M
+import qualified Data.Set as S
 
 import Math.ExpPairs.ProcessMatrix
 
@@ -35,8 +36,6 @@ data PrettyProcess
   deriving (Show)
 
 data PrettyProcessWithWidth = PPWL { ppwlProcess :: PrettyProcess, ppwlWidth :: Int }
-
-deriveMemoizable ''PrettyProcess
 
 instance Pretty PrettyProcess where
   pretty = \case
@@ -94,28 +93,31 @@ prettify = ppwlProcess . prettifyP
 
 -- | Find the most compact representation of the sequence of processes, keeping track of widthess.
 prettifyP :: [Process] -> PrettyProcessWithWidth
-prettifyP = memoize prettify' where
+prettifyP ps = (M.!) cache ps
+  where
+    keys = S.fromList $ concatMap inits (tails ps)
+    cache = M.fromSet alg keys
 
-prettify' :: [Process] -> PrettyProcessWithWidth
-prettify' = \case
-  []   -> annotateWithWidth (Simply [])
-  [A]  -> annotateWithWidth (Simply [A])
-  [BA] -> annotateWithWidth (Simply [BA])
-  xs   -> minimumBy (comparing ppwlWidth) yss where
-    xs'' = case asRepeat xs of
-      (_, 1)   -> annotateWithWidth (Simply xs)
-      (xs', n) -> annotateWithWidth (Repeat (prettify xs') n)
+    alg :: [Process] -> PrettyProcessWithWidth
+    alg = \case
+      []   -> annotateWithWidth (Simply [])
+      [A]  -> annotateWithWidth (Simply [A])
+      [BA] -> annotateWithWidth (Simply [BA])
+      xs   -> minimumBy (comparing ppwlWidth) yss where
+        xs'' = case asRepeat xs of
+          (_, 1)   -> annotateWithWidth (Simply xs)
+          (xs', n) -> annotateWithWidth (Repeat (ppwlProcess $ (M.!) cache xs') n)
 
-    yss = xs'' : map f bcs
+        yss = xs'' : map f bcs
 
-    bcs = takeWhile (not . null . snd) $ iterate bcf ([head xs], tail xs)
+        bcs = takeWhile (not . null . snd) $ iterate bcf ([head xs], tail xs)
 
-    bcf (_, [])    = error "prettify': unexpected second argument of bcf"
-    bcf (zs, y:ys) = (zs++[y], ys)
+        bcf (_, [])    = error "prettifyP: unexpected second argument of bcf"
+        bcf (zs, y:ys) = (zs++[y], ys)
 
-    f (bs, cs) = PPWL (Sequence bsP csP) (bsW + csW) where
-      PPWL bsP bsW = prettifyP bs
-      PPWL csP csW = prettifyP cs
+        f (bs, cs) = PPWL (Sequence bsP csP) (bsW + csW) where
+          PPWL bsP bsW = (M.!) cache  bs
+          PPWL csP csW = (M.!) cache  cs
 
 -- | Unfold back 'PrettyProcess' into the sequence of 'Process'.
 uglify :: PrettyProcess -> [Process]

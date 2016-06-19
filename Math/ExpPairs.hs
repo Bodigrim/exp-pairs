@@ -14,9 +14,9 @@ A. V. Lelechenko, Linear programming over exponent pairs. Acta Univ. Sapientiae,
 A set of useful applications can be found in
 "Math.ExpPairs.Ivic", "Math.ExpPairs.Kratzel" and "Math.ExpPairs.MenzerNowak".
 -}
+
 {-# LANGUAGE CPP             #-}
 {-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module Math.ExpPairs
   ( optimize
@@ -50,7 +50,6 @@ import Data.Ratio
 import Text.PrettyPrint.Leijen hiding ((<$>), (<>))
 import qualified Text.PrettyPrint.Leijen as PP
 import Text.Printf
-import Data.Function.Memoize (deriveMemoizable)
 
 import Math.ExpPairs.LinearForm
 import Math.ExpPairs.Process
@@ -116,8 +115,6 @@ data OptimizeResult = OptimizeResult {
   optimalPath  :: Path
   }
   deriving (Show)
-
-deriveMemoizable ''OptimizeResult
 
 instance Pretty OptimizeResult where
   pretty (OptimizeResult r' ip p) = pretty1 r' PP.<$>

@@ -5,11 +5,16 @@ Copyright   : (c) Andrew Lelechenko, 2014-2015
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
 Stability   : experimental
-Portability : TemplateHaskell
+Portability : POSIX
 
 Provides types for sequences of /A/- and /B/-processes of van der Corput. A good account on this topic can be found in /Graham S. W.,  Kolesnik G. A./ Van Der Corput's Method of Exponential Sums, Cambridge University Press, 1991, especially Ch. 5.
 -}
-{-# LANGUAGE TemplateHaskell, BangPatterns, GeneralizedNewtypeDeriving, CPP, DeriveGeneric #-}
+
+{-# LANGUAGE BangPatterns               #-}
+{-# LANGUAGE CPP                        #-}
+{-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 module Math.ExpPairs.ProcessMatrix
   ( Process (..)
   , ProcessMatrix ()
@@ -21,7 +26,6 @@ module Math.ExpPairs.ProcessMatrix
 #if __GLASGOW_HASKELL__ < 710
 import Data.Monoid           (Monoid, mempty, mappend)
 #endif
-import Data.Function.Memoize (deriveMemoizable)
 import GHC.Generics          (Generic (..))
 import Text.PrettyPrint.Leijen
 
@@ -38,13 +42,9 @@ data Process
 instance Pretty Process where
   pretty = text . show
 
-deriveMemoizable ''Process
-
 -- | Sequence of processes, represented as a matrix 3x3.
 newtype ProcessMatrix = ProcessMatrix (Matrix3 Integer)
   deriving (Eq, Num, Show, Pretty)
-
-deriveMemoizable ''ProcessMatrix
 
 instance Monoid ProcessMatrix where
   mempty = 1
