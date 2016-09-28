@@ -122,18 +122,6 @@ cons6 f = decDepth $
 instance (Serial m a, Serial m b, Serial m c, Serial m d, Serial m e, Serial m f) => Serial m (a,b,c,d,e,f) where
   series = cons6 (,,,,,)
 
-liftM6  :: (Monad m) => (a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> r) -> m a1 -> m a2 -> m a3 -> m a4 -> m a5 -> m a6 -> m r
-liftM6 f m1 m2 m3 m4 m5 m6 = do { x1 <- m1; x2 <- m2; x3 <- m3; x4 <- m4; x5 <- m5; x6 <- m6; return (f x1 x2 x3 x4 x5 x6) }
-
-instance (Arbitrary a, Arbitrary b, Arbitrary c, Arbitrary d, Arbitrary e, Arbitrary f)
-      => Arbitrary (a,b,c,d,e,f)
- where
-  arbitrary = liftM6 (,,,,,) arbitrary arbitrary arbitrary arbitrary arbitrary arbitrary
-
-  shrink (u, v, w, x, y, z) =
-    [ (u', v', w', x', y', z')
-    | (u', (v', (w', (x', (y', z'))))) <- shrink (u, (v, (w, (x, (y, z))))) ]
-
 newtype Sorted t = Sorted t
   deriving (Show, Generic)
 

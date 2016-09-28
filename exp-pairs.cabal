@@ -55,7 +55,7 @@ test-suite tests
                        tasty-quickcheck,
                        tasty-smallcheck,
                        tasty-hunit,
-                       QuickCheck >=2.4.2,
+                       QuickCheck >=2.9,
                        smallcheck >=0.2.1,
                        exp-pairs,
                        matrix >=0.1,
