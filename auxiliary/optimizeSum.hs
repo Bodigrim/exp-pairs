@@ -21,7 +21,7 @@ import Data.Ord
 import Control.Arrow hiding ((<+>))
 import Data.Function
 
-import Text.PrettyPrint.Leijen hiding ((<>), group)
+import Data.Text.Prettyprint.Doc hiding ((<>), group)
 
 import Prelude hiding (foldl, foldl1, maximum, mapM_, minimum, sum, concat)
 

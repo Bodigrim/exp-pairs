@@ -24,7 +24,7 @@ module Math.ExpPairs.Process
 
 import GHC.Generics             (Generic)
 import Data.Monoid
-import Text.PrettyPrint.Leijen hiding ((<>))
+import Data.Text.Prettyprint.Doc hiding ((<>))
 
 import Math.ExpPairs.ProcessMatrix
 import Math.ExpPairs.PrettyProcess

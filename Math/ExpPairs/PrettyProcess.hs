@@ -14,14 +14,16 @@ This module uses memoization extensively.
 -}
 {-# LANGUAGE LambdaCase      #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
+{-# OPTIONS_GHC -fno-warn-unused-imports #-}
 module Math.ExpPairs.PrettyProcess
   ( prettify,
     uglify,
     PrettyProcess) where
 
 import Data.List                (minimumBy, inits, tails)
+import Data.Monoid              (mempty)
 import Data.Ord                 (comparing)
-import Text.PrettyPrint.Leijen
+import Data.Text.Prettyprint.Doc
 
 import qualified Data.Map as M
 import qualified Data.Set as S
@@ -39,11 +41,11 @@ data PrettyProcessWithWidth = PPWL { ppwlProcess :: PrettyProcess, ppwlWidth :: 
 
 instance Pretty PrettyProcess where
   pretty = \case
-    Simply xs    -> hsep (map (text . show) xs)
-    Repeat _  0  -> empty
+    Simply xs    -> hsep (map (pretty . show) xs)
+    Repeat _  0  -> mempty
     Repeat xs 1  -> pretty xs
-    Repeat (Simply [A]) n -> text (show A) <> char '^' <> int n
-    Repeat xs n  -> parens (pretty xs) <> char '^' <> int n
+    Repeat (Simply [A]) n -> pretty (show A) <> pretty "^" <> pretty n
+    Repeat xs n  -> parens (pretty xs) <> pretty "^" <> pretty n
     Sequence a b -> pretty a <+> pretty b
 
 -- | Width of the bracket.

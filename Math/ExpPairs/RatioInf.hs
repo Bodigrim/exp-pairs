@@ -18,7 +18,7 @@ module Math.ExpPairs.RatioInf
   ) where
 
 import Data.Ratio (Ratio, numerator, denominator)
-import Text.PrettyPrint.Leijen
+import Data.Text.Prettyprint.Doc
 
 -- |Extends a rational type with positive and negative
 -- infinities.
@@ -36,11 +36,11 @@ data RatioInf t
 type RationalInf = RatioInf Integer
 
 instance (Integral t, Pretty t) => Pretty (RatioInf t) where
-  pretty InfMinus   = text "-Inf"
+  pretty InfMinus   = pretty "-Inf"
   pretty (Finite x)
     | denominator x == 1 = pretty (numerator x)
-    | otherwise          = pretty (numerator x) <+> char '/' <+> pretty (denominator x)
-  pretty InfPlus    = text "+Inf"
+    | otherwise          = pretty (numerator x) <+> pretty "/" <+> pretty (denominator x)
+  pretty InfPlus    = pretty "+Inf"
 
 instance Integral t => Num (RatioInf t) where
   InfMinus + InfPlus = error "Cannot add up negative and positive infinities"

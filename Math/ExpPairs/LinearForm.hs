@@ -30,7 +30,7 @@ import Data.Monoid    (Monoid, mempty, mappend)
 #endif
 import Data.Ratio     (numerator, denominator)
 import GHC.Generics   (Generic (..))
-import Text.PrettyPrint.Leijen
+import Data.Text.Prettyprint.Doc
 
 import Math.ExpPairs.RatioInf
 
@@ -44,12 +44,12 @@ instance NFData t => NFData (LinearForm t) where
   rnf = rnf . toList
 
 instance (Num t, Eq t, Pretty t) => Pretty (LinearForm t) where
-  pretty (LinearForm 0 0 0) = char '0'
+  pretty (LinearForm 0 0 0) = pretty "0"
   pretty (LinearForm a b c) = cat $ punctuate plus $ mapMaybe f [(a, 'k'), (b, 'l'), (c, 'm')] where
-    plus = space <> char '+' <> space
+    plus = space <> pretty "+" <> space
     f (0, _) = Nothing
-    f (1, t) = Just (char t)
-    f (r, t) = Just (pretty r <+> char '*' <+> char t)
+    f (1, t) = Just (pretty t)
+    f (r, t) = Just (pretty r <+> pretty "*" <+> pretty t)
 
 instance Num t => Num (LinearForm t) where
   (LinearForm a b c) + (LinearForm d e f) = LinearForm (a+d) (b+e) (c+f)
@@ -84,7 +84,7 @@ data RationalForm t = (LinearForm t) :/: (LinearForm t)
 infix 5 :/:
 
 instance (Num t, Eq t, Pretty t) => Pretty (RationalForm t) where
-  pretty (l1 :/: l2) = parens (pretty l1) </> parens (pretty l2)
+  pretty (l1 :/: l2) = parens (pretty l1) <> softline <> parens (pretty l2)
 
 instance NFData t => NFData (RationalForm t) where
   rnf = rnf . toList
@@ -122,15 +122,15 @@ data IneqType
   deriving (Eq, Ord, Show, Enum, Bounded, Generic)
 
 instance Pretty IneqType where
-  pretty Strict    = text ">"
-  pretty NonStrict = text ">="
+  pretty Strict    = pretty ">"
+  pretty NonStrict = pretty ">="
 
 -- |A linear constraint of two variables.
 data Constraint t = Constraint !(LinearForm t) !IneqType
   deriving (Eq, Show, Functor, Foldable, Generic)
 
 instance (Num t, Eq t, Pretty t) => Pretty (Constraint t) where
-  pretty (Constraint lf ineq) = pretty lf <+> pretty ineq <+> int 0
+  pretty (Constraint lf ineq) = pretty lf <+> pretty ineq <+> pretty "0"
 
 instance NFData t => NFData (Constraint t) where
   rnf (Constraint l i) = i `seq` rnf l

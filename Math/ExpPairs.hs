@@ -47,8 +47,8 @@ import Data.Ord      (comparing)
 import Data.List     (minimumBy)
 import Data.Monoid
 import Data.Ratio
-import Text.PrettyPrint.Leijen hiding ((<$>), (<>))
-import qualified Text.PrettyPrint.Leijen as PP
+import Data.Text.Prettyprint.Doc hiding ((<>))
+import qualified Data.Text.Prettyprint.Doc as PP
 import Text.Printf
 
 import Math.ExpPairs.LinearForm
@@ -117,10 +117,10 @@ data OptimizeResult = OptimizeResult {
   deriving (Show)
 
 instance Pretty OptimizeResult where
-  pretty (OptimizeResult r' ip p) = pretty1 r' PP.<$>
-    (parens (pretty (k%m) PP.<> comma PP.<> pretty (l%m)) <+> equals <+> pretty p </> pretty ip)
+  pretty (OptimizeResult r' ip p) = pretty1 r' <> PP.line <>
+    (parens (pretty (k%m) PP.<> comma PP.<> pretty (l%m)) <+> equals <+> pretty p <> softline <> pretty ip)
     where
-      pretty1 r@(Finite rr) = text (printf "%.6f" (fromRational rr :: Double)) <+> equals <+> pretty r
+      pretty1 r@(Finite rr) = pretty (printf "%.6f" (fromRational rr :: Double) :: String) <+> equals <+> pretty r
       pretty1 r = pretty r
 
       (k, l, m) = evalPath p $ initPairToProjValue ip

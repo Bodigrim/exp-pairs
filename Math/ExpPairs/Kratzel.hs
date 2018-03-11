@@ -43,7 +43,7 @@ import Data.Maybe
 import Data.Ratio
 import Data.Ord   (comparing)
 import Data.List  (minimumBy, sort, inits, tails)
-import Text.PrettyPrint.Leijen
+import Data.Text.Prettyprint.Doc
 
 import qualified Data.Map as M
 import qualified Data.Set as S
@@ -65,7 +65,7 @@ data TauabTheorem
   deriving (Eq, Ord, Enum, Bounded, Show)
 
 instance Pretty TauabTheorem where
-  pretty = text . show
+  pretty = pretty . show
 
 divideResult :: Real a => a -> (b, OptimizeResult) -> (b, OptimizeResult)
 divideResult d = second (\o -> o {optimalValue = optimalValue o / Finite (toRational d)})
@@ -281,8 +281,8 @@ data Theorem
   deriving (Eq, Ord, Show)
 
 instance Pretty Theorem where
-  pretty NoTheorem = text ""
-  pretty Ivic = text "Ivic"
+  pretty NoTheorem = pretty ""
+  pretty Ivic = pretty "Ivic"
   pretty (Ab t) = pretty t
   pretty (Abc t) = pretty t
   pretty (Abcd t) = pretty t

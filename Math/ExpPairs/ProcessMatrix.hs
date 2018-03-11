@@ -27,7 +27,7 @@ module Math.ExpPairs.ProcessMatrix
 import Data.Monoid           (Monoid, mempty, mappend)
 #endif
 import GHC.Generics          (Generic (..))
-import Text.PrettyPrint.Leijen
+import Data.Text.Prettyprint.Doc
 
 import Math.ExpPairs.Matrix3
 
@@ -40,7 +40,7 @@ data Process
   deriving (Eq, Show, Read, Ord, Enum, Generic)
 
 instance Pretty Process where
-  pretty = text . show
+  pretty = pretty . show
 
 -- | Sequence of processes, represented as a matrix 3x3.
 newtype ProcessMatrix = ProcessMatrix (Matrix3 Integer)

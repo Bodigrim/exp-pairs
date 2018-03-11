@@ -33,7 +33,7 @@ import Control.DeepSeq
 import Data.Foldable  (Foldable (..), toList)
 import Data.List      (transpose)
 import GHC.Generics   (Generic (..))
-import Text.PrettyPrint.Leijen
+import Data.Text.Prettyprint.Doc
 
 -- |Matrix of order 3. Instances of 'Num' and 'Fractional'
 -- are given in terms of the multiplicative group of matrices,

@@ -30,7 +30,7 @@ module Math.ExpPairs.Pair
 import Data.Maybe
 import Data.Ratio
 import GHC.Generics (Generic (..))
-import Text.PrettyPrint.Leijen
+import Data.Text.Prettyprint.Doc
 
 -- |Vertices of the triangle of initial exponent pairs.
 data Triangle
@@ -49,7 +49,7 @@ data Triangle
   deriving (Show, Bounded, Enum, Eq, Ord, Generic)
 
 instance Pretty Triangle where
-  pretty = text . show
+  pretty = pretty . show
 
 -- |Type to hold an initial exponent pair.
 data InitPair' t
@@ -69,17 +69,17 @@ data InitPair' t
 -- 'Corput16', 'HuxW87b1' and 'Hux05'
 type InitPair = InitPair' Rational
 
-instance Pretty Rational where
-  pretty = rational
+instance (Integral a, Show a) => Pretty (Ratio a) where
+  pretty = pretty . show
 
 instance (Pretty t, Num t, Eq t) => Pretty (InitPair' t) where
-  pretty Corput01 = parens (rational 0     <> comma <+> rational 1)
-  pretty Corput12 = parens (rational (1%2) <> comma <+> rational (1%2))
+  pretty Corput01 = parens (pretty (0%1) <> comma <+> pretty (1%1))
+  pretty Corput12 = parens (pretty (1%2) <> comma <+> pretty (1%2))
   pretty (Mix r1 r2) = cat $ punctuate plus $ mapMaybe f [(r1, Corput16), (r2, HuxW87b1), (1 - r1 - r2, Hux05)] where
-    plus = space <> char '+' <> space
+    plus = space <> pretty "+" <> space
     f (0, _) = Nothing
     f (1, t) = Just (pretty t)
-    f (r, t) = Just (pretty r <+> char '*' <+> pretty t)
+    f (r, t) = Just (pretty r <+> pretty "*" <+> pretty t)
 
 sect :: Integer
 sect = 30
