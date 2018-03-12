@@ -23,7 +23,8 @@ module Math.ExpPairs.Process
   ) where
 
 import GHC.Generics             (Generic)
-import Data.Monoid
+import Data.Monoid              (Monoid, mempty, mappend)
+import Data.Semigroup           (Semigroup, (<>))
 import Data.Text.Prettyprint.Doc hiding ((<>))
 
 import Math.ExpPairs.ProcessMatrix
@@ -34,9 +35,12 @@ import Math.ExpPairs.PrettyProcess
 data Path = Path !ProcessMatrix ![Process]
   deriving (Eq, Show, Generic)
 
+instance Semigroup Path where
+  Path m1 p1 <> Path m2 p2 = Path (m1 <> m2) (p1 <> p2)
+
 instance Monoid Path where
   mempty  = Path mempty mempty
-  mappend (Path m1 p1) (Path m2 p2) = Path (m1 <> m2) (p1 <> p2)
+  mappend = (<>)
 
 instance Pretty Path where
   pretty (Path _ l) = pretty (prettify l)

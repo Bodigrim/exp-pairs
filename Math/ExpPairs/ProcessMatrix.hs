@@ -23,9 +23,8 @@ module Math.ExpPairs.ProcessMatrix
   , evalMatrix
   ) where
 
-#if __GLASGOW_HASKELL__ < 710
 import Data.Monoid           (Monoid, mempty, mappend)
-#endif
+import Data.Semigroup        (Semigroup, (<>))
 import GHC.Generics          (Generic (..))
 import Data.Text.Prettyprint.Doc
 
@@ -46,9 +45,12 @@ instance Pretty Process where
 newtype ProcessMatrix = ProcessMatrix (Matrix3 Integer)
   deriving (Eq, Num, Show, Pretty)
 
+instance Semigroup ProcessMatrix where
+  ProcessMatrix a <> ProcessMatrix b = ProcessMatrix $ normalize $ a * b
+
 instance Monoid ProcessMatrix where
   mempty = 1
-  mappend (ProcessMatrix a) (ProcessMatrix b) = ProcessMatrix $ normalize $ a * b
+  mappend = (<>)
 
 process2matrix :: Process -> ProcessMatrix
 process2matrix  A = ProcessMatrix $ Matrix3 1 0 0 1 1 1  2 0 2

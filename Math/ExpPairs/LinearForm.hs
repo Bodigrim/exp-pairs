@@ -25,10 +25,9 @@ module Math.ExpPairs.LinearForm
 import Control.DeepSeq
 import Data.Foldable  (Foldable (..), toList)
 import Data.Maybe     (mapMaybe)
-#if __GLASGOW_HASKELL__ < 710
 import Data.Monoid    (Monoid, mempty, mappend)
-#endif
 import Data.Ratio     (numerator, denominator)
+import Data.Semigroup (Semigroup, (<>))
 import GHC.Generics   (Generic (..))
 import Data.Text.Prettyprint.Doc
 
@@ -59,9 +58,12 @@ instance Num t => Num (LinearForm t) where
   signum = error "Signum of LinearForm is undefined"
   fromInteger n = LinearForm 0 0 (fromInteger n)
 
+instance Num t => Semigroup (LinearForm t) where
+  (<>) = (+)
+
 instance Num t => Monoid (LinearForm t) where
   mempty  = 0
-  mappend = (+)
+  mappend = (<>)
 
 -- | Multiply a linear form by a given coefficient.
 scaleLF :: (Num t, Eq t) => t -> LinearForm t -> LinearForm t
