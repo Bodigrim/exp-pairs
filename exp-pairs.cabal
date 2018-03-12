@@ -1,5 +1,5 @@
 name:                exp-pairs
-version:             0.1.5.2
+version:             0.1.6.0
 synopsis:            Linear programming over exponent pairs
 description:         Package implements an algorithm to minimize rational objective function over the set of exponent pairs
 homepage:            https://github.com/Bodigrim/exp-pairs
