@@ -59,7 +59,7 @@ testMOnSInf (Ratio01 a') = a < 1 || (optimalValue . mOnS) a == InfPlus where
   a = fromMinus3To3 a'
 
 testZetaReverse1 :: Ratio01 Rational -> Bool
-testZetaReverse1 (Ratio01 s') = if t <= s + 2e-2 && s <= t + 2e-3 then True else trace (show $ fromRational $ s-t) False where
+testZetaReverse1 (Ratio01 s') = if t <= s + 2.1e-2 && s <= t + 2e-3 then True else trace (show $ fromRational $ s-t) False where
   s = fromHalfToOne s'
   zs = zetaOnS s
   t = toRational $ optimalValue $ reverseZetaOnS $ toRational $ optimalValue zs

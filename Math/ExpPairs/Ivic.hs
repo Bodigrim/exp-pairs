@@ -147,16 +147,16 @@ mBigOnHalf :: Rational -> OptimizeResult
 mBigOnHalf a
   | a < 4     = simulateOptimize 1
   | a < 12    = simulateOptimize $ 1+(a-4)/8
-  | a > 41614060315296730740083860226662 % 2636743270445733804969041895717 = simulateOptimize $ 1 + (a - 6) * zetaOnHalf
+  | a > 16645467 / 972266 = simulateOptimize $ 1 + (a - 6) * zetaOnHalf
   | otherwise = if Finite x >= optimalValue optRes
     then simulateOptimize x
     else optRes where
       optRes = optimize [K 1 + L 1 :/: K 1]
         [K (4 - a) + L 4 + 2 >=. 0]
-      x = 1 + 32*(a-6)/205
--- Constant 41614060315296730740083860226662 % 2636743270445733804969041895717
+      x = 1 + 13*(a-6)/84
+-- Constant 16645467 / 972266
 -- is produced by
--- optimize [K 4 + L 4 + 2 :/: K 1] [64 >. K 64 + L 77]
+-- optimize [K 4 + L 4 + 2 :/: K 1] [26 >. K 26 + L 32]
 
 -- | Try to reverse 'mBigOnHalf': for a given M(A) find maximal possible A.
 -- Sometimes, when 'mBigOnHalf' gets especially lucky exponent pair, 'reverseMBigOnHalf' can miss

@@ -42,10 +42,10 @@ data Triangle
   -- \/\/ Proceedings of the International Number
   -- Theory Conference held at Universite Laval in 1987, Walter de Gruyter, 1989, P. 417-423.
   | HuxW87b1
-  -- | An exponent pair (32\/205, 269\/410) from /Huxley M. N./
-  -- `Exponential sums and the Riemann zeta function V' \/\/
-  -- Proc. Lond. Math. Soc., 2005, Vol. 90, no. 1., P. 1--41.
-  | Hux05
+  -- |An exponent pair (13\/84, 55\/84) from /Bourgain J./
+  -- `Decoupling, exponential sums and the Riemann zeta function`
+  -- \/\/ J. Amer. Math. Soc., 2017, 30, P. 205-224.
+  | Bourgain17
   deriving (Show, Bounded, Enum, Eq, Ord, Generic)
 
 instance Pretty Triangle where
@@ -61,7 +61,7 @@ data InitPair' t
   | Corput12
   -- |Point from the interior of 'Triangle'.
   -- Exactly
-  -- 'Mix' a b = a * 'Corput16' + b * 'HuxW87b1' + (1-a-b) * 'Hux05'
+  -- 'Mix' a b = a * 'Corput16' + b * 'HuxW87b1' + (1-a-b) * 'Bourgain17'
   | Mix !t !t
   deriving (Eq, Ord, Show, Generic)
 
@@ -75,7 +75,7 @@ instance (Integral a, Show a) => Pretty (Ratio a) where
 instance (Pretty t, Num t, Eq t) => Pretty (InitPair' t) where
   pretty Corput01 = parens (pretty (0%1) <> comma <+> pretty (1%1))
   pretty Corput12 = parens (pretty (1%2) <> comma <+> pretty (1%2))
-  pretty (Mix r1 r2) = cat $ punctuate plus $ mapMaybe f [(r1, Corput16), (r2, HuxW87b1), (1 - r1 - r2, Hux05)] where
+  pretty (Mix r1 r2) = cat $ punctuate plus $ mapMaybe f [(r1, Corput16), (r2, HuxW87b1), (1 - r1 - r2, Bourgain17)] where
     plus = space <> pretty "+" <> space
     f (0, _) = Nothing
     f (1, t) = Just (pretty t)
@@ -97,7 +97,7 @@ initPairToValue (Mix r1 r2) = (x, y) where
   r3 = 1 - r1 - r2
   (x1, y1) = (1%6, 2%3)
   (x2, y2) = ( 2 %  13,  35 %  52)
-  (x3, y3) = (32 % 205, 269 % 410)
+  (x3, y3) = (13 % 84, 55 % 84)
   x = x1*r1 + x2*r2 + x3*r3
   y = y1*r1 + y2*r2 + y3*r3
 --initPairToValue (Mix r1 r2) = (13 % 1230 * r1 - 6 % 2665 * r2 + 32 % 205, 13 % 1230 * r1 + 181 % 10660 * r2 + 269 % 410)
@@ -110,9 +110,9 @@ initPairToProjValue (Mix r1 r2) = (k `div` d , l `div` d, m `div` d)
   where
     dr1 = denominator r1
     dr2 = denominator r2
-    m = 31980 * dr1 * dr2
-    k = 338 * numerator r1 * dr2 -  72 * numerator r2 * dr1 +  4992 * dr1 * dr2
-    l = 338 * numerator r1 * dr2 + 543 * numerator r2 * dr1 + 20982 * dr1 * dr2
+    m = 1092 * dr1 * dr2
+    k = 13 * numerator r1 * dr2 -  1 * numerator r2 * dr1 +  169 * dr1 * dr2
+    l = 13 * numerator r1 * dr2 + 20 * numerator r2 * dr1 + 715 * dr1 * dr2
 
     d = k `gcd` l `gcd` m
 
