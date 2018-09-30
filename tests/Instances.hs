@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, DeriveGeneric, CPP #-}
 module Instances (Ratio01 (..), Positive (..), Sorted(..)) where
 
-import Test.QuickCheck hiding (Positive)
+import Test.QuickCheck (Arbitrary(..), Gen, genericShrink, suchThat, vectorOf)
 import Test.SmallCheck.Series
 import Control.Applicative
 import Control.Monad
