@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 0.2.0.0
+----------------
+
+Switch from Huxley's exponent pair (2005) to Bourgain's one (2017).
+
 Version 0.1.5.0
 ----------------
 
