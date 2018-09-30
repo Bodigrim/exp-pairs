@@ -1,1 +1,5 @@
-resolver: lts-7.0
+flags: {}
+extra-package-dbs: []
+packages:
+- .
+resolver: nightly-2018-06-29
