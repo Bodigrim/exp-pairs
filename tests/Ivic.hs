@@ -72,7 +72,7 @@ testZetaReverse2 (Ratio01 s') = if t <= s + 1e-10 && s <= t + 4e-3 then True els
 
 testMOnSReverse1 :: Ratio01 Rational -> Bool
 testMOnSReverse1 (Ratio01 s') =
-  if t <= s + 4e-2 && s <= t + 1e-3 then True else trace (show $ fromRational $ s-t) False
+  if t <= s + 4e-2 && s <= t + 1.4e-3 then True else trace (show $ fromRational $ s-t) False
   where
     s = fromHalfToOne s'
     zs = mOnS s

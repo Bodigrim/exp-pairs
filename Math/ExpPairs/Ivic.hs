@@ -108,10 +108,10 @@ binarySearch predicate choice precision = go
 mOnSTwoThird :: RationalInf
 mOnSTwoThird = optimalValue $ mOnS $ 2 % 3
 
--- | Try to reverse 'mOnS': for a given precision and m compute minimal possible σ.
--- Implementation is usual try-and-divide search, so performance is very poor.
--- Sometimes, when 'mOnS' gets especially lucky exponent pair, 'reverseMOnS' can miss
--- real σ and returns significantly bigger value.
+-- | Try to reverse 'mOnS': for a given precision and m compute σ.
+-- Implemented as a binary search, so its performance is very poor.
+-- Since 'mOnS' is not monotonic, the result is not guaranteed to be neither
+-- minimal nor maximal possible, but usually is close enough.
 --
 -- For integer m>=4 this function corresponds to the multidimensional Dirichlet problem
 -- and returns σ from error term O(x^{σ+ε}). See Ch. 13 in Ivić2003.
