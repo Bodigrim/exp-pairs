@@ -2,4 +2,4 @@ flags: {}
 extra-package-dbs: []
 packages:
 - .
-resolver: nightly-2018-06-29
+resolver: nightly-2019-02-16
