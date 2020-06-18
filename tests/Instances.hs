@@ -97,31 +97,6 @@ instance (Arbitrary a) => Arbitrary (M3.Matrix3 a) where
 suchThatSerial :: Series m a -> (a -> Bool) -> Series m a
 suchThatSerial s p = s >>= \x -> if p x then pure x else empty
 
-cons5 :: (Serial m a, Serial m b, Serial m c, Serial m d, Serial m e) =>
-         (a->b->c->d->e->f) -> Series m f
-cons5 f = decDepth $
-  f <$> series
-    <~> series
-    <~> series
-    <~> series
-    <~> series
-
-instance (Serial m a, Serial m b, Serial m c, Serial m d, Serial m e) => Serial m (a,b,c,d,e) where
-  series = cons5 (,,,,)
-
-cons6 :: (Serial m a, Serial m b, Serial m c, Serial m d, Serial m e, Serial m f) =>
-         (a->b->c->d->e->f->g) -> Series m g
-cons6 f = decDepth $
-  f <$> series
-    <~> series
-    <~> series
-    <~> series
-    <~> series
-    <~> series
-
-instance (Serial m a, Serial m b, Serial m c, Serial m d, Serial m e, Serial m f) => Serial m (a,b,c,d,e,f) where
-  series = cons6 (,,,,,)
-
 newtype Sorted t = Sorted t
   deriving (Show, Generic)
 

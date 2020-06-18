@@ -1,5 +1,5 @@
-flags: {}
-extra-package-dbs: []
+resolver: nightly-2020-05-03
 packages:
 - .
-resolver: nightly-2019-02-16
+extra-deps:
+- smallcheck-1.2.0
