@@ -70,9 +70,12 @@ instance Pretty TauabTheorem where
 divideResult :: Real a => a -> (b, OptimizeResult) -> (b, OptimizeResult)
 divideResult d = second (\o -> o {optimalValue = optimalValue o / Finite (toRational d)})
 
-tauab' :: Rational -> Rational -> (TauabTheorem, OptimizeResult)
-tauab' a b = minimumBy (comparing snd) [kr511a, kr511b, kr512a, kr512b]
+tauab' :: Integer -> Integer -> (TauabTheorem, OptimizeResult)
+tauab' a' b' = minimumBy (comparing snd) [kr511a, kr511b, kr512a, kr512b]
   where
+    a = toRational a'
+    b = toRational b'
+
     kr511a = (Kr511a, optimize
       [K 2 + L 2 - 1 :/: M (a+b)]
       [L (2 * a) >=. K (2 * b) + M a])
@@ -97,7 +100,7 @@ tauab a b
       d = a `gcd` b
 tauab a b = tauab' a' b'
   where
-    [a', b'] = sort $ map toRational [a, b]
+    [a', b'] = sort [a, b]
 
 
 -- |Special type to specify the theorem of Krätzel1988,
@@ -129,16 +132,20 @@ instance Pretty TauabcTheorem where
   pretty (Tauab t) = pretty t
   pretty t         = pretty (show t)
 
-tauabc' :: Rational -> Rational -> Rational -> (TauabcTheorem, OptimizeResult)
-tauabc' a b c = minimumBy (comparing snd) [kr61, kr62, kr63, kr64, kr65, kr66]
+tauabc' :: Integer -> Integer -> Integer -> (TauabcTheorem, OptimizeResult)
+tauabc' a' b' c' = minimumBy (comparing snd) [kr61, kr62, kr63, kr64, kr65, kr66]
   where
+    a = toRational a'
+    b = toRational b'
+    c = toRational c'
+
     abc = a + b + c
     kr61
       | c<a+b = (Kr61, simulateOptimize $ 2/abc)
       | optimalValue optRes < Finite (recip c) = (Kr61, simulateOptimize $ 1/c)
       | otherwise = (Tauab th, optRes)
       where
-        (th, optRes) = tauab' a b
+        (th, optRes) = tauab a' b'
     kr62 = (Kr62, optimize
       [K 2 + L 2 :/: M (a + b + c)]
       [ L a >=. K (b + c)
@@ -164,7 +171,7 @@ tauabc a b c
       d = a `gcd` b `gcd` c
 tauabc a b c = tauabc' a' b' c'
   where
-    [a', b', c'] = sort $ map toRational [a, b, c]
+    [a', b', c'] = sort [a, b, c]
 
 
 -- |Special type to specify the theorem of Krätzel1988,
@@ -187,9 +194,14 @@ instance Pretty TauabcdTheorem where
   pretty (Tauabc t) = pretty t
   pretty t          = pretty (show t)
 
-tauabcd' :: Rational -> Rational -> Rational -> Rational -> (TauabcdTheorem, OptimizeResult)
-tauabcd' a1 a2 a3 a4 = minimumBy (comparing snd) [kr611, kr1992_2, kr1992_31, kr1992_32, kr2010_1a, kr2010_1b, kr2010_2, kr2010_3]
+tauabcd' :: Integer -> Integer -> Integer -> Integer -> (TauabcdTheorem, OptimizeResult)
+tauabcd' a1' a2' a3' a4' = minimumBy (comparing snd) [kr611, kr1992_2, kr1992_31, kr1992_32, kr2010_1a, kr2010_1b, kr2010_2, kr2010_3]
   where
+    a1 = toRational a1'
+    a2 = toRational a2'
+    a3 = toRational a3'
+    a4 = toRational a4'
+
     a12 = a1 + a2
     a123 = a1 + a2 + a3
     a1234 = a1 + a2 + a3 + a4
@@ -198,7 +210,7 @@ tauabcd' a1 a2 a3 a4 = minimumBy (comparing snd) [kr611, kr1992_2, kr1992_31, kr
       | optimalValue optRes3 < Finite (recip a4) = (Kr611, optimize [form] cons)
       | otherwise = (Tauabc th3, optRes3)
       where
-        (th3, optRes3) = tauabc' a1 a2 a3
+        (th3, optRes3) = tauabc a1' a2' a3'
         form = K 2 + L 2 + 1 :/: M (a1 + a2 + a3 + a4)                              -- (6.46)
         cons =
           [ scaleLF a1 (L 2 - 1) >. K (2 * a4)                                      -- (6.41)
@@ -267,7 +279,7 @@ tauabcd a1 a2 a3 a4
       d = a1 `gcd` a2 `gcd` a3 `gcd` a4
 tauabcd a1 a2 a3 a4 = tauabcd' a1' a2' a3' a4'
   where
-    [a1', a2', a3', a4'] = sort $ map toRational [a1, a2, a3, a4]
+    [a1', a2', a3', a4'] = sort [a1, a2, a3, a4]
 
 
 -- |Special type to specify the theorem of Krätzel1988,
