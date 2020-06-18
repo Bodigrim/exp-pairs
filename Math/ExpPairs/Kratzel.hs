@@ -241,7 +241,7 @@ tauabcd' a1' a2' a3' a4' = minimumBy (comparing snd) [kr611, kr1992_2, kr1992_31
 
     kr1992_32 = (Kr1992_32, simulateOptimize $ if cond then val else 1)
       where
-        k = 32 % 205
+        k = 13 % 84 -- Bourgain 2017
         l = k + 1 % 2
         val = (k + l + 2) / ((k + l) * a1 + a1234)
         cond = (k + l - 2) * a4 < (k + l) * a1 + a1234
