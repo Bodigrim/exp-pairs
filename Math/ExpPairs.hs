@@ -85,7 +85,7 @@ infix 5 <=.
 
 evalFunctional :: [InitPair] -> [InitPair] -> [RationalForm Rational] -> [Constraint Rational] -> Path -> (RationalInf, InitPair)
 evalFunctional corners interiors rfs cons path = case rs of
-  [] -> (InfPlus, error "evalFunctional: cannot find any exponential pair, which satisfies constraints")
+  [] -> (InfPlus, error $ "evalFunctional: cannot find any exponential pair, which satisfies constraints " ++ show (map pretty cons))
   _  -> minimumBy (comparing fst) rs
   where
     applyPath  = map (evalPath path . initPairToProjValue &&& id)
