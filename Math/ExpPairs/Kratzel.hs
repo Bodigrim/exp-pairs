@@ -177,11 +177,18 @@ tauabc a b c = tauabc' a' b' c'
 -- |Special type to specify the theorem of Krätzel1988,
 -- which provided the best estimate of Θ(a, b, c, d)
 data TauabcdTheorem
+  -- | Heath-Brown, 1978
   = HeathBrown
   | Tauabc TauabcTheorem
+  -- | Theorem 6.11
   | Kr611
+  -- | Krätzel, Estimates in the general divisor problem,
+  -- Abh. Math. Sem. Univ. Hamburg 62 (1992), 191-206,
+  -- Theorem 2 for p = 4
   | Kr1992_2
+  -- | Ibidem, Theorem 3 for p = 4 under condition 3.1
   | Kr1992_31
+  -- | Ibidem, Theorem 3 for p = 4 under condition 3.2
   | Kr1992_32
   | Kr2010_1a
   | Kr2010_1b
@@ -195,7 +202,7 @@ instance Pretty TauabcdTheorem where
   pretty t          = pretty (show t)
 
 tauabcd' :: Integer -> Integer -> Integer -> Integer -> (TauabcdTheorem, OptimizeResult)
-tauabcd' a1' a2' a3' a4' = minimumBy (comparing snd) [kr611, kr1992_2, kr1992_31, kr1992_32, kr2010_1a, kr2010_1b, kr2010_2, kr2010_3]
+tauabcd' a1' a2' a3' a4' = minimumBy (comparing snd) [fallback, kr611, kr1992_2, kr1992_31, kr1992_32, kr2010_1a, kr2010_1b, kr2010_2, kr2010_3]
   where
     a1 = toRational a1'
     a2 = toRational a2'
@@ -206,11 +213,16 @@ tauabcd' a1' a2' a3' a4' = minimumBy (comparing snd) [kr611, kr1992_2, kr1992_31
     a123 = a1 + a2 + a3
     a1234 = a1 + a2 + a3 + a4
 
+    (th3, optRes3) = tauabc a1' a2' a3'
+
+    fallback = (Tauabc th3, optRes3 { optimalValue = optVal })
+      where
+        optVal = optimalValue optRes3 `max` Finite (1 % a4')
+
     kr611
       | optimalValue optRes3 < Finite (recip a4) = (Kr611, optimize [form] cons)
       | otherwise = (Tauabc th3, optRes3)
       where
-        (th3, optRes3) = tauabc a1' a2' a3'
         form = K 2 + L 2 + 1 :/: M (a1 + a2 + a3 + a4)                              -- (6.46)
         cons =
           [ scaleLF a1 (L 2 - 1) >. K (2 * a4)                                      -- (6.41)

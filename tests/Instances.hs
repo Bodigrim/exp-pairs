@@ -9,6 +9,7 @@ import Control.Monad
 #if __GLASGOW_HASKELL__ < 710
 import Data.Foldable
 #endif
+import Data.List (sort)
 import GHC.Generics          (Generic (..))
 
 import Math.ExpPairs.LinearForm
@@ -114,6 +115,11 @@ instance (Ord t, Serial m t) => Serial m (Sorted (t, t, t)) where
 
 instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t)) where
   arbitrary = Sorted <$> (arbitrary `suchThat` (\(a, b, c, d) -> a <= b && b <= c && c <= d))
+  shrink (Sorted (aa, bb, cc, dd))
+    = map (\[a, b, c, d] -> Sorted (a, b, c, d))
+    $ map sort
+    $ filter ((== 4) . length)
+    $ shrink [aa, bb, cc, dd]
 
 instance (Ord t, Serial m t) => Serial m (Sorted (t, t, t, t)) where
   series = Sorted <$> (series `suchThatSerial` (\(a, b, c, d) -> a <= b && b <= c && c <= d))
@@ -130,6 +136,13 @@ instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t, t, t)) where
 instance (Ord t, Serial m t) => Serial m (Sorted (t, t, t, t, t, t)) where
   series = Sorted <$> (series `suchThatSerial` (\(a, b, c, d, e, f) -> a <= b && b <= c && c <= d && d <= e && e <= f))
 
+instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t, t, t, t, t)) where
+  arbitrary = Sorted <$> (arbitrary `suchThat` (\(a, b, c, d, e, f, g, h) -> a <= b && b <= c && c <= d && d <= e && e <= f && f <= g && g <= h))
+  shrink (Sorted (aa, bb, cc, dd, ee, ff, gg, hh))
+    = map (\[a, b, c, d, e, f, g, h] -> Sorted (a, b, c, d, e, f, g, h))
+    $ map sort
+    $ filter ((== 8) . length)
+    $ shrink [aa, bb, cc, dd, ee, ff, gg, hh]
 
 instance Arbitrary Path where
   arbitrary = foldMap (\x -> if x then aPath else baPath) <$> (arbitrary :: Gen [Bool])
