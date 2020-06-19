@@ -37,11 +37,28 @@ testAbcMonotonic (Sorted (Positive a, Positive d, Positive b, Positive e, Positi
 
 testAbcCompareLow :: Sorted (Positive Integer, Positive Integer, Positive Integer) -> Bool
 testAbcCompareLow (Sorted (Positive a, Positive b, Positive c))
-  = c >= a + b || optimalValue (snd $ tauabc a b c) >= Finite (1 % (a + b + c))
+  = optimalValue (snd $ tauabc a b c) >= Finite (1 % (a + b + c))
 
 testAbcCompareHigh :: Sorted (Positive Integer, Positive Integer, Positive Integer) -> Bool
 testAbcCompareHigh (Sorted (Positive a, Positive b, Positive c))
   = c >= a + b || optimalValue (snd $ tauabc a b c) < Finite (2 % (a + b + c))
+
+testAbcdMonotonic :: Sorted (Positive Integer, Positive Integer, Positive Integer, Positive Integer, Positive Integer, Positive Integer, Positive Integer, Positive Integer) -> Bool
+testAbcdMonotonic (Sorted (Positive a, Positive e, Positive b, Positive f, Positive c, Positive g, Positive d, Positive h))
+  = (a == e && b == f && c == g && d == h) || theoremAbcd `elem` [Kr1992_32] || zabcd >= zefgh
+    where
+      (theoremAbcd, resultAbcd) = tauabcd a b c d
+      zabcd = optimalValue resultAbcd
+      zefgh = optimalValue $ snd $ tauabcd e f g h
+
+testAbcdCompareLow :: Sorted (Positive Integer, Positive Integer, Positive Integer, Positive Integer) -> Bool
+testAbcdCompareLow (Sorted (Positive a, Positive b, Positive c, Positive d))
+  = optimalValue (snd $ tauabcd a b c d) >= Finite (1 % (a + b + c + d))
+
+-- | Kratzel1988, Eq. (6.31)
+testAbcdCompareHigh :: Sorted (Positive Integer, Positive Integer, Positive Integer, Positive Integer) -> Bool
+testAbcdCompareHigh (Sorted (Positive a, Positive b, Positive c, Positive d))
+  = d >= a + b + c || optimalValue (snd $ tauabcd a b c d) <= Finite ((a + b + c) % (a * (a + b + c + d)))
 
 etalonTauab :: Integer -> Integer -> Integer -> Integer -> Bool
 etalonTauab a b c d = Finite (c % d) >= (optimalValue . snd) (tauab a b)
@@ -55,6 +72,13 @@ testSuite = testGroup "Kratzel"
     (testEtalon 100 (\[x1, x2, x3, x4] -> etalonTauab x1 x2 x3 x4) "tests/etalon-tauab.txt")
   , testCase "etalon tauabc"
     (testEtalon 100 (\[x1, x2, x3, x4, x5] -> etalonTauabc x1 x2 x3 x4 x5) "tests/etalon-tauabc.txt")
+
+  , SC.testProperty "tauabcd compare with 1/(a+b+c+d)" testAbcdCompareLow
+  , QC.testProperty "tauabcd compare with 1/(a+b+c+d)" testAbcdCompareLow
+  , SC.testProperty "tauabcd compare with (6.31)" testAbcdCompareHigh
+  , QC.testProperty "tauabcd compare with (6.31)" testAbcdCompareHigh
+  , QC.testProperty "tauabcd monotonic" testAbcdMonotonic
+
   , SC.testProperty "tauabc compare with 1/(a+b+c)" testAbcCompareLow
   , QC.testProperty "tauabc compare with 1/(a+b+c)" testAbcCompareLow
   , SC.testProperty "tauabc compare with 2/(a+b+c)" testAbcCompareHigh
@@ -62,6 +86,7 @@ testSuite = testGroup "Kratzel"
   , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 3)) $
       SC.testProperty "tauabc monotonic" testAbcMonotonic
   , QC.testProperty "tauabc monotonic" testAbcMonotonic
+
   , SC.testProperty "tauab compare with 1/2(a+b)" testAbCompareLow
   , QC.testProperty "tauab compare with 1/2(a+b)" testAbCompareLow
   , SC.testProperty "tauab compare with 1/(a+b)" testAbCompareHigh
