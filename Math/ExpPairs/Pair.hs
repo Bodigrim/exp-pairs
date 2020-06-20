@@ -1,12 +1,13 @@
 {-|
 Module      : Math.ExpPairs.RatioInf
-Description : Initial exponent pairs
-Copyright   : (c) Andrew Lelechenko, 2014-2015
+Copyright   : (c) Andrew Lelechenko, 2014-2020
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
 
+Initial exponent pairs.
+
 Provides a set of initial exponent pairs, consisting
-of two points (0, 1), (1\/2, 1\/2) and a triangle with vertices in (1\/6, 2\/3), (2\/13, 35\/52) and (32\/205, 269\/410). The triangle is represented as a list of nodes of a net, covering the triangle.
+of two points (0, 1), (1\/2, 1\/2) and a triangle with vertices in (1\/6, 2\/3), (2\/13, 35\/52) and (13\/84, 55\/84). The triangle is represented as a list of nodes of a net, covering the triangle.
 
 Below /A/ and /B/ stands for van der Corput's processes. See "Math.ExpPairs.Process" for explanations.
 -}

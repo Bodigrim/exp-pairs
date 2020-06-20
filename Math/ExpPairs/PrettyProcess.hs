@@ -1,9 +1,10 @@
 {-|
 Module      : Math.ExpPairs.PrettyProcess
-Description : Compact representation of process sequences
-Copyright   : (c) Andrew Lelechenko, 2015
+Copyright   : (c) Andrew Lelechenko, 2015-2020
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
+
+Compact representation of process sequences
 
 Transforms sequences of 'Process' into most compact (by the means of typesetting) representation using brackets and powers.
 E. g., AAAABABABA -> A^4(BA)^3.

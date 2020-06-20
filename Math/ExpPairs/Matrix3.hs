@@ -1,23 +1,24 @@
 {-|
 Module      : Math.ExpPairs.Matrix3
-Description : Implements matrices of order 3
-Copyright   : (c) Andrew Lelechenko, 2014-2015
+Copyright   : (c) Andrew Lelechenko, 2014-2020
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
 
-Provides types and functions for matrices and vectors of order 3.
-Can be used instead of "Data.Matrix" to reduce overhead and simplify code.
+Matrices of order 3
+and efficient multiplication algorithms.
+
 -}
 
-{-# LANGUAGE DeriveFunctor   #-}
-{-# LANGUAGE DeriveFoldable  #-}
-{-# LANGUAGE DeriveGeneric   #-}
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveFunctor     #-}
+{-# LANGUAGE DeriveFoldable    #-}
+{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE Safe              #-}
 
 module Math.ExpPairs.Matrix3
   ( Matrix3 (..)
   , fromList
-  , toList
   , det
   , multCol
   , normalize
@@ -33,13 +34,7 @@ import Data.List      (transpose)
 import GHC.Generics   (Generic (..))
 import Data.Text.Prettyprint.Doc
 
--- |Matrix of order 3. Instances of 'Num' and 'Fractional'
--- are given in terms of the multiplicative group of matrices,
--- not the additive one. E. g.,
---
--- > toList 1 == [1,0,0,0,1,0,0,0,1]
--- > toList 1 /= [1,1,1,1,1,1,1,1,1]
---
+-- | Matrix of order 3.
 data Matrix3 t = Matrix3 {
   a11 :: !t,
   a12 :: !t,
@@ -51,7 +46,7 @@ data Matrix3 t = Matrix3 {
   a32 :: !t,
   a33 :: !t
   }
-  deriving (Eq, Show, Functor, Foldable, Generic)
+  deriving (Eq, Show, Functor, Foldable, Traversable, Generic)
 
 instance NFData t => NFData (Matrix3 t) where
   rnf = rnf . toList
@@ -69,7 +64,8 @@ diag n = Matrix3 {
   a33 = n
   }
 
-instance (Num t, Ord t) => Num (Matrix3 t) where
+-- | 'fromInteger' returns a diagonal matrix
+instance Num t => Num (Matrix3 t) where
   a + b = Matrix3 {
     a11 = a11 a + a11 b,
     a12 = a12 a + a12 b,
@@ -82,14 +78,10 @@ instance (Num t, Ord t) => Num (Matrix3 t) where
     a33 = a33 a + a33 b
     }
 
-  (*) = usualMult
-
-  negate = fmap negate
-
-  abs = error "abs of Matrix3 is undefined"
-
-  signum = diag . signum . det
-
+  (*)         = usualMult
+  negate      = fmap negate
+  abs         = id
+  signum      = id
   fromInteger = diag . fromInteger
 
 usualMult :: Num t => Matrix3 t -> Matrix3 t -> Matrix3 t
@@ -107,12 +99,16 @@ usualMult a b = Matrix3 {
 {-# SPECIALIZE usualMult :: Matrix3 Int -> Matrix3 Int -> Matrix3 Int #-}
 {-# SPECIALIZE usualMult :: Matrix3 Integer -> Matrix3 Integer -> Matrix3 Integer #-}
 
--- | Multiplicate matrices by 23 multiplications and 68 additions.
--- It becomes faster than usual multiplication (which requires 27 multiplications and 18 additions),
--- when matrix's elements are large (several hundred digits) integers.
+-- | Multiplicate matrices. Requires 23 multiplications and 68 additions.
+-- It becomes faster than vanilla multiplication '(*)',
+-- which requires 27 multiplications and 18 additions,
+-- when matrix's elements are large (> 700 digits) integers.
 --
 -- An algorithm follows
--- /J. Laderman./ A noncommutative algorithm for multiplying 3 × 3 matrices using 23 multiplications. Bull. Amer. Math. Soc., 82:126–128, 1976.
+-- /J. Laderman./
+-- A noncommutative algorithm for multiplying \( 3 \times 3 \)
+-- matrices using 23 multiplications.
+-- Bull. Amer. Math. Soc., 82:126–128, 1976.
 --
 -- We were able to reduce the number of additions from 98 to 68 by sofisticated choice of intermediate variables.
 ladermanMult :: Num t => Matrix3 t -> Matrix3 t -> Matrix3 t
@@ -178,13 +174,17 @@ ladermanMult
 
 -- | Multiplicate matrices under assumption that multiplication of elements is commutative.
 -- Requires 22 multiplications and 66 additions.
--- It becomes faster than usual multiplication (which requires 27 multiplications and 18 additions),
--- when matrix's elements are large (several hundred digits) integers.
+-- It becomes faster than vanilla multiplication '(*)',
+-- which requires 27 multiplications and 18 additions,
+-- when matrix's elements are large (> 700 digits) integers.
 --
 -- An algorithm follows
--- /O. M. Makarov./ An algorithm for multiplication of 3 × 3 matrices. Zh. Vychisl. Mat. i Mat. Fiz., 26(2):293–294, 320, 1986.
+-- /O. M. Makarov./
+-- An algorithm for multiplication of \( 3 \times 3 \) matrices.
+-- Zh. Vychisl. Mat. i Mat. Fiz., 26(2):293–294, 320, 1986.
 --
--- We were able to reduce the number of additions from 105 to 66 by sofisticated choice of intermediate variables.
+-- We were able to reduce the number of additions from 105 to 66
+-- by sofisticated choice of intermediate variables.
 makarovMult :: Num t => Matrix3 t -> Matrix3 t -> Matrix3 t
 makarovMult
   (Matrix3 k1 b1 c1 k2 b2 c2 k3 b3 c3)
@@ -243,14 +243,15 @@ makarovMult
     c33 = v32 + m4 + m21
 {-# SPECIALIZE makarovMult :: Matrix3 Integer -> Matrix3 Integer -> Matrix3 Integer #-}
 
--- |Compute the determinant of a matrix.
+-- | Compute the determinant of a matrix.
 det :: Num t => Matrix3 t -> t
 det Matrix3 {..} =
   a11 * (a22 * a33 - a32 * a23)
   - a12 * (a21 * a33 - a23 * a31)
   + a13 * (a21 * a32 - a22 * a31)
 
-instance (Fractional t, Ord t) => Fractional (Matrix3 t) where
+-- | 'fromRational' returns a diagonal matrix
+instance Fractional t => Fractional (Matrix3 t) where
   fromRational = diag . fromRational
 
   recip a@(Matrix3 {..}) = Matrix3 {
@@ -265,7 +266,8 @@ instance (Fractional t, Ord t) => Fractional (Matrix3 t) where
     a33 =  (a11 * a22 - a12 * a21) / d
     } where d = det a
 
--- |Convert a list of 9 elements into 'Matrix3'. Reverse conversion can be done by 'toList' from "Data.Foldable".
+-- | Convert a list of 9 elements into 'Matrix3'.
+-- Reverse conversion can be done by 'Data.Foldable.toList'.
 fromList :: [t] -> Matrix3 t
 fromList [a11, a12, a13, a21, a22, a23, a31, a32, a33] = Matrix3 {
   a11 = a11,
@@ -278,9 +280,9 @@ fromList [a11, a12, a13, a21, a22, a23, a31, a32, a33] = Matrix3 {
   a32 = a32,
   a33 = a33
   }
-fromList _ = error "The list must contain exactly 9 elements"
+fromList _ = error "fromList: input must contain exactly 9 elements"
 
--- |Divide all elements of the matrix by their greatest common
+-- | Divide all elements of the matrix by their greatest common
 -- divisor. This is useful for matrices of projective
 -- transformations to reduce the magnitude of computations.
 normalize :: Integral t => Matrix3 t -> Matrix3 t
@@ -294,7 +296,7 @@ instance Pretty t => Pretty (Matrix3 t) where
       table = [[a11, a12, a13], [a21, a22, a23], [a31, a32, a33]]
       ls = map (maximum . map (length . show)) (transpose table)
 
--- |Multiplicate a matrix by a vector (considered as a column).
+-- | Multiplicate a matrix by a column vector.
 multCol :: Num t => Matrix3 t -> (t, t, t) -> (t, t, t)
 multCol Matrix3 {..} (a1, a2, a3) = (
   a11 * a1 + a12 * a2 + a13 * a3,

@@ -1,14 +1,13 @@
 {-|
 Module      : Math.ExpPairs.RatioInf
-Description : Rational numbers with infinities
-Copyright   : (c) Andrew Lelechenko, 2014-2015
+Copyright   : (c) Andrew Lelechenko, 2014-2020
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
 
-Provides types and necessary instances for rational numbers, extended with infinite values. Just use 'RationalInf' instead of 'Rational' from "Data.Ratio".
+Rational numbers extended with infinities.
 -}
 
-{-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# LANGUAGE Safe #-}
 
 module Math.ExpPairs.RatioInf
   ( RatioInf (..)
@@ -18,15 +17,12 @@ module Math.ExpPairs.RatioInf
 import Data.Ratio (Ratio, numerator, denominator)
 import Data.Text.Prettyprint.Doc
 
--- |Extends a rational type with positive and negative
+-- | Extend 'Ratio' @t@ with \( \pm \infty  \) positive and negative
 -- infinities.
 data RatioInf t
-  -- |Negative infinity
-  = InfMinus
-  -- |Finite value
-  | Finite !(Ratio t)
-  -- |Positive infinity
-  | InfPlus
+  = InfMinus          -- ^ \( - \infty  \)
+  | Finite !(Ratio t) -- ^ Finite value
+  | InfPlus           -- ^ \( + \infty  \)
   deriving (Eq, Ord, Show)
 
 -- |Arbitrary-precision rational numbers with positive and negative

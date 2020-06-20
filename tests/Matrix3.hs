@@ -1,5 +1,6 @@
 module Matrix3 where
 
+import Data.Foldable
 import qualified Data.Matrix as M
 import qualified Math.ExpPairs.Matrix3 as M3
 
@@ -9,10 +10,10 @@ import Test.Tasty.QuickCheck as QC
 import Instances ()
 
 toM :: M3.Matrix3 a -> M.Matrix a
-toM = M.fromList 3 3 . M3.toList
+toM = M.fromList 3 3 . toList
 
 toM3 :: M.Matrix a -> M3.Matrix3 a
-toM3 = M3.fromList . M.toList
+toM3 = M3.fromList . toList
 
 testOp :: (M3.Matrix3 Integer -> M3.Matrix3 Integer -> M3.Matrix3 Integer) -> (M.Matrix Integer -> M.Matrix Integer -> M.Matrix Integer) -> M3.Matrix3 Integer -> M3.Matrix3 Integer -> Bool
 testOp op1 op2 m1 m2 = m'==m'' where

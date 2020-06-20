@@ -1,7 +1,6 @@
 {-|
 Module      : Math.ExpPairs.Ivic
-Description : Riemann zeta-function
-Copyright   : (c) Andrew Lelechenko, 2014-2015
+Copyright   : (c) Andrew Lelechenko, 2014-2020
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
 

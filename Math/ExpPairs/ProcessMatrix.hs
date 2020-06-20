@@ -1,11 +1,16 @@
 {-|
 Module      : Math.ExpPairs.ProcessMatrix
-Description : Monoidal wrapper for Matrix3
-Copyright   : (c) Andrew Lelechenko, 2014-2015
+Copyright   : (c) Andrew Lelechenko, 2014-2020
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
 
-Provides types for sequences of /A/- and /B/-processes of van der Corput. A good account on this topic can be found in /Graham S. W.,  Kolesnik G. A./ Van Der Corput's Method of Exponential Sums, Cambridge University Press, 1991, especially Ch. 5.
+Sequences of \( A \)- and \( B \)-processes
+of van der Corput's method of exponential sums.
+A good reference can be found in
+/Graham S. W., Kolesnik G. A./
+Van Der Corput's Method of Exponential Sums,
+Cambridge University Press, 1991,
+especially Ch. 5.
 -}
 
 {-# LANGUAGE BangPatterns               #-}

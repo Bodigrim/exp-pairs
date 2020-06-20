@@ -1,9 +1,10 @@
 {-|
 Module      : Math.ExpPairs.Kratzel
-Description : Asymmetric divisor problem
-Copyright   : (c) Andrew Lelechenko, 2014-2015
+Copyright   : (c) Andrew Lelechenko, 2014-2020
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
+
+Asymmetric divisor problem
 
 Let τ_{a, b}(n) denote the number of integer
 (v, w) with v^a w^b = n.

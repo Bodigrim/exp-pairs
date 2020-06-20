@@ -1,13 +1,16 @@
-{-# LANGUAGE DeriveFunctor, DeriveFoldable, DeriveGeneric, CPP #-}
 {-|
 Module      : Math.ExpPairs.LinearForm
-Description : Linear forms, rational forms and constraints
-Copyright   : (c) Andrew Lelechenko, 2014-2015
+Copyright   : (c) Andrew Lelechenko, 2014-2020
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
 
+Linear forms, rational forms and constraints
+
 Provides types for rational forms (to hold objective functions in "Math.ExpPairs") and linear contraints (to hold constraints of optimization). Both of them are built atop of projective linear forms.
 -}
+
+{-# LANGUAGE DeriveFunctor, DeriveFoldable, DeriveGeneric, CPP #-}
+
 module Math.ExpPairs.LinearForm
   ( LinearForm (..)
   , scaleLF
