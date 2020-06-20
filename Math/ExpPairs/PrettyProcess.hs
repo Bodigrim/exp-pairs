@@ -4,8 +4,6 @@ Description : Compact representation of process sequences
 Copyright   : (c) Andrew Lelechenko, 2015
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
-Stability   : experimental
-Portability : POSIX
 
 Transforms sequences of 'Process' into most compact (by the means of typesetting) representation using brackets and powers.
 E. g., AAAABABABA -> A^4(BA)^3.

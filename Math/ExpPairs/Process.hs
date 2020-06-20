@@ -4,8 +4,6 @@ Description : Processes of van der Corput
 Copyright   : (c) Andrew Lelechenko, 2014-2015
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
-Stability   : experimental
-Portability : POSIX
 
 Provides types for sequences of /A/- and /B/-processes of van der Corput. A good account on this topic can be found in /Graham S. W.,  Kolesnik G. A./ Van Der Corput's Method of Exponential Sums, Cambridge University Press, 1991, especially Ch. 5.
 -}

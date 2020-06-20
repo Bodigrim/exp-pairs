@@ -4,8 +4,6 @@ Description : Asymmetric divisor problem with congruence conditions
 Copyright   : (c) Andrew Lelechenko, 2014-2015
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
-Stability   : experimental
-Portability : POSIX
 
 Let τ_{a, b}(l_1, k_1; l_2, k_2; n) denote the number of integer
 (v, w) with v^a w^b = n, v ≡ l_1 (mod k_1), w ≡ l_2 (mod k_2).

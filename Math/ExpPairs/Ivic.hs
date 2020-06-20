@@ -4,8 +4,6 @@ Description : Riemann zeta-function
 Copyright   : (c) Andrew Lelechenko, 2014-2015
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
-Stability   : experimental
-Portability : POSIX
 
 Provides functions to compute estimates Riemann zeta-function
 ζ in a critical strip, given in  /Ivić A./ `The Riemann zeta-function: Theory and applications',

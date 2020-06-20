@@ -4,8 +4,6 @@ Description : Linear programming over exponent pairs
 Copyright   : (c) Andrew Lelechenko, 2014-2015
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
-Stability   : experimental
-Portability : POSIX
 
 Package implements an algorithm to minimize the maximum of a list of rational objective functions over the set of exponent pairs. See full description in
 A. V. Lelechenko, Linear programming over exponent pairs. Acta Univ. Sapientiae, Inform. 5, No. 2, 271-287 (2013).

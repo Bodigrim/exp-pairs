@@ -4,8 +4,6 @@ Description : Implements matrices of order 3
 Copyright   : (c) Andrew Lelechenko, 2014-2015
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
-Stability   : experimental
-Portability : POSIX
 
 Provides types and functions for matrices and vectors of order 3.
 Can be used instead of "Data.Matrix" to reduce overhead and simplify code.
