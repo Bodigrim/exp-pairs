@@ -13,7 +13,6 @@ Below /A/ and /B/ stands for van der Corput's processes. See "Math.ExpPairs.Proc
 -}
 {-# LANGUAGE DeriveGeneric        #-}
 {-# LANGUAGE FlexibleInstances    #-}
-{-# LANGUAGE TypeSynonymInstances #-}
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 

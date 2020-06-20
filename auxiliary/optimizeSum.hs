@@ -140,13 +140,13 @@ optimize ch fs = case suspicious fs of
 main :: IO ()
 main = do
   let before =
-    [ ('t', makarov1)
-    , ('u', makarov2)
-    , ('v', makarov3)
-    , ('t', laderman1)
-    , ('u', laderman2)
-    , ('v', laderman3)
-    ]
+        [ ('t', makarov1)
+        , ('u', makarov2)
+        , ('v', makarov3)
+        , ('t', laderman1)
+        , ('u', laderman2)
+        , ('v', laderman3)
+        ]
   let weightBefore = map (weight . snd) before
   let after = map (uncurry optimize) before
   let weightAfter = map weight after

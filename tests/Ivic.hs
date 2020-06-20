@@ -59,20 +59,24 @@ testMOnSInf (Ratio01 a') = a < 1 || (optimalValue . mOnS) a == InfPlus where
   a = fromMinus3To3 a'
 
 testZetaReverse1 :: Ratio01 Rational -> Bool
-testZetaReverse1 (Ratio01 s') = if t <= s + 2.1e-2 && s <= t + 2e-3 then True else trace (show $ fromRational $ s-t) False where
-  s = fromHalfToOne s'
-  zs = zetaOnS s
-  t = toRational $ optimalValue $ reverseZetaOnS $ toRational $ optimalValue zs
+testZetaReverse1 (Ratio01 s') = t <= s + 2.1e-2 && s <= t + 2e-3 ||
+  trace (show $ fromRational $ s-t) False
+  where
+    s = fromHalfToOne s'
+    zs = zetaOnS s
+    t = toRational $ optimalValue $ reverseZetaOnS $ toRational $ optimalValue zs
 
 testZetaReverse2 :: Ratio01 Rational -> Bool
-testZetaReverse2 (Ratio01 s') = if t <= s + 1e-10 && s <= t + 4e-3 then True else trace (show $ fromRational $ s-t) False where
-  s = s' * 32 / 205
-  zs = reverseZetaOnS s
-  t = toRational $ optimalValue $ zetaOnS $ toRational $ optimalValue zs
+testZetaReverse2 (Ratio01 s') = t <= s + 1e-10 && s <= t + 4e-3 ||
+  trace (show $ fromRational $ s-t) False
+  where
+    s = s' * 32 / 205
+    zs = reverseZetaOnS s
+    t = toRational $ optimalValue $ zetaOnS $ toRational $ optimalValue zs
 
 testMOnSReverse1 :: Ratio01 Rational -> Bool
-testMOnSReverse1 (Ratio01 s') =
-  if t <= s + 4e-2 && s <= t + 1.4e-3 then True else trace (show $ fromRational $ s-t) False
+testMOnSReverse1 (Ratio01 s') = t <= s + 4e-2 && s <= t + 1.4e-3 ||
+  trace (show $ fromRational $ s-t) False
   where
     s = fromHalfToOne s'
     zs = mOnS s
@@ -82,7 +86,8 @@ testMOnSReverse2 :: Ratio01 Rational -> Bool
 testMOnSReverse2 (Ratio01 s')
   =  s' == 0
   || t' == InfPlus || t' == InfMinus
-  || if recip t <= recip s + 1e-3 && recip s <= recip t + 1e-3 then True else trace (show $ fromRational $ recip s - recip t) False
+  || recip t <= recip s + 1e-3 && recip s <= recip t + 1e-3
+  || trace (show $ fromRational $ recip s - recip t) False
     where
       s  = 4 * recip s'
       zs = reverseMOnS 1e-3 (Finite s)
@@ -90,17 +95,20 @@ testMOnSReverse2 (Ratio01 s')
       t  = toRational t'
 
 testMBigOnHalfReverse1 :: Positive Rational -> Bool
-testMBigOnHalfReverse1 (Positive s') = if recip t <= recip s + 2e-3 && recip s <= recip t + 1e-10 then True else trace (show $ fromRational $ recip s - recip t) False where
-  s = s' + 4
-  zs = mBigOnHalf s
-  t = toRational $ optimalValue $ reverseMBigOnHalf $ toRational $ optimalValue zs
+testMBigOnHalfReverse1 (Positive s') = recip t <= recip s + 2e-3 && recip s <= recip t + 1e-10 ||
+  trace (show $ fromRational $ recip s - recip t) False
+  where
+    s = s' + 4
+    zs = mBigOnHalf s
+    t = toRational $ optimalValue $ reverseMBigOnHalf $ toRational $ optimalValue zs
 
 testMBigOnHalfReverse2 :: Positive Rational -> Bool
-testMBigOnHalfReverse2 (Positive s') = if recip t <= recip s + 2e-3 && recip s <= recip t + 1e-10 then True else trace (show $ fromRational $ recip s - recip t) False where
-  s = s' + 1
-  zs = reverseMBigOnHalf s
-  t = toRational $ optimalValue $ mBigOnHalf $ toRational $ optimalValue zs
-
+testMBigOnHalfReverse2 (Positive s') = recip t <= recip s + 2e-3 && recip s <= recip t + 1e-10 ||
+  trace (show $ fromRational $ recip s - recip t) False
+  where
+    s = s' + 1
+    zs = reverseMBigOnHalf s
+    t = toRational $ optimalValue $ mBigOnHalf $ toRational $ optimalValue zs
 
 etalonZetaOnS :: Integer -> Integer -> Integer -> Integer -> Bool
 etalonZetaOnS a b c d = Finite (c%d) >= optimalValue (zetaOnS $ a%b)

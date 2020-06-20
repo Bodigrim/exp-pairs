@@ -13,7 +13,6 @@ Cambridge University Press, 1991,
 especially Ch. 5.
 -}
 
-{-# LANGUAGE BangPatterns               #-}
 {-# LANGUAGE CPP                        #-}
 {-# LANGUAGE DeriveGeneric              #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -26,8 +25,6 @@ module Math.ExpPairs.ProcessMatrix
   , evalMatrix
   ) where
 
-import Data.Monoid           (Monoid, mempty, mappend)
-import Data.Semigroup        (Semigroup, (<>))
 import GHC.Generics          (Generic (..))
 import Data.Text.Prettyprint.Doc
 

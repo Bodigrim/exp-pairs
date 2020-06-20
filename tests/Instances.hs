@@ -116,8 +116,7 @@ instance (Ord t, Serial m t) => Serial m (Sorted (t, t, t)) where
 instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t)) where
   arbitrary = Sorted <$> (arbitrary `suchThat` (\(a, b, c, d) -> a <= b && b <= c && c <= d))
   shrink (Sorted (aa, bb, cc, dd))
-    = map (\[a, b, c, d] -> Sorted (a, b, c, d))
-    $ map sort
+    = map ((\[a, b, c, d] -> Sorted (a, b, c, d)) . sort)
     $ filter ((== 4) . length)
     $ shrink [aa, bb, cc, dd]
 
@@ -139,8 +138,7 @@ instance (Ord t, Serial m t) => Serial m (Sorted (t, t, t, t, t, t)) where
 instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t, t, t, t, t)) where
   arbitrary = Sorted <$> (arbitrary `suchThat` (\(a, b, c, d, e, f, g, h) -> a <= b && b <= c && c <= d && d <= e && e <= f && f <= g && g <= h))
   shrink (Sorted (aa, bb, cc, dd, ee, ff, gg, hh))
-    = map (\[a, b, c, d, e, f, g, h] -> Sorted (a, b, c, d, e, f, g, h))
-    $ map sort
+    = map ((\[a, b, c, d, e, f, g, h] -> Sorted (a, b, c, d, e, f, g, h)) . sort)
     $ filter ((== 8) . length)
     $ shrink [aa, bb, cc, dd, ee, ff, gg, hh]
 

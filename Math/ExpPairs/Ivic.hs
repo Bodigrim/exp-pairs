@@ -82,7 +82,7 @@ mOnS s
     numer = t - scaleLF (4 * (1-s)) (K 1 + L 1) + scaleLF (4 * muS) (K 2 + L 2 + 1)
     denom = scaleLF muS t
 
-    cons = if s >= 2%3 then [] else [scaleLF s (K 4 + L 8 + 2) >=. K 2 + L 6 + 1]
+    cons = [ scaleLF s (K 4 + L 8 + 2) >=. K 2 + L 6 + 1 | s < 2 % 3 ]
 
     x2' = optimize [- numer :/: denom] cons
     x2 = x2' {optimalValue = negate $ optimalValue x2'}
@@ -130,8 +130,8 @@ kolpakova2011 k = 1 - 1/3 * 2**(2/3) * (4.45 * fromInteger k)**(-2/3)
 -- | Check whether ∫_1^T   Π_i |ζ(n_i*σ+it)|^m_i dt ≪ T^(1+ε) for a given list of pairs [(n_1, m_1), ...] and fixed σ.
 checkAbscissa :: [(Rational, Rational)] -> Rational -> Bool
 checkAbscissa xs s = sum rs < Finite 1 where
-  qs = map (\(n,m) -> optimalValue (mOnS (n*s)) / Finite m) xs
-  rs = map (\q -> 1/q) qs
+  qs = map (\(n, m) -> optimalValue (mOnS (n * s)) / Finite m) xs
+  rs = map recip qs
 
 -- | Find for a given precision and list of pairs [(n_1, m_1), ...] the minimal σ
 -- such that ∫_1^T   Π_i|ζ(n_i*σ+it)|^m_i dt ≪ T^(1+ε).

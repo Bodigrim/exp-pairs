@@ -14,7 +14,6 @@ A set of useful applications can be found in
 "Math.ExpPairs.Ivic", "Math.ExpPairs.Kratzel" and "Math.ExpPairs.MenzerNowak".
 -}
 
-{-# LANGUAGE CPP             #-}
 {-# LANGUAGE PatternSynonyms #-}
 
 module Math.ExpPairs
@@ -44,7 +43,6 @@ import Control.Arrow hiding ((<+>))
 import Data.Function (on)
 import Data.Ord      (comparing)
 import Data.List     (minimumBy)
-import Data.Monoid
 import Data.Ratio
 import Data.Text.Prettyprint.Doc hiding ((<>))
 import qualified Data.Text.Prettyprint.Doc as PP
@@ -56,10 +54,15 @@ import Math.ExpPairs.Pair
 import Math.ExpPairs.RatioInf
 
 -- | For a given @c@ returns linear form @c * k@
+pattern K :: (Eq a, Num a) => a -> LinearForm a
 pattern K n = LinearForm n 0 0
+
 -- | For a given @c@ returns linear form @c * l@
+pattern L :: (Eq a, Num a) => a -> LinearForm a
 pattern L n = LinearForm 0 n 0
+
 -- | For a given @c@ returns linear form @c * m@
+pattern M :: (Eq a, Num a) => a -> LinearForm a
 pattern M n = LinearForm 0 0 n
 
 -- | Build a constraint, which states that the value of the first linear form is greater than the value of the second one.
@@ -167,5 +170,5 @@ optimize' rfs cons ret@(OptimizeResult r _ path)
       pathba  = path <> baPath
       branchB@(OptimizeResult r2' _ _) = optimize' rfs cons (OptimizeResult r1 ip1 pathba)
 
-    consBuilder rr (num :/: den) = (substituteLF (num, den, 1) (L (toRational rr) - K 1)) >. 0
+    consBuilder rr (num :/: den) = substituteLF (num, den, 1) (L (toRational rr) - K 1) >. 0
 

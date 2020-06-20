@@ -9,8 +9,6 @@ and efficient multiplication algorithms.
 
 -}
 
-{-# LANGUAGE DeriveFunctor     #-}
-{-# LANGUAGE DeriveFoldable    #-}
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE RecordWildCards   #-}
@@ -254,7 +252,7 @@ det Matrix3 {..} =
 instance Fractional t => Fractional (Matrix3 t) where
   fromRational = diag . fromRational
 
-  recip a@(Matrix3 {..}) = Matrix3 {
+  recip a@Matrix3{..} = Matrix3 {
     a11 =  (a22 * a33 - a32 * a23) / d,
     a12 = -(a21 * a33 - a23 * a31) / d,
     a13 =  (a21 * a32 - a22 * a31) / d,
@@ -292,7 +290,7 @@ normalize a = case foldl1 gcd a of
 
 instance Pretty t => Pretty (Matrix3 t) where
   pretty = vsep . map hsep . pad . fmap pretty where
-    pad (Matrix3 {..}) = map (zipWith fill ls) table where
+    pad Matrix3{..} = map (zipWith fill ls) table where
       table = [[a11, a12, a13], [a21, a22, a23], [a31, a32, a33]]
       ls = map (maximum . map (length . show)) (transpose table)
 

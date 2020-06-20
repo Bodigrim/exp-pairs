@@ -9,7 +9,8 @@ Linear forms, rational forms and constraints
 Provides types for rational forms (to hold objective functions in "Math.ExpPairs") and linear contraints (to hold constraints of optimization). Both of them are built atop of projective linear forms.
 -}
 
-{-# LANGUAGE DeriveFunctor, DeriveFoldable, DeriveGeneric, CPP #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DeriveGeneric     #-}
 
 module Math.ExpPairs.LinearForm
   ( LinearForm (..)
@@ -26,9 +27,7 @@ module Math.ExpPairs.LinearForm
 import Control.DeepSeq
 import Data.Foldable  (Foldable (..), toList)
 import Data.Maybe     (mapMaybe)
-import Data.Monoid    (Monoid, mempty, mappend)
 import Data.Ratio     (numerator, denominator)
-import Data.Semigroup (Semigroup, (<>))
 import GHC.Generics   (Generic (..))
 import Data.Text.Prettyprint.Doc
 
@@ -38,7 +37,7 @@ import Math.ExpPairs.RatioInf
 -- First argument of 'LinearForm' stands for a, second for b
 -- and third for c. Linear forms form a monoid by addition.
 data LinearForm t = LinearForm !t !t !t
-  deriving (Eq, Show, Functor, Foldable, Generic)
+  deriving (Eq, Show, Functor, Foldable, Traversable, Generic)
 
 instance NFData t => NFData (LinearForm t) where
   rnf = rnf . toList
@@ -83,7 +82,7 @@ substituteLF (k, l, m) (LinearForm a b c) = scaleLF a k + scaleLF b l + scaleLF 
 
 -- | Define a rational form of two variables, equal to the ratio of two 'LinearForm'.
 data RationalForm t = (LinearForm t) :/: (LinearForm t)
-  deriving (Eq, Show, Functor, Foldable, Generic)
+  deriving (Eq, Show, Functor, Foldable, Traversable, Generic)
 infix 5 :/:
 
 instance (Num t, Eq t, Pretty t) => Pretty (RationalForm t) where
@@ -130,7 +129,7 @@ instance Pretty IneqType where
 
 -- |A linear constraint of two variables.
 data Constraint t = Constraint !(LinearForm t) !IneqType
-  deriving (Eq, Show, Functor, Foldable, Generic)
+  deriving (Eq, Show, Functor, Foldable, Traversable, Generic)
 
 instance (Num t, Eq t, Pretty t) => Pretty (Constraint t) where
   pretty (Constraint lf ineq) = pretty lf <+> pretty ineq <+> pretty "0"

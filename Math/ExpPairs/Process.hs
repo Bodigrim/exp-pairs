@@ -22,8 +22,6 @@ module Math.ExpPairs.Process
   ) where
 
 import GHC.Generics             (Generic)
-import Data.Monoid              (Monoid, mempty, mappend)
-import Data.Semigroup           (Semigroup, (<>))
 import Data.Text.Prettyprint.Doc hiding ((<>))
 
 import Math.ExpPairs.ProcessMatrix
