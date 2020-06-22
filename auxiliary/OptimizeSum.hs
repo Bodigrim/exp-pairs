@@ -13,12 +13,11 @@ import qualified Data.Bimap as B
 import Data.String
 import Text.RawString.QQ     (r)
 
-import Data.List (groupBy, sortBy)
+import Data.List (sortOn, subsequences, mapAccumL)
 import Data.Monoid
 import Data.Foldable
 import Data.Maybe
 import Data.Ord
-import Control.Arrow hiding ((<+>))
 import Data.Function
 
 import Data.Text.Prettyprint.Doc hiding ((<>), group)
@@ -71,44 +70,42 @@ nextId bm
 instance Pretty Forms where
   pretty (Forms ids exprs) = vsep (IM.elems $ IM.mapWithKey prettyExpr exprs) where
     toStr i = fromJust $ B.lookupR i ids
-    prettyExpr lhsId expr = text (toStr lhsId) <+> equals <+> hsep (map prettyVar (IS.toDescList expr))
-    prettyVar n = char (if n < 0 then '-' else '+') <+> text (toStr (abs n))
+    prettyExpr lhsId expr = pretty (toStr lhsId) <+> equals <+> hsep (map prettyVar (IS.toDescList expr))
+    prettyVar n = pretty (if n < 0 then '-' else '+') <+> pretty (toStr (abs n))
 
 
 flipSign :: Expr -> Expr
 flipSign = IS.map negate
 
-splitRoot :: IntSet -> [IntSet]
-splitRoot s
-  | IS.null s = [s]
-  | otherwise = case IS.splitRoot s of
-      [_] -> [IS.singleton m, t'] where
-        (m, t') = IS.deleteFindMin s
-      ts -> ts
+nonTrivial :: [a] -> Bool
+nonTrivial []  = False
+nonTrivial [_] = False
+nonTrivial _   = True
 
-subsets :: Expr -> Set Expr
-subsets s
-  | IS.null s      = S.singleton mempty
-  | IS.size s == 1 = S.fromList [mempty, s]
-  | otherwise      = foldl1 f $ map subsets $ splitRoot s where
-    f xs ys = S.fromList [x <> y | x <- toList xs, y <- toList ys]
-
-nonTrivial :: Expr -> Bool
-nonTrivial s = IS.size s > 1
-
-absExpr :: Expr -> Expr
-absExpr s = if abs (IS.findMin s) < IS.findMax s then s else flipSign s
+-- | Input must be in ascending order
+absExpr :: (Num a, Ord a) => [a] -> [a]
+absExpr [] = []
+absExpr [x] = [x]
+absExpr xxs@(x : xs) = if negate x < last xs then xxs else map negate xxs
 
 nub :: Ord a => [a] -> [a]
 nub = toList . S.fromList
 
 suspicious :: Forms -> [IntSet]
-suspicious fs@(Forms _ exprs) = if null maxSusp then [] else map fst (concat $ take 2 maxSusp) where
-  subexprs = map (S.map absExpr . S.filter nonTrivial . subsets) (toList exprs)
-  maxSusp = groupBy ((==) `on` snd) . sortBy (comparing snd) . map (id &&& substitutionWeight fs) . toList . f $ subexprs
-  f :: [Set Expr] -> Set Expr
-  f [] = mempty
-  f (x:xs) = foldMap (`S.intersection` x) xs <> f xs
+suspicious fs@(Forms _ exprs) = take 8 $ sortOn (substitutionWeight fs) subexprs
+  where
+    subexprs :: [Expr]
+    subexprs = toList $ fold $ snd $ mapAccumL doExpr mempty (toList exprs)
+
+    doExpr :: [IntSet] -> Expr -> ([IntSet], Set Expr)
+    doExpr acc expr = (expr : acc
+      , S.fromList
+      $ map (IS.fromList . absExpr)
+      $ filter nonTrivial
+      $ concatMap (subsequences . IS.toList)
+      $ filter ((> 1) . IS.size)
+      $ map (IS.intersection expr) acc ++ map (IS.intersection (flipSign expr)) acc
+      )
 
 substitutionWeight:: Forms -> Expr -> Int
 substitutionWeight (Forms _ exprs) newExpr = size * count where
