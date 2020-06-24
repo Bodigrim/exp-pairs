@@ -13,7 +13,6 @@ Cambridge University Press, 1991,
 especially Ch. 5.
 -}
 
-{-# LANGUAGE CPP                        #-}
 {-# LANGUAGE DeriveGeneric              #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 

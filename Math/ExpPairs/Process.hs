@@ -9,7 +9,6 @@ Processes of van der Corput
 Provides types for sequences of /A/- and /B/-processes of van der Corput. A good account on this topic can be found in /Graham S. W.,  Kolesnik G. A./ Van Der Corput's Method of Exponential Sums, Cambridge University Press, 1991, especially Ch. 5.
 -}
 
-{-# LANGUAGE CPP             #-}
 {-# LANGUAGE DeriveGeneric   #-}
 
 module Math.ExpPairs.Process
