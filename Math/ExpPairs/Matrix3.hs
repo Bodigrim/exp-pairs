@@ -97,7 +97,7 @@ usualMult a b = Matrix3 {
 {-# SPECIALIZE usualMult :: Matrix3 Int -> Matrix3 Int -> Matrix3 Int #-}
 {-# SPECIALIZE usualMult :: Matrix3 Integer -> Matrix3 Integer -> Matrix3 Integer #-}
 
--- | Multiplicate matrices. Requires 23 multiplications and 68 additions.
+-- | Multiplicate matrices. Requires 23 multiplications and 62 additions.
 -- It becomes faster than vanilla multiplication '(*)',
 -- which requires 27 multiplications and 18 additions,
 -- when matrix's elements are large (> 700 digits) integers.
@@ -107,43 +107,49 @@ usualMult a b = Matrix3 {
 -- A noncommutative algorithm for multiplying \( 3 \times 3 \)
 -- matrices using 23 multiplications.
 -- Bull. Amer. Math. Soc., 82:126–128, 1976.
---
--- We were able to reduce the number of additions from 98 to 68 by sofisticated choice of intermediate variables.
+-- Our contribution is reducing the number of additions
+-- from 98 to 62 by well-thought choice of intermediate variables.
 ladermanMult :: Num t => Matrix3 t -> Matrix3 t -> Matrix3 t
 ladermanMult
   (Matrix3 a11 a12 a13 a21 a22 a23 a31 a32 a33)
   (Matrix3 b11 b12 b13 b21 b22 b23 b31 b32 b33)
   = Matrix3 c11 c12 c13 c21 c22 c23 c31 c32 c33 where
-    t33 = t37 + a12 - a32
-    t34 = a13 - a23
-    t35 = a13 - a33
-    t36 = a31 - a11
-    t37 = a11 - a22
+    t33 = t37 + a22
+    t34 = t38 + a32
+    t35 = t39 - a32
+    t36 = a22 - t40
+    t37 = a23 - a13
+    t38 = a31 - a11
+    t39 = a13 - a33
+    t40 = a11 - a21
 
-    u33 = b21 - b11 - b23 - b31
-    u34 = b22 - b12
-    u35 = b22 - b32
-    u36 = b33 - b31
-    u37 = b13 - b23
+    u33 = b23 - u37
+    u34 = u38 - b22
+    u35 = b11 - u39
+    u36 = b22 - u40
+    u37 = b33 - b31
+    u38 = b32 - b31
+    u39 = b13 - b23
+    u40 = b12 - b11
 
-    m1 = (t35 + t33 - a21) * b22
-    m2 = (a11 - a21) * u34
-    m3 = a22 * (u33 + b33 - u34)
-    m4 = (a21 - t37) * (b11 + u34)
-    m5 = (a22 + a21) * (b12 - b11)
+    m1 = (t35 + a12 - t36) * b22
+    m2 = t40 * (b22 - b12)
+    m3 = a22 * (b21 - u36 - u33)
+    m4 = t36 * u36
+    m5 = (a22 + a21) * u40
     m6 = a11 * b11
-    m7 = (t36 + a32) * (b11 - u37)
-    m8 = t36 * u37
+    m7 = t34 * u35
+    m8 = t38 * u39
     m9 = (a31 + a32) * (b13 - b11)
-    m10 = (t33 - a31 + t34) * b23
-    m11 = a32 * (u33 + b13 - u35)
-    m12 = (a32 - t35) * (b31 + u35)
-    m13 = t35 * u35
+    m10 = (a12 - t33 - t34) * b23
+    m11 = a32 * (u34 + b21 - u35)
+    m12 = t35 * u34
+    m13 = t39 * (b22 - b32)
     m14 = a13 * b31
-    m15 = (a33 + a32) * (b32 - b31)
-    m16 = (a22 - t34) * (b23 - u36)
-    m17 = t34 * (b23 - b33)
-    m18 = (a23 + a22) * u36
+    m15 = (a33 + a32) * u38
+    m16 = t33 * u33
+    m17 = t37 * (b33 - b23)
+    m18 = (a23 + a22) * u37
     m19 = a12 * b21
     m20 = a23 * b32
     m21 = a21 * b13
@@ -180,9 +186,8 @@ ladermanMult
 -- /O. M. Makarov./
 -- An algorithm for multiplication of \( 3 \times 3 \) matrices.
 -- Zh. Vychisl. Mat. i Mat. Fiz., 26(2):293–294, 320, 1986.
---
--- We were able to reduce the number of additions from 105 to 66
--- by sofisticated choice of intermediate variables.
+-- Our contribution is reducing the number of additions
+-- from 105 to 66 by well-thought choice of intermediate variables.
 makarovMult :: Num t => Matrix3 t -> Matrix3 t -> Matrix3 t
 makarovMult
   (Matrix3 k1 b1 c1 k2 b2 c2 k3 b3 c3)
