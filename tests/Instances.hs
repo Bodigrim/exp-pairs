@@ -1,15 +1,17 @@
+{-# LANGUAGE DeriveGeneric         #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, DeriveGeneric, CPP #-}
+
 module Instances (Ratio01 (..), Positive (..), Sorted(..)) where
 
 import Test.QuickCheck (Arbitrary(..), Gen, genericShrink, suchThat, vectorOf)
 import Test.SmallCheck.Series
 import Control.Applicative
 import Control.Monad
-#if __GLASGOW_HASKELL__ < 710
-import Data.Foldable
-#endif
 import Data.List (sort)
+import Data.Ratio
 import GHC.Generics          (Generic (..))
 
 import Math.ExpPairs.LinearForm
@@ -55,20 +57,24 @@ instance Arbitrary Process where
 instance Monad m => Serial m Process where
   series = cons0 A \/ cons0 BA
 
+-- | Does not have a 'Num' instance!
 newtype Ratio01 t = Ratio01 t
   deriving (Eq, Ord, Generic)
 
-instance (Ord t, Fractional t, Arbitrary t) => Arbitrary (Ratio01 t) where
-  arbitrary = Ratio01 <$> (arbitrary `suchThat` (\x -> 0 <= x && x <= 1))
+instance (Ord t, Integral t, Arbitrary t) => Arbitrary (Ratio01 (Ratio t)) where
+  arbitrary = do
+    denom <- arbitrary `suchThat` (> 0)
+    numer <- arbitrary
+    pure $ Ratio01 $ (numer `mod` (denom + 1)) % denom
   shrink (Ratio01 y) = Ratio01 <$> filter (\x -> 0 <= x && x <= 1) (shrink y)
 
-instance (Ord t, Fractional t, Serial m t) => Serial m (Ratio01 t) where
+instance (Ord t, Integral t, Serial m t) => Serial m (Ratio01 (Ratio t)) where
   series = Ratio01 <$> (series `suchThatSerial` (\x -> 0 <= x && x <= 1))
 
 instance Show t => Show (Ratio01 t) where
   showsPrec n (Ratio01 x) = showsPrec n x
 
-instance (Ord t, Fractional t, Arbitrary t) => Arbitrary (InitPair' t) where
+instance (Ord t, Integral t, Arbitrary t) => Arbitrary (InitPair' (Ratio t)) where
   arbitrary = f <$> liftM2 (,) arbitrary arbitrary where
     f :: (Ord t, Fractional t) => (Ratio01 t, Ratio01 t) -> InitPair' t
     f (Ratio01 x, Ratio01 y)
@@ -79,7 +85,7 @@ instance (Ord t, Fractional t, Arbitrary t) => Arbitrary (InitPair' t) where
         y' = y*(1-x)
   shrink = genericShrink
 
-instance (Ord t, Fractional t, Serial m t) => Serial m (InitPair' t) where
+instance (Ord t, Integral t, Serial m t) => Serial m (InitPair' (Ratio t)) where
   series = cons0 Corput01 \/ cons0 Corput12 \/ mseries
     where
       mseries = do
@@ -107,36 +113,78 @@ instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t)) where
 instance (Ord t, Serial m t) => Serial m (Sorted (t, t)) where
   series = Sorted <$> (series `suchThatSerial` uncurry (<=))
 
-instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t)) where
-  arbitrary = Sorted <$> (arbitrary `suchThat` (\(a, b, c) -> a <= b && b <= c))
+instance (Num t, Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t)) where
+  arbitrary = do
+    a  <- arbitrary
+    ab <- arbitrary `suchThat` (>= 0)
+    bc <- arbitrary `suchThat` (>= 0)
+    let b = a + ab; c = b + bc
+    pure $ Sorted (a, b, c)
 
-instance (Ord t, Serial m t) => Serial m (Sorted (t, t, t)) where
-  series = Sorted <$> (series `suchThatSerial` (\(a, b, c) -> a <= b && b <= c))
+instance (Num t, Ord t, Serial m t) => Serial m (Sorted (t, t, t)) where
+  series = do
+    a  <- series
+    ab <- series `suchThatSerial` (>= 0)
+    bc <- series `suchThatSerial` (>= 0)
+    let b = a + ab; c = b + bc
+    pure $ Sorted (a, b, c)
 
-instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t)) where
-  arbitrary = Sorted <$> (arbitrary `suchThat` (\(a, b, c, d) -> a <= b && b <= c && c <= d))
+instance (Num t, Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t)) where
+  arbitrary = do
+    a  <- arbitrary
+    ab <- arbitrary `suchThat` (>= 0)
+    bc <- arbitrary `suchThat` (>= 0)
+    cd <- arbitrary `suchThat` (>= 0)
+    let b = a + ab; c = b + bc; d = c + cd
+    pure $ Sorted (a, b, c, d)
   shrink (Sorted (aa, bb, cc, dd))
     = map ((\[a, b, c, d] -> Sorted (a, b, c, d)) . sort)
     $ filter ((== 4) . length)
     $ shrink [aa, bb, cc, dd]
 
-instance (Ord t, Serial m t) => Serial m (Sorted (t, t, t, t)) where
-  series = Sorted <$> (series `suchThatSerial` (\(a, b, c, d) -> a <= b && b <= c && c <= d))
+instance (Num t, Ord t, Serial m t) => Serial m (Sorted (t, t, t, t)) where
+  series = do
+    a  <- series
+    ab <- series `suchThatSerial` (>= 0)
+    bc <- series `suchThatSerial` (>= 0)
+    cd <- series `suchThatSerial` (>= 0)
+    let b = a + ab; c = b + bc; d = c + cd
+    pure $ Sorted (a, b, c, d)
 
-instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t, t)) where
-  arbitrary = Sorted <$> (arbitrary `suchThat` (\(a, b, c, d, e) -> a <= b && b <= c && c <= d && d <= e))
+instance (Num t, Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t, t, t)) where
+  arbitrary = do
+    a  <- arbitrary
+    ab <- arbitrary `suchThat` (>= 0)
+    bc <- arbitrary `suchThat` (>= 0)
+    cd <- arbitrary `suchThat` (>= 0)
+    de <- arbitrary `suchThat` (>= 0)
+    ef <- arbitrary `suchThat` (>= 0)
+    let b = a + ab; c = b + bc; d = c + cd; e = d + de; f = e + ef
+    pure $ Sorted (a, b, c, d, e, f)
 
-instance (Ord t, Serial m t) => Serial m (Sorted (t, t, t, t, t)) where
-  series = Sorted <$> (series `suchThatSerial` (\(a, b, c, d, e) -> a <= b && b <= c && c <= d && d <= e))
+instance (Num t, Ord t, Serial m t) => Serial m (Sorted (t, t, t, t, t, t)) where
+  series = do
+    a  <- series
+    ab <- series `suchThatSerial` (>= 0)
+    bc <- series `suchThatSerial` (>= 0)
+    cd <- series `suchThatSerial` (>= 0)
+    de <- series `suchThatSerial` (>= 0)
+    ef <- series `suchThatSerial` (>= 0)
+    let b = a + ab; c = b + bc; d = c + cd; e = d + de; f = e + ef
+    pure $ Sorted (a, b, c, d, e, f)
 
-instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t, t, t)) where
-  arbitrary = Sorted <$> (arbitrary `suchThat` (\(a, b, c, d, e, f) -> a <= b && b <= c && c <= d && d <= e && e <= f))
-
-instance (Ord t, Serial m t) => Serial m (Sorted (t, t, t, t, t, t)) where
-  series = Sorted <$> (series `suchThatSerial` (\(a, b, c, d, e, f) -> a <= b && b <= c && c <= d && d <= e && e <= f))
-
-instance (Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t, t, t, t, t)) where
-  arbitrary = Sorted <$> (arbitrary `suchThat` (\(a, b, c, d, e, f, g, h) -> a <= b && b <= c && c <= d && d <= e && e <= f && f <= g && g <= h))
+instance (Num t, Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t, t, t, t, t)) where
+  arbitrary = do
+    a  <- arbitrary
+    ab <- arbitrary `suchThat` (>= 0)
+    bc <- arbitrary `suchThat` (>= 0)
+    cd <- arbitrary `suchThat` (>= 0)
+    de <- arbitrary `suchThat` (>= 0)
+    ef <- arbitrary `suchThat` (>= 0)
+    fg <- arbitrary `suchThat` (>= 0)
+    gh <- arbitrary `suchThat` (>= 0)
+    let b = a + ab; c = b + bc; d = c + cd; e = d + de; f = e + ef; g = f + fg; h = g + gh
+    pure $ Sorted (a, b, c, d, e, f, g, h)
   shrink (Sorted (aa, bb, cc, dd, ee, ff, gg, hh))
     = map ((\[a, b, c, d, e, f, g, h] -> Sorted (a, b, c, d, e, f, g, h)) . sort)
     $ filter ((== 8) . length)
