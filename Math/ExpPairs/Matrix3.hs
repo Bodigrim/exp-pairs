@@ -289,9 +289,16 @@ fromList _ = error "fromList: input must contain exactly 9 elements"
 -- divisor. This is useful for matrices of projective
 -- transformations to reduce the magnitude of computations.
 normalize :: Integral t => Matrix3 t -> Matrix3 t
-normalize a = case foldl1 gcd a of
-  0 -> a
-  d -> fmap (`div` d) a
+normalize a@Matrix3{..}
+  | d <= 1    = a
+  | otherwise = fmap (`quot` d) a
+  where
+    d = go a11 [a12, a13, a21, a22, a23, a31, a32, a33]
+    go 1 _ = 1
+    go 2 xs = if all even xs then 2 else 1
+    go acc [] = acc
+    go acc (x : xs) = go (gcd acc x) xs
+{-# SPECIALIZE normalize :: Matrix3 Integer -> Matrix3 Integer #-}
 
 instance Pretty t => Pretty (Matrix3 t) where
   pretty = vsep . map hsep . pad . fmap pretty where
