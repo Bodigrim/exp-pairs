@@ -4,12 +4,8 @@ Copyright   : (c) Andrew Lelechenko, 2015-2020
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
 
-Compact representation of process sequences
-
 Transforms sequences of 'Process' into most compact (by the means of typesetting) representation using brackets and powers.
 E. g., AAAABABABA -> A^4(BA)^3.
-
-This module uses memoization extensively.
 -}
 {-# LANGUAGE LambdaCase      #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
@@ -29,7 +25,8 @@ import qualified Data.Set as S
 
 import Math.ExpPairs.ProcessMatrix
 
--- | Compact representation of the sequence of 'Process'.
+-- | Compact representation of the sequence of 'Process',
+-- using brackets and powers.
 data PrettyProcess
   = Simply [Process]
   | Repeat PrettyProcess Int
@@ -47,20 +44,21 @@ instance Pretty PrettyProcess where
     Repeat xs n  -> parens (pretty xs) <> pretty "^" <> pretty n
     Sequence a b -> pretty a <+> pretty b
 
--- | Width of the bracket.
+-- | Width of the bracket symbol.
 bracketWidth :: Int
 bracketWidth = 4
 
--- | Width of the subscript-sized character (e. g., power).
+-- | Width of the subscript-sized digit (e. g., power).
 subscriptWidth :: Int
 subscriptWidth = 4
 
--- | Width of the processes in typeset
+-- | Width of the process symbols.
 processWidth :: Process -> Int
 processWidth  A = 10
 processWidth BA = 20
 
--- | Compute the width of the 'PrettyProcess' according to 'bracketWidth', 'subscriptWidth' and 'printedWidth''.
+-- | Compute the width of the 'PrettyProcess'
+-- according to 'bracketWidth', 'subscriptWidth' and 'printedWidth''.
 printedWidth :: PrettyProcess -> Int
 printedWidth = \case
   Simply xs             -> sum (map processWidth xs)
@@ -74,7 +72,7 @@ printedWidth = \case
 annotateWithWidth :: PrettyProcess -> PrettyProcessWithWidth
 annotateWithWidth p = PPWL p (printedWidth p)
 
--- | Return non-trivial divisors of an argument.
+-- | List divisors.
 divisors :: Int -> [Int]
 divisors n = ds1 ++ reverse ds2 where
   (ds1, ds2) = unzip [ (a, n `div` a) | a <- [1 .. sqrtint n], n `mod` a == 0 ]

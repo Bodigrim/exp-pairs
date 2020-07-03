@@ -29,18 +29,21 @@ import Data.Text.Prettyprint.Doc
 
 import Math.ExpPairs.Matrix3
 
--- | Since B^2 = id, B 'Corput16' = 'Corput16', B 'Hux05' = 'Hux05' and B 'HuxW87b1' = ???, the sequence of /A/- and /B/-processes, applied to 'initPairs' can be rewritten as a sequence of 'A' and 'BA'.
+-- | Since \( B \)-process is
+-- <https://en.wikipedia.org/wiki/Involution_(mathematics) involutive>,
+-- a sequence of \( A \)- and \( B \)-processes can be rewritten as a sequence
+-- of 'A' and 'BA'.
 data Process
-  -- | /A/-process
+  -- | \( A \)-process
   = A
-  -- | /BA/-process
+  -- | \( BA \)-process
   | BA
   deriving (Eq, Show, Read, Ord, Enum, Generic)
 
 instance Pretty Process where
   pretty = pretty . show
 
--- | Sequence of processes, represented as a matrix 3x3.
+-- | Sequence of processes, represented as a matrix \( 3 \times 3 \).
 newtype ProcessMatrix = ProcessMatrix (Matrix3 Integer)
   deriving (Eq, Num, Show, Pretty)
 
@@ -55,15 +58,15 @@ process2matrix :: Process -> ProcessMatrix
 process2matrix  A = ProcessMatrix $ Matrix3 1 0 0 1 1 1  2 0 2
 process2matrix BA = ProcessMatrix $ Matrix3 0 1 0 2 0 1  2 0 2
 
--- | Return process matrix for 'A'-process.
+-- | Return process matrix for \( A \)-process.
 aMatrix :: ProcessMatrix
 aMatrix = process2matrix A
 
--- | Return process matrix for 'BA'-process.
+-- | Return process matrix for \( BA \)-process.
 baMatrix :: ProcessMatrix
 baMatrix = process2matrix BA
 
--- |Apply a projective transformation, defined by 'Path',
+-- | Apply a projective transformation, defined by 'Path',
 -- to a given point in two-dimensional projective space.
 evalMatrix :: Num t => ProcessMatrix -> (t, t, t) -> (t, t, t)
 evalMatrix (ProcessMatrix m) = multCol (fmap fromInteger m)

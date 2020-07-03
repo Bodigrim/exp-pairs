@@ -4,9 +4,13 @@ Copyright   : (c) Andrew Lelechenko, 2014-2020
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
 
-Provides functions to compute estimates Riemann zeta-function
-ζ in a critical strip, given in  /Ivić A./ `The Riemann zeta-function: Theory and applications',
-Mineola, New York: Dover Publications, 2003.
+Estimates of the Riemann zeta-function
+in a critical strip, according to
+Ivić A. "The Riemann zeta-function: theory and applications",
+Mineola, New York: Dover Publications, 2003,
+and Lelechenko A. V. "Dirichlet divisor problem on Gaussian integers" in
+Proceedings of the 6th international conference on analytic number theory
+and spatial tesselations, Kyiv, 2018, vol. 1, p. 76-86.
 
 -}
 module Math.ExpPairs.Ivic
@@ -27,8 +31,9 @@ import Data.Ord   (comparing)
 
 import Math.ExpPairs
 
--- | Compute µ(σ) such that |ζ(σ+it)| ≪ |t|^µ(σ) .
--- See equation (7.57) in Ivić2003.
+-- | Compute \( \mu(\sigma) \) such that
+-- \( \zeta(\sigma+it) \ll |t|^{\mu(\sigma)} \).
+-- See equation (7.57) in Ivić, 2003.
 zetaOnS :: Rational -> OptimizeResult
 zetaOnS s
   | s >= 1  = simulateOptimize 0
@@ -60,8 +65,9 @@ lemma82_f s
   | s<=57%62  = 98/(31-32*s)
   | otherwise =   5/(1-s)
 
--- | Compute maximal m(σ) such that ∫_1^T |ζ(σ+it)|^m(σ) dt ≪ T^(1+ε).
--- See equation (8.97) in Ivić2003. Further justification will be published elsewhere.
+-- | Compute maximal \( m(\sigma) \) such that
+--  \( \int_1^T | \zeta(\sigma+it) |^{m(\sigma)} dt \ll T^{1+\varepsilon} \).
+-- See equation (8.97) in Ivić, 2003.
 mOnS :: Rational -> OptimizeResult
 mOnS s
   | s < 1%2 = simulateOptimize 0
@@ -105,13 +111,15 @@ binarySearch predicate choice precision = go
 mOnSTwoThird :: RationalInf
 mOnSTwoThird = optimalValue $ mOnS $ 2 % 3
 
--- | Try to reverse 'mOnS': for a given precision and m compute σ.
+-- | Try to reverse 'mOnS': for a given precision and \( m \) compute \( \sigma \).
 -- Implemented as a binary search, so its performance is very poor.
 -- Since 'mOnS' is not monotonic, the result is not guaranteed to be neither
 -- minimal nor maximal possible, but usually is close enough.
 --
--- For integer m>=4 this function corresponds to the multidimensional Dirichlet problem
--- and returns σ from error term O(x^{σ+ε}). See Ch. 13 in Ivić2003.
+-- For integer \( m \ge 4 \) this function corresponds
+-- to the multidimensional Dirichlet problem
+-- and returns \( \sigma \) from error term \( O(x^{\sigma+\varepsilon}) \).
+-- See Ch. 13 in Ivić, 2003.
 reverseMOnS :: Rational -> RationalInf -> Rational
 reverseMOnS _ InfPlus = 1
 reverseMOnS _ (Finite m)
@@ -123,23 +131,32 @@ reverseMOnS prec m
   where
     go = binarySearch (\c -> optimalValue (mOnS c) > m) Greatest prec
 
--- | An estimate of the symmetric multidimensional divisor function from Kolpakova, 2011.
+-- | An estimate of the symmetric multidimensional divisor function from
+-- Kolpakova O. V.,
+-- "New estimates of the remainder in an asymptotic formula
+-- in the multidimensional Dirichlet divisor problem", Mathematical Notes,
+-- vol. 89, p. 504-518, 2011.
 kolpakova2011 :: Integer -> Double
 kolpakova2011 k = 1 - 1/3 * 2**(2/3) * (4.45 * fromInteger k)**(-2/3)
 
--- | Check whether ∫_1^T   Π_i |ζ(n_i*σ+it)|^m_i dt ≪ T^(1+ε) for a given list of pairs [(n_1, m_1), ...] and fixed σ.
+-- | Check whether
+-- \( \int_1^T \prod_i |\zeta(n_i\sigma+it|^{m_i} dt \ll T^{1+\varepsilon} \)
+-- for a given list of pairs \( [(n_1, m_1), ...] \) and fixed \( \sigma \).
 checkAbscissa :: [(Rational, Rational)] -> Rational -> Bool
 checkAbscissa xs s = sum rs < Finite 1 where
   qs = map (\(n, m) -> optimalValue (mOnS (n * s)) / Finite m) xs
   rs = map recip qs
 
--- | Find for a given precision and list of pairs [(n_1, m_1), ...] the minimal σ
--- such that ∫_1^T   Π_i|ζ(n_i*σ+it)|^m_i dt ≪ T^(1+ε).
+-- | Find for a given precision and list of pairs \( [(n_1, m_1), ...] \)
+-- the minimal \( \sigma \)
+-- such that
+-- \( \int_1^T \prod_i |\zeta(n_i\sigma+it|^{m_i} dt \ll T^{1+\varepsilon} \).
 findMinAbscissa :: Rational -> [(Rational, Rational)] -> Rational
 findMinAbscissa prec xs = binarySearch (checkAbscissa xs) Greatest prec (1 % 2 / minimum (map fst xs)) 1
 
--- | Compute minimal M(A) such that ∫_1^T |ζ(1/2+it)|^A dt ≪ T^(M(A)+ε).
--- See Ch. 8 in Ivić2003. Further justification will be published elsewhere.
+-- | For a given \( A \) compute minimal \( M(A) \) such that
+-- \( \int_1^T |\zeta(1/2+it)|^A \ll T^{M(A)+\varepsilon} \)
+-- See Ch. 8 in Ivić, 2003 and Th. 1 in Lelechenko, 2018.
 mBigOnHalf :: Rational -> OptimizeResult
 mBigOnHalf a
   | a < 4     = simulateOptimize 1
@@ -155,9 +172,11 @@ mBigOnHalf a
 -- is produced by
 -- optimize [K 4 + L 4 + 2 :/: K 1] [26 >. K 26 + L 32]
 
--- | Try to reverse 'mBigOnHalf': for a given M(A) find maximal possible A.
--- Sometimes, when 'mBigOnHalf' gets especially lucky exponent pair, 'reverseMBigOnHalf' can miss
--- real A and returns lower value.
+-- | Try to reverse 'mBigOnHalf':
+-- for a given \( M(A) \) find maximal possible \( A \).
+-- Sometimes, when 'mBigOnHalf' gets especially lucky exponent pair,
+-- 'reverseMBigOnHalf' can miss
+-- real \( A \) and returns lower value.
 reverseMBigOnHalf :: Rational -> OptimizeResult
 reverseMBigOnHalf m
   | m <= 2 = simulateOptimize $ (m-1)*8 + 4

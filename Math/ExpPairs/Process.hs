@@ -4,9 +4,13 @@ Copyright   : (c) Andrew Lelechenko, 2014-2020
 License     : GPL-3
 Maintainer  : andrew.lelechenko@gmail.com
 
-Processes of van der Corput
-
-Provides types for sequences of /A/- and /B/-processes of van der Corput. A good account on this topic can be found in /Graham S. W.,  Kolesnik G. A./ Van Der Corput's Method of Exponential Sums, Cambridge University Press, 1991, especially Ch. 5.
+Sequences of \( A \)- and \( B \)-processes
+of van der Corput's method of exponential sums.
+A good reference can be found in
+/Graham S. W., Kolesnik G. A./
+Van Der Corput's Method of Exponential Sums,
+Cambridge University Press, 1991,
+especially Ch. 5.
 -}
 
 {-# LANGUAGE DeriveGeneric   #-}
@@ -68,12 +72,12 @@ aPath  = Path aMatrix [ A]
 baPath :: Path
 baPath = Path baMatrix [BA]
 
--- |Apply a projective transformation, defined by 'Path',
+-- | Apply a projective transformation, defined by 'Path',
 -- to a given point in two-dimensional projective space.
 evalPath :: (Num t) => Path -> (t, t, t) -> (t, t, t)
 evalPath (Path m _) = evalMatrix m
 
 -- | Count processes in the 'Path'. Note that 'BA' counts
--- for one process, not two.
+-- for a single process.
 lengthPath :: Path -> Int
 lengthPath (Path _ xs) = length xs
