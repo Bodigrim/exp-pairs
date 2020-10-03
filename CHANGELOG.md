@@ -1,6 +1,12 @@
 Changes
 =======
 
+Version 0.2.1.0
+----------------
+
+Improvements for 4D asymmetric divisor problems.
+Refine matrix manipulations.
+
 Version 0.2.0.0
 ----------------
 
