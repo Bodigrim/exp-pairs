@@ -1,5 +1,3 @@
-resolver: nightly-2020-05-03
+resolver: nightly-2020-09-28
 packages:
 - .
-extra-deps:
-- smallcheck-1.2.0
