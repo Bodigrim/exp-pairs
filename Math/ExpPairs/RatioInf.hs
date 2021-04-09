@@ -69,24 +69,24 @@ instance Integral t => Num (RatioInf t) where
   InfMinus * Finite a = case signum a of
     1  -> InfMinus
     -1 -> InfPlus
-    _  -> error "Cannot multiply infinity by zero"
+    _  -> error "Cannot multiply -infinity by zero"
 
   InfPlus * InfMinus = InfMinus
   InfPlus * InfPlus  = InfPlus
   InfPlus * Finite a = case signum a of
     1  -> InfPlus
     -1 -> InfMinus
-    _  -> error "Cannot multiply infinity by zero"
+    _  -> error "Cannot multiply +infinity by zero"
 
   Finite a * InfMinus = case signum a of
     1  -> InfMinus
     -1 -> InfPlus
-    _  -> error "Cannot multiply infinity by zero"
+    _  -> error "Cannot multiply -infinity by zero"
 
   Finite a * InfPlus = case signum a of
     1  -> InfPlus
     -1 -> InfMinus
-    _  -> error "Cannot multiply infinity by zero"
+    _  -> error "Cannot multiply +infinity by zero"
 
   Finite a * Finite b = Finite (a * b)
 
