@@ -36,7 +36,7 @@ instance (Integral t, Pretty t) => Pretty (RatioInf t) where
     | otherwise          = pretty (numerator x) <+> pretty "/" <+> pretty (denominator x)
   pretty InfPlus    = pretty "+Inf"
 
-instance Integral t => Num (RatioInf t) where
+instance (Show t, Integral t) => Num (RatioInf t) where
   InfMinus + InfPlus = error "Cannot add up negative and positive infinities"
   InfPlus + InfMinus = error "Cannot add up negative and positive infinities"
   InfMinus + _ = InfMinus
@@ -69,30 +69,30 @@ instance Integral t => Num (RatioInf t) where
   InfMinus * Finite a = case signum a of
     1  -> InfMinus
     -1 -> InfPlus
-    _  -> error "Cannot multiply -infinity by zero"
+    _  -> error $ "Cannot multiply -infinity by " ++ show a
 
   InfPlus * InfMinus = InfMinus
   InfPlus * InfPlus  = InfPlus
   InfPlus * Finite a = case signum a of
     1  -> InfPlus
     -1 -> InfMinus
-    _  -> error "Cannot multiply +infinity by zero"
+    _  -> error $ "Cannot multiply +infinity by " ++ show a
 
   Finite a * InfMinus = case signum a of
     1  -> InfMinus
     -1 -> InfPlus
-    _  -> error "Cannot multiply -infinity by zero"
+    _  -> error $ "Cannot multiply -infinity by " ++ show a
 
   Finite a * InfPlus = case signum a of
     1  -> InfPlus
     -1 -> InfMinus
-    _  -> error "Cannot multiply +infinity by zero"
+    _  -> error $ "Cannot multiply +infinity by " ++ show a
 
   Finite a * Finite b = Finite (a * b)
 
   {-# SPECIALIZE (*) :: RationalInf -> RationalInf -> RationalInf #-}
 
-instance Integral t => Fractional (RatioInf t) where
+instance (Show t, Integral t) => Fractional (RatioInf t) where
   fromRational = Finite . fromRational
   {-# SPECIALIZE fromRational :: Rational -> RationalInf #-}
 
@@ -118,7 +118,7 @@ instance Integral t => Fractional (RatioInf t) where
 
   {-# SPECIALIZE (/) :: RationalInf -> RationalInf -> RationalInf #-}
 
-instance Integral t => Real (RatioInf t) where
+instance (Show t, Integral t) => Real (RatioInf t) where
   toRational (Finite r) = toRational r
   toRational InfPlus    = error "Cannot convert positive infinity into Rational"
   toRational InfMinus   = error "Cannot convert negative infinity into Rational"
