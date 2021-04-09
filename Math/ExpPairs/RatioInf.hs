@@ -69,24 +69,24 @@ instance (Show t, Integral t) => Num (RatioInf t) where
   InfMinus * Finite a = case signum a of
     1  -> InfMinus
     -1 -> InfPlus
-    _  -> error $ "Cannot multiply -infinity by " ++ show a
+    _  -> error $ "Cannot multiply -infinity by " ++ show a ++ " signum is " ++ show (signum a)
 
   InfPlus * InfMinus = InfMinus
   InfPlus * InfPlus  = InfPlus
   InfPlus * Finite a = case signum a of
     1  -> InfPlus
     -1 -> InfMinus
-    _  -> error $ "Cannot multiply +infinity by " ++ show a
+    _  -> error $ "Cannot multiply +infinity by " ++ show a ++ " signum is " ++ show (signum a)
 
   Finite a * InfMinus = case signum a of
     1  -> InfMinus
     -1 -> InfPlus
-    _  -> error $ "Cannot multiply -infinity by " ++ show a
+    _  -> error $ "Cannot multiply -infinity by " ++ show a ++ " signum is " ++ show (signum a)
 
   Finite a * InfPlus = case signum a of
     1  -> InfPlus
     -1 -> InfMinus
-    _  -> error $ "Cannot multiply +infinity by " ++ show a
+    _  -> error $ "Cannot multiply +infinity by " ++ show a ++ " signum is " ++ show (signum a)
 
   Finite a * Finite b = Finite (a * b)
 
