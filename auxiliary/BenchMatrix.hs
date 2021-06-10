@@ -1,7 +1,7 @@
 module Main where
 
 import qualified Math.ExpPairs.Matrix3 as M3
-import Gauge.Main
+import Test.Tasty.Bench
 
 testm3 :: Int -> M3.Matrix3 Integer
 testm3 k = M3.fromList $ map (100*10^k `div`) [100..108]

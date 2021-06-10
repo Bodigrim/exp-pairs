@@ -72,7 +72,7 @@ benchmark matrix-bench
   build-depends:
     base,
     exp-pairs,
-    gauge
+    tasty-bench
   type: exitcode-stdio-1.0
   main-is: BenchMatrix.hs
   default-language: Haskell2010
