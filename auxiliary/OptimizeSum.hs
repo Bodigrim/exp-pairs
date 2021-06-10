@@ -13,12 +13,13 @@ import qualified Data.Bimap as B
 import Data.String
 import Text.RawString.QQ     (r)
 
-import Data.List (sortOn, subsequences, mapAccumL)
+import Data.List (sortOn, subsequences)
 import Data.Monoid
 import Data.Foldable
 import Data.Maybe
 import Data.Ord
 import Data.Function
+import Data.Traversable
 
 import Data.Text.Prettyprint.Doc hiding ((<>), group)
 

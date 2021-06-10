@@ -2,7 +2,7 @@ module Etalon (testEtalon) where
 
 import System.Random
 import Data.Ord
-import Data.List
+import Data.List (sortBy)
 import Test.Tasty.HUnit
 
 unsort :: (RandomGen g) => g -> [x] -> [x]
