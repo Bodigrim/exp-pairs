@@ -42,7 +42,7 @@ import Data.Maybe
 import Data.Ratio
 import Data.Ord   (comparing)
 import Data.List  (minimumBy, sort, inits, tails)
-import Data.Text.Prettyprint.Doc
+import Prettyprinter
 
 import qualified Data.Map as M
 import qualified Data.Set as S
@@ -99,8 +99,12 @@ tauab a b
       d = a `gcd` b
 tauab a b = tauab' a' b'
   where
-    [a', b'] = sort [a, b]
+    (a', b') = sort2 (a, b)
 
+sort2 :: Ord a => (a, a) -> (a, a)
+sort2 (a, b)
+  | a <= b    = (a, b)
+  | otherwise = (b, a)
 
 -- |Special type to specify the theorem of Krätzel1988,
 -- which provided the best estimate of Θ(a, b, c)
@@ -170,8 +174,15 @@ tauabc a b c
       d = a `gcd` b `gcd` c
 tauabc a b c = tauabc' a' b' c'
   where
-    [a', b', c'] = sort [a, b, c]
+    (a', b', c') = sort3 (a, b, c)
 
+sort3 :: Ord a => (a, a, a) -> (a, a, a)
+sort3 (a, b', c')
+  | a <= b    = (a, b, c)
+  | a <= c    = (b, a, c)
+  | otherwise = (b, c, a)
+  where
+    (b, c) = sort2 (b', c')
 
 -- |Special type to specify the theorem of Krätzel1988,
 -- which provided the best estimate of Θ(a, b, c, d)
@@ -290,8 +301,16 @@ tauabcd a1 a2 a3 a4
       d = a1 `gcd` a2 `gcd` a3 `gcd` a4
 tauabcd a1 a2 a3 a4 = tauabcd' a1' a2' a3' a4'
   where
-    [a1', a2', a3', a4'] = sort [a1, a2, a3, a4]
+    (a1', a2', a3', a4') = sort4 (a1, a2, a3, a4)
 
+sort4 :: Ord a => (a, a, a, a) -> (a, a, a, a)
+sort4 (a, b', c', d')
+  | a <= b    = (a, b, c, d)
+  | a <= c    = (b, a, c, d)
+  | a <= d    = (b, c, a, d)
+  | otherwise = (b, c, d, a)
+  where
+    (b, c, d) = sort3 (b', c', d')
 
 -- |Special type to specify the theorem of Krätzel1988,
 -- which provided the best estimate of Θ(a1, a2...)

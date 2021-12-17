@@ -28,7 +28,7 @@ module Math.ExpPairs.Pair
 import Data.Maybe
 import Data.Ratio
 import GHC.Generics (Generic (..))
-import Data.Text.Prettyprint.Doc
+import Prettyprinter
 
 -- |Vertices of the triangle of initial exponent pairs.
 data Triangle

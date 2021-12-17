@@ -44,8 +44,8 @@ import Data.Function (on)
 import Data.Ord      (comparing)
 import Data.List     (minimumBy)
 import Data.Ratio
-import Data.Text.Prettyprint.Doc hiding ((<>))
-import qualified Data.Text.Prettyprint.Doc as PP
+import Prettyprinter hiding ((<>))
+import qualified Prettyprinter as PP
 import Text.Printf
 
 import Math.ExpPairs.LinearForm

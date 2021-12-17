@@ -30,7 +30,7 @@ import Control.DeepSeq
 import Data.Foldable  (Foldable (..), toList)
 import Data.List      (transpose)
 import GHC.Generics   (Generic (..))
-import Data.Text.Prettyprint.Doc
+import Prettyprinter
 
 -- | Matrix of order 3.
 data Matrix3 t = Matrix3 {

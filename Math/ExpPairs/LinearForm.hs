@@ -29,7 +29,7 @@ import Data.Foldable  (Foldable (..), toList)
 import Data.Maybe     (mapMaybe)
 import Data.Ratio     (numerator, denominator)
 import GHC.Generics   (Generic (..))
-import Data.Text.Prettyprint.Doc
+import Prettyprinter
 
 import Math.ExpPairs.RatioInf
 

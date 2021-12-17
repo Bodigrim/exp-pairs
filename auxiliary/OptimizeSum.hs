@@ -21,7 +21,7 @@ import Data.Ord
 import Data.Function
 import Data.Traversable
 
-import Data.Text.Prettyprint.Doc hiding ((<>), group)
+import Prettyprinter hiding ((<>), group)
 
 import Prelude hiding (foldl, foldl1, maximum, mapM_, minimum, sum, concat)
 

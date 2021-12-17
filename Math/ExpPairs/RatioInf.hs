@@ -15,7 +15,7 @@ module Math.ExpPairs.RatioInf
   ) where
 
 import Data.Ratio (Ratio, numerator, denominator)
-import Data.Text.Prettyprint.Doc
+import Prettyprinter
 
 -- | Extend 'Ratio' @t@ with \( \pm \infty  \) positive and negative
 -- infinities.

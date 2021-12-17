@@ -25,7 +25,7 @@ module Math.ExpPairs.Process
   ) where
 
 import GHC.Generics             (Generic)
-import Data.Text.Prettyprint.Doc hiding ((<>))
+import Prettyprinter hiding ((<>))
 
 import Math.ExpPairs.ProcessMatrix
 import Math.ExpPairs.PrettyProcess

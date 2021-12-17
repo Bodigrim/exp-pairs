@@ -18,7 +18,7 @@ module Math.ExpPairs.PrettyProcess
 import Data.List                (minimumBy, inits, tails)
 import Data.Monoid              (mempty)
 import Data.Ord                 (comparing)
-import Data.Text.Prettyprint.Doc
+import Prettyprinter
 
 import qualified Data.Map as M
 import qualified Data.Set as S

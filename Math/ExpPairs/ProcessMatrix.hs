@@ -25,7 +25,7 @@ module Math.ExpPairs.ProcessMatrix
   ) where
 
 import GHC.Generics          (Generic (..))
-import Data.Text.Prettyprint.Doc
+import Prettyprinter
 
 import Math.ExpPairs.Matrix3
 
