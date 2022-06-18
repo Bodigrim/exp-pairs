@@ -60,7 +60,7 @@ test-suite tests
                        QuickCheck >=2.9,
                        smallcheck >=1.2,
                        exp-pairs,
-                       matrix >=0.1,
+                       matrix >=0.3.4,
                        random
   hs-source-dirs:      tests
   default-language:    Haskell2010
