@@ -1,5 +1,4 @@
-exp-pairs [![Build Status](https://travis-ci.org/Bodigrim/exp-pairs.svg?branch=master)](https://travis-ci.org/Bodigrim/exp-pairs)
-=========
+# exp-pairs [![Hackage](http://img.shields.io/hackage/v/exp-pairs.svg)](https://hackage.haskell.org/package/exp-pairs) [![Stackage LTS](http://stackage.org/package/exp-pairs/badge/lts)](http://stackage.org/lts/package/exp-pairs) [![Stackage Nightly](http://stackage.org/package/exp-pairs/badge/nightly)](http://stackage.org/nightly/package/exp-pairs)
 
 Package implements an algorithm to minimize the maximum of a list of rational objective functions over the set of exponent pairs. See full description in
 > A. V. Lelechenko, Linear programming over exponent pairs.
