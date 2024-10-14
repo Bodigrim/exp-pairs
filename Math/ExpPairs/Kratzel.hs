@@ -38,6 +38,8 @@ module Math.ExpPairs.Kratzel
 
 import Control.Arrow hiding ((<+>))
 import Data.Function
+import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.List.NonEmpty as NE
 import Data.Maybe
 import Data.Ratio
 import Data.Ord   (comparing)
@@ -369,22 +371,23 @@ tauA ys = (M.!) cache xs
     go [_] = Node NoTheorem (simulateOptimize 0)
     go [a, b]    = (\(t, o) -> Node (Ab t) o) $ tauab a b
     go [a, b, c] = (\(t, o) -> Node (Abc t) o) $ tauabc a b c
-    go as@[a,b,c,d] = (\(t, o) -> Node (Abcd t) o) (tauabcd a b c d) `min` go608 as
+    go [a,b,c,d] = (\(t, o) -> Node (Abcd t) o) (tauabcd a b c d) `min` go608 (a :| [b,c,d])
     go as@(a:_)
       | all (== a) as
       = Node Ivic $ simulateOptimize $ reverseMOnS 1e-6 (fromIntegral $ length as) / fi a
-    go as = go608 as
+    go (a : as) = go608 (a :| as)
 
+    go608 :: NonEmpty Integer -> TauAResult
     go608 as = minimum $ mapMaybe f [1 .. length as - 1]
       where
-        f q = if (alphaV `max` betaV) < 1 / fi (last as)
+        f q = if (alphaV `max` betaV) < 1 / fi (NE.last as)
           then Just $ Combination alpha beta ret
           else Nothing
           where
-            alpha = (M.!) cache $ take q as
+            alpha = (M.!) cache $ NE.take q as
             alphaV = extractValue alpha
-            beta  = (M.!) cache $ drop q as
+            beta  = (M.!) cache $ NE.drop q as
             betaV = extractValue beta
-            a0 = fi $ head as
-            aq = fi $ as !! q
+            a0 = fi $ NE.head as
+            aq = fi $ as NE.!! q
             ret = (1 - a0 * aq * alphaV * betaV) / (a0 + aq - a0 * aq * (alphaV + betaV))

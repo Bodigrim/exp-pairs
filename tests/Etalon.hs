@@ -22,4 +22,6 @@ testEtalon n f filename = do
   tests <- fetchRandomLines n filename
   let results = map f tests
   let fails = filter (not . snd) (zip tests results)
-  assertBool ("failed at " ++ show (fst $ head fails)) (null fails)
+  case fails of
+    [] -> pure ()
+    failure : _ -> assertFailure $ "failed at " ++ show (fst failure)

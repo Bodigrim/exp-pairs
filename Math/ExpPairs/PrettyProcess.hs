@@ -15,7 +15,7 @@ module Math.ExpPairs.PrettyProcess
     uglify,
     PrettyProcess) where
 
-import Data.List                (minimumBy, inits, tails)
+import Data.List                (minimumBy, inits, tails, uncons)
 import Data.Monoid              (mempty)
 import Data.Ord                 (comparing)
 import Prettyprinter
@@ -84,7 +84,8 @@ asRepeat [] = ([], 0)
 asRepeat xs = pair where
   l = length xs
   candidates = [ (take d xs, l `div` d) | d <- divisors l ]
-  pair = head $ filter (\(ys, n) -> concat (replicate n ys) == xs) candidates
+  pair = maybe (xs, 1) fst $ uncons $
+    filter (\(ys, n) -> concat (replicate n ys) == xs) candidates
 
 -- | Find the most compact representation of the sequence of processes.
 prettify :: [Process] -> PrettyProcess
@@ -102,15 +103,18 @@ prettifyP ps = (M.!) cache ps
       []   -> annotateWithWidth (Simply [])
       [A]  -> annotateWithWidth (Simply [A])
       [BA] -> annotateWithWidth (Simply [BA])
-      xs   -> minimumBy (comparing ppwlWidth) yss where
+      xs@(xsHd : xsTl) -> minimumBy (comparing ppwlWidth) yss where
         xs'' = case asRepeat xs of
           (_, 1)   -> annotateWithWidth (Simply xs)
           (xs', n) -> annotateWithWidth (Repeat (ppwlProcess $ (M.!) cache xs') n)
 
+        yss :: [PrettyProcessWithWidth]
         yss = xs'' : map f bcs
 
-        bcs = takeWhile (not . null . snd) $ iterate bcf ([head xs], tail xs)
+        bcs :: [([Process], [Process])]
+        bcs = takeWhile (not . null . snd) $ iterate bcf ([xsHd], xsTl)
 
+        bcf :: ([a], [a]) -> ([a], [a])
         bcf (_, [])    = error "prettifyP: unexpected second argument of bcf"
         bcf (zs, y:ys) = (zs++[y], ys)
 
