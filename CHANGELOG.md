@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 0.2.1.1
+----------------
+
+Switch benchmarks from gauge to tasty-bench.
+
 Version 0.2.1.0
 ----------------
 
