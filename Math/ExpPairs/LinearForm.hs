@@ -110,10 +110,14 @@ mapTriple f (x, y, z) = (f x, f y, f z)
 -- |Evaluate a rational form (a*k + b*l + c*m) \/ (a'*k + b'*l + c'*m)
 -- for given k, l and m.
 evalRF :: Real t => (Integer, Integer, Integer) -> RationalForm t -> RationalInf
-evalRF (k, l, m) (num :/: den) = if denom==0 then InfPlus else Finite (numer / denom) where
-  klm = mapTriple fromInteger (k, l, m)
-  numer = toRational $ evalLF klm num
-  denom = toRational $ evalLF klm den
+evalRF (k, l, m) (num :/: den)
+  | denom == 0 && numer < 0 = InfMinus
+  | denom == 0              = InfPlus
+  | otherwise               = Finite (numer / denom)
+  where
+    klm = mapTriple fromInteger (k, l, m)
+    numer = toRational $ evalLF klm num
+    denom = toRational $ evalLF klm den
 
 -- |Constants to specify the strictness of 'Constraint'.
 data IneqType

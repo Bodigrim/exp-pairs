@@ -8,6 +8,7 @@ import Math.ExpPairs.LinearForm
 import Math.ExpPairs.RatioInf
 
 import Test.Tasty
+import Test.Tasty.HUnit
 import Test.Tasty.SmallCheck as SC
 import Test.Tasty.QuickCheck as QC
 
@@ -61,6 +62,14 @@ testNegateVarsRF rf k l m =
 testFromIntegerRF :: Integer -> Bool
 testFromIntegerRF a = evalRF (0, 0, 1) (fromInteger a) == Finite (a % 1)
 
+-- | When the denominator of a rational form vanishes, the result
+-- must be @+Inf@ or @-Inf@ depending on the sign of the numerator,
+-- not always @+Inf@.
+testZeroDenominatorRF :: Bool
+testZeroDenominatorRF
+  =  evalRF (1, 1, 1) (LinearForm 0 0 (-1) :/: LinearForm 1 (-1) 0) == InfMinus
+  && evalRF (1, 1, 1) (LinearForm 0 0 1    :/: LinearForm 1 (-1) 0) == InfPlus
+
 testCheckConstraint :: Integer -> Integer -> Integer -> Constraint Rational -> Bool
 testCheckConstraint k l m c@(Constraint lf ineq)
   =  (ineq==Strict    && isZero || x || y)
@@ -83,4 +92,5 @@ testSuite = testGroup "LinearForm"
   , SC.testProperty "from integer RF" testFromIntegerRF
   , QC.testProperty "from integer RF" testFromIntegerRF
   , QC.testProperty "constraint" testCheckConstraint
+  , testCase "zero denominator RF" (assertBool "" testZeroDenominatorRF)
   ]
