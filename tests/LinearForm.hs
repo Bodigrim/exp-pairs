@@ -70,6 +70,19 @@ testZeroDenominatorRF
   =  evalRF (1, 1, 1) (LinearForm 0 0 (-1) :/: LinearForm 1 (-1) 0) == InfMinus
   && evalRF (1, 1, 1) (LinearForm 0 0 1    :/: LinearForm 1 (-1) 0) == InfPlus
 
+-- | Regression test: the sign of infinity at a vanishing denominator
+-- must depend only on the projective point @(k:l:m)@, i.e. it must
+-- be invariant under negating @k@, @l@ and @m@ simultaneously.
+-- See 'testNegateVarsRF' for the general property; this is a concrete
+-- counterexample found by QuickCheck for an earlier, insufficiently
+-- invariant implementation.
+testZeroDenominatorNegateVarsRF :: Bool
+testZeroDenominatorNegateVarsRF
+  =  evalRF (1, 1, 2)    rf == InfPlus
+  && evalRF (-1, -1, -2) rf == InfPlus
+  where
+    rf = LinearForm 0 0 1 :/: LinearForm (-1) (-2) (3 % 2)
+
 testCheckConstraint :: Integer -> Integer -> Integer -> Constraint Rational -> Bool
 testCheckConstraint k l m c@(Constraint lf ineq)
   =  (ineq==Strict    && isZero || x || y)
@@ -93,4 +106,5 @@ testSuite = testGroup "LinearForm"
   , QC.testProperty "from integer RF" testFromIntegerRF
   , QC.testProperty "constraint" testCheckConstraint
   , testCase "zero denominator RF" (assertBool "" testZeroDenominatorRF)
+  , testCase "zero denominator RF invariant under negating vars" (assertBool "" testZeroDenominatorNegateVarsRF)
   ]
