@@ -107,13 +107,23 @@ mapTriple :: (a -> b) -> (a, a, a) -> (b, b, b)
 mapTriple f (x, y, z) = (f x, f y, f z)
 {-# INLINE mapTriple #-}
 
+-- |Determine the sign of \( \pm\infty \) at a pole of a rational form,
+-- so that it depends only on the projective point \( (k:l:m) \)
+-- and not on the particular representative triple (e.g. it is
+-- invariant under negating @k@, @l@ and @m@ simultaneously).
+projSign :: (Integer, Integer, Integer) -> Integer
+projSign (k, l, m)
+  | m /= 0 = signum m
+  | l /= 0 = signum l
+  | otherwise = signum k
+
 -- |Evaluate a rational form (a*k + b*l + c*m) \/ (a'*k + b'*l + c'*m)
 -- for given k, l and m.
 evalRF :: Real t => (Integer, Integer, Integer) -> RationalForm t -> RationalInf
 evalRF (k, l, m) (num :/: den)
-  | denom == 0 && numer < 0 = InfMinus
-  | denom == 0              = InfPlus
-  | otherwise               = Finite (numer / denom)
+  | denom == 0 && numer * fromInteger (projSign (k, l, m)) < 0 = InfMinus
+  | denom == 0                                                = InfPlus
+  | otherwise                                                 = Finite (numer / denom)
   where
     klm = mapTriple fromInteger (k, l, m)
     numer = toRational $ evalLF klm num
