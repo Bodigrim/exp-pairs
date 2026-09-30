@@ -49,14 +49,14 @@ testSubstitute2 a1 a2 b1 b2 c1 c2 lf
   =  substituteLF (a1 + a2, b1 + b2, c1 + c2) lf
   == substituteLF (a1, b1, c1) lf + substituteLF (a2, b2, c2) lf
 
-testNegateRF :: RationalForm Rational -> Integer -> Integer -> Integer -> Bool
-testNegateRF rf k l m = case evalRF (k, l, m) rf of
-  x@Finite{} -> x == negate (evalRF (k, l, m) (negate rf))
-  _          -> True
+testNegateRF :: RationalForm Rational -> Integer -> Integer -> Integer -> QC.Property
+testNegateRF rf k l m =case evalRF (k, l, m) rf of
+  x@Finite{} -> x === negate (evalRF (k, l, m) (negate rf))
+  _          -> property True
 
-testNegateVarsRF :: RationalForm Rational -> Integer -> Integer -> Integer -> Bool
+testNegateVarsRF :: RationalForm Rational -> Integer -> Integer -> Integer -> QC.Property
 testNegateVarsRF rf k l m =
-  evalRF (k, l, m) rf == evalRF (-k, -l, -m) rf
+  evalRF (k, l, m) rf === evalRF (-k, -l, -m) rf
 
 testFromIntegerRF :: Integer -> Bool
 testFromIntegerRF a = evalRF (0, 0, 1) (fromInteger a) == Finite (a % 1)
