@@ -55,7 +55,7 @@ testMOnSZero (Ratio01 a') = a >= 1%2 || (optimalValue . mOnS) a == 0 where
   a = fromMinus3To3 a'
 
 testMOnSInf :: Ratio01 Rational -> Bool
-testMOnSInf (Ratio01 a') = a < 1 || (optimalValue . mOnS) a == InfPlus where
+testMOnSInf (Ratio01 a') = a < 1 || (optimalValue . mOnS) a == Infinity where
   a = fromMinus3To3 a'
 
 testZetaReverse1 :: Ratio01 Rational -> Bool
@@ -85,7 +85,7 @@ testMOnSReverse1 (Ratio01 s') = t <= s + 4e-2 && s <= t + 1.4e-3 ||
 testMOnSReverse2 :: Ratio01 Rational -> Bool
 testMOnSReverse2 (Ratio01 s')
   =  s' == 0
-  || t' == InfPlus || t' == InfMinus
+  || t' == Infinity
   || recip t <= recip s + 1e-3 && recip s <= recip t + 1e-3
   || trace (show $ fromRational $ recip s - recip t) False
     where

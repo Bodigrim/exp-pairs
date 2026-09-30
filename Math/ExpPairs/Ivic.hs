@@ -72,7 +72,7 @@ mOnS :: Rational -> OptimizeResult
 mOnS s
   | s < 1%2 = simulateOptimize 0
   | s < 5%8 = simulateOptimize $ 4/(3-4*s)
-  | s>= 1   = simulateOptimize' InfPlus
+  | s>= 1   = simulateOptimize' Infinity
   | otherwise = minimumBy (comparing optimalValue) [x1, x2, simulateOptimize (lemma82_f s * 2)] where
 
     optRes = zetaOnS s
@@ -121,7 +121,7 @@ mOnSTwoThird = optimalValue $ mOnS $ 2 % 3
 -- and returns \( \sigma \) from error term \( O(x^{\sigma+\varepsilon}) \).
 -- See Ch. 13 in Ivić, 2003.
 reverseMOnS :: Rational -> RationalInf -> Rational
-reverseMOnS _ InfPlus = 1
+reverseMOnS _ Infinity = 1
 reverseMOnS _ (Finite m)
   | m <= 4 = 1 % 2
   | m <= 8 = 3 % 4 - recip m

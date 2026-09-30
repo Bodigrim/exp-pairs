@@ -87,7 +87,7 @@ infix 5 <=.
 
 evalFunctional :: [InitPair] -> [InitPair] -> [RationalForm Rational] -> [Constraint Rational] -> Path -> (RationalInf, InitPair)
 evalFunctional corners interiors rfs cons path = case rs of
-  [] -> (InfPlus, error $ "evalFunctional: cannot find any exponential pair, which satisfies constraints " ++ show (map pretty cons))
+  [] -> (Infinity, error $ "evalFunctional: cannot find any exponential pair, which satisfies constraints " ++ show (map pretty cons))
   _  -> minimumBy (comparing fst) rs
   where
     applyPath  = map (evalPath path . initPairToProjValue &&& id)
@@ -158,7 +158,7 @@ optimize' rfs cons ret@(OptimizeResult r _ path)
       corners = [Mix 1 0, Mix 0 1, Mix 0 0]
       interiors = initPairs
 
-    cons0 = if r0==InfPlus then cons else cons ++ map (consBuilder r0) rfs
+    cons0 = if r0 == Infinity then cons else cons ++ map (consBuilder r0) rfs
 
     retA@(OptimizeResult r1 ip1 _) = if checkMConstraints patha cons0 && r1' < r0 then branchA else ret0 where
       patha  = path <> aPath

@@ -42,14 +42,10 @@ testSuite = testGroup "RatioInf"
       SC.testProperty "multiply"            testMultiply
   , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
       SC.testProperty "divide"              testDivide
-  , SC.testProperty "infplus plus"      $ testInfPlus InfPlus
-  , SC.testProperty "infplus minus"     $ testInfPlus InfMinus
-  , SC.testProperty "infminus plus"     $ testInfMinus InfPlus
-  , SC.testProperty "infminus minus"    $ testInfMinus InfMinus
-  , SC.testProperty "infmultiply plus"  $ testInfMultiply InfPlus
-  , SC.testProperty "infmultiply minus" $ testInfMultiply InfMinus
-  , SC.testProperty "infdivide plus"    $ testInfDivide InfPlus
-  , SC.testProperty "infdivide minus"   $ testInfDivide InfMinus
+  , SC.testProperty "infinity plus"     $ testInfPlus Infinity
+  , SC.testProperty "infinity minus"    $ testInfMinus Infinity
+  , SC.testProperty "infinity multiply" $ testInfMultiply Infinity
+  , SC.testProperty "infinity divide"   $ testInfDivide Infinity
   , SC.testProperty "conversion"          testConversion
   ]
 
