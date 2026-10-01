@@ -378,7 +378,7 @@ tauA ys = (M.!) cache xs
     go (a : as) = go608 (a :| as)
 
     go608 :: NonEmpty Integer -> TauAResult
-    go608 as = minimum $ mapMaybe f [1 .. length as - 1]
+    go608 as = minimum $ Node NoTheorem (simulateOptimize 1) : mapMaybe f [1 .. length as - 1]
       where
         f q = if (alphaV `max` betaV) < 1 / fi (NE.last as)
           then Just $ Combination alpha beta ret
