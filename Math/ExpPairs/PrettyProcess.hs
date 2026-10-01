@@ -74,9 +74,10 @@ annotateWithWidth p = PPWL p (printedWidth p)
 
 -- | List divisors.
 divisors :: Int -> [Int]
-divisors n = ds1 ++ reverse ds2 where
-  (ds1, ds2) = unzip [ (a, n `div` a) | a <- [1 .. sqrtint n], n `mod` a == 0 ]
-  sqrtint = round . sqrt . fromIntegral
+divisors n = ds1 ++ (if nSqrt * nSqrt == n then drop 1 else id) (reverse ds2)
+  where
+    (ds1, ds2) = unzip [ (a, n `div` a) | a <- [1 .. nSqrt], n `mod` a == 0 ]
+    nSqrt = round $ sqrt $ fromIntegral n
 
 -- | Try to represent list as a replication of list.
 asRepeat :: [Process] -> ([Process], Int)
