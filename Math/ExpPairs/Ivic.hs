@@ -1,3 +1,4 @@
+{- HLINT ignore "Parenthesize unary negation" -}
 {-|
 Module      : Math.ExpPairs.Ivic
 Copyright   : (c) Andrew Lelechenko, 2014-2020
@@ -140,7 +141,7 @@ kolpakova2011 :: Integer -> Double
 kolpakova2011 k = 1 - 1/3 * 2**(2/3) * (4.45 * fromInteger k)**(-2/3)
 
 -- | Check whether
--- \( \int_1^T \prod_i |\zeta(n_i\sigma+it|^{m_i} dt \ll T^{1+\varepsilon} \)
+-- \( \int_1^T \prod_i |\zeta(n_i\sigma+it)|^{m_i} dt \ll T^{1+\varepsilon} \)
 -- for a given list of pairs \( [(n_1, m_1), ...] \) and fixed \( \sigma \).
 checkAbscissa :: [(Rational, Rational)] -> Rational -> Bool
 checkAbscissa xs s = sum rs < Finite 1 where
@@ -150,9 +151,13 @@ checkAbscissa xs s = sum rs < Finite 1 where
 -- | Find for a given precision and list of pairs \( [(n_1, m_1), ...] \)
 -- the minimal \( \sigma \)
 -- such that
--- \( \int_1^T \prod_i |\zeta(n_i\sigma+it|^{m_i} dt \ll T^{1+\varepsilon} \).
+-- \( \int_1^T \prod_i |\zeta(n_i\sigma+it)|^{m_i} dt \ll T^{1+\varepsilon} \).
 findMinAbscissa :: Rational -> [(Rational, Rational)] -> Rational
-findMinAbscissa prec xs = binarySearch (checkAbscissa xs) Greatest prec (1 % 2 / minimum (map fst xs)) 1
+findMinAbscissa prec xs
+  | lowerBound > 1 = lowerBound
+  | otherwise = binarySearch (checkAbscissa xs) Greatest prec lowerBound 1
+  where
+    lowerBound = 1 % 2 / minimum (map fst xs)
 
 -- | For a given \( A \) compute minimal \( M(A) \) such that
 -- \( \int_1^T |\zeta(1/2+it)|^A \ll T^{M(A)+\varepsilon} \)
