@@ -53,10 +53,8 @@ testMakarov m1 m2 = m1 * m2 == m1 `M3.makarovMult` m2
 testLaderman :: M3.Matrix3 Integer -> M3.Matrix3 Integer -> Bool
 testLaderman m1 m2 = m1 * m2 == m1 `M3.ladermanMult` m2
 
-testRecip :: M3.Matrix3 Rational -> Bool
-testRecip m = M3.det m==0 || m/=m' && m==m'' && M3.det m * M3.det m' == 1 where
-  m' = recip m
-  m'' = recip m'
+testRecip :: M3.Matrix3 Rational -> Property
+testRecip m = M3.det m === 0 .||. m * recip m === 1
 
 testNormalize :: Integer -> M3.Matrix3 Integer -> Bool
 testNormalize a m = (M3.normalize m' == m') && (a==0 || a>0 && m'==m'' || a<0 && m'==negate m'') where

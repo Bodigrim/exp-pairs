@@ -13,6 +13,7 @@ and efficient multiplication algorithms.
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE Safe              #-}
+{- HLINT ignore "Parenthesize unary negation" -}
 
 module Math.ExpPairs.Matrix3
   ( Matrix3 (..)
@@ -259,13 +260,13 @@ instance Fractional t => Fractional (Matrix3 t) where
 
   recip a@Matrix3{..} = Matrix3 {
     a11 =  (a22 * a33 - a32 * a23) / d,
-    a12 = -(a21 * a33 - a23 * a31) / d,
-    a13 =  (a21 * a32 - a22 * a31) / d,
-    a21 = -(a12 * a33 - a13 * a32) / d,
+    a12 = -(a12 * a33 - a13 * a32) / d,
+    a13 =  (a12 * a23 - a13 * a22) / d,
+    a21 = -(a21 * a33 - a23 * a31) / d,
     a22 =  (a11 * a33 - a13 * a31) / d,
-    a23 = -(a11 * a32 - a12 * a31) / d,
-    a31 =  (a12 * a23 - a13 * a22) / d,
-    a32 = -(a11 * a23 - a13 * a21) / d,
+    a23 = -(a11 * a23 - a13 * a21) / d,
+    a31 =  (a21 * a32 - a22 * a31) / d,
+    a32 = -(a11 * a32 - a12 * a31) / d,
     a33 =  (a11 * a22 - a12 * a21) / d
     } where d = det a
 
