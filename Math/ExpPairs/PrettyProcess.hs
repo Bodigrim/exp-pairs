@@ -8,8 +8,8 @@ Transforms sequences of 'Process' into most compact (by the means of typesetting
 E. g., AAAABABABA -> A^4(BA)^3.
 -}
 {-# LANGUAGE LambdaCase      #-}
-{-# OPTIONS_GHC -fno-warn-type-defaults #-}
-{-# OPTIONS_GHC -fno-warn-unused-imports #-}
+{-# OPTIONS_GHC -Wno-type-defaults #-}
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 module Math.ExpPairs.PrettyProcess
   ( prettify,
     uglify,

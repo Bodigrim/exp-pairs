@@ -1,8 +1,9 @@
 {-# LANGUAGE DeriveGeneric         #-}
 {-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE LambdaCase            #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-{-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 
 module Instances (Ratio01 (..), Positive (..), Sorted(..)) where
 
@@ -11,6 +12,7 @@ import Test.SmallCheck.Series
 import Control.Applicative
 import Control.Monad
 import Data.List (sort)
+import Data.Maybe
 import Data.Ratio
 import GHC.Generics          (Generic (..))
 
@@ -138,8 +140,7 @@ instance (Num t, Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t)) where
     let b = a + ab; c = b + bc; d = c + cd
     pure $ Sorted (a, b, c, d)
   shrink (Sorted (aa, bb, cc, dd))
-    = map ((\[a, b, c, d] -> Sorted (a, b, c, d)) . sort)
-    $ filter ((== 4) . length)
+    = mapMaybe ((\case (a : b : c : d : _) -> Just (Sorted (a, b, c, d)); _ -> Nothing) . sort)
     $ shrink [aa, bb, cc, dd]
 
 instance (Num t, Ord t, Serial m t) => Serial m (Sorted (t, t, t, t)) where
@@ -186,8 +187,7 @@ instance (Num t, Ord t, Arbitrary t) => Arbitrary (Sorted (t, t, t, t, t, t, t, 
     let b = a + ab; c = b + bc; d = c + cd; e = d + de; f = e + ef; g = f + fg; h = g + gh
     pure $ Sorted (a, b, c, d, e, f, g, h)
   shrink (Sorted (aa, bb, cc, dd, ee, ff, gg, hh))
-    = map ((\[a, b, c, d, e, f, g, h] -> Sorted (a, b, c, d, e, f, g, h)) . sort)
-    $ filter ((== 8) . length)
+    = mapMaybe ((\case (a : b : c : d : e : f : g : h : _) -> Just (Sorted (a, b, c, d, e, f, g, h)); _ -> Nothing) . sort)
     $ shrink [aa, bb, cc, dd, ee, ff, gg, hh]
 
 instance Arbitrary Path where

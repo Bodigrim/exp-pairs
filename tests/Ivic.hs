@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module Ivic where
 
 import Data.Ratio
@@ -20,15 +21,18 @@ fromMinus3To3 n = (n - 1 % 2) * 6
 fromHalfToOne :: Rational -> Rational
 fromHalfToOne n = n / 2 + 1 % 2
 
+both :: (a -> b) -> (a, a) -> (b, b)
+both f (x, y) = (f x, f y)
+
 testZetaOnS1 :: Sorted (Ratio01 Rational, Ratio01 Rational) -> Bool
 testZetaOnS1 (Sorted (Ratio01 a', Ratio01 b')) = a == b || za >= zb where
-  [ a,  b] = map fromMinus3To3 [a', b']
-  [za, zb] = map (optimalValue . zetaOnS) [a, b]
+  ( a,  b) = both fromMinus3To3 (a', b')
+  (za, zb) = both (optimalValue . zetaOnS) (a, b)
 
 -- Strict comparison without 3e-4 may fail due to the granularity of 'sect'.
 testZetaOnS2 :: Sorted (Ratio01 Rational, Ratio01 Rational) -> Bool
 testZetaOnS2 (Sorted (Ratio01 a, Ratio01 b)) = a == b || za + 5e-4 > zb where
-  [za, zb] = map (optimalValue . zetaOnS) [a, b]
+  (za, zb) = both (optimalValue . zetaOnS) (a, b)
 
 testZetaOnSsym :: Ratio01 Rational -> Bool
 testZetaOnSsym (Ratio01 a') = (toRational . abs) (za - za') == abs (a - 1 % 2) where
@@ -42,13 +46,13 @@ testZetaOnSZero (Ratio01 a') = a < 1 || optimalValue (zetaOnS a) == 0 where
 
 testMOnS1 :: Sorted (Ratio01 Rational, Ratio01 Rational) -> Bool
 testMOnS1 (Sorted (Ratio01 a', Ratio01 b')) = a == b || za <= zb where
-  [ a,  b] = map fromMinus3To3 [a', b']
-  [za, zb] = map (optimalValue . mOnS) [a, b]
+  ( a,  b) = both fromMinus3To3 (a', b')
+  (za, zb) = both (optimalValue . mOnS) (a, b)
 
 testMOnS2 :: Sorted (Ratio01 Rational, Ratio01 Rational) -> Bool
 testMOnS2 (Sorted (Ratio01 a', Ratio01 b')) = a == b || za < zb where
-  [ a,  b] = map fromHalfToOne [a', b']
-  [za, zb] = map (optimalValue . mOnS) [a, b]
+  ( a,  b) = both fromHalfToOne (a', b')
+  (za, zb) = both (optimalValue . mOnS) (a, b)
 
 testMOnSZero :: Ratio01 Rational -> Bool
 testMOnSZero (Ratio01 a') = a >= 1%2 || (optimalValue . mOnS) a == 0 where
@@ -119,9 +123,9 @@ etalonMOnS a b c d = Finite (c%d) <= (optimalValue . mOnS) (a%b)
 testSuite :: TestTree
 testSuite = testGroup "Ivic"
   [ testCase "etalon zetaOnS"
-    (testEtalon 100 (\(a:b:c:d:_) -> etalonZetaOnS a b c d) "tests/etalon-zetaOnS.txt")
+    (testEtalon 100 (\case [a, b, c, d] -> etalonZetaOnS a b c d; _ -> error "should be 4 arguments") "tests/etalon-zetaOnS.txt")
   , testCase "etalon mOnS"
-    (testEtalon 100 (\(a:b:c:d:_) -> etalonMOnS a b c d) "tests/etalon-mOnS.txt")
+    (testEtalon 100 (\case [a, b, c, d] -> etalonMOnS a b c d; _ -> error "should be 4 arguments") "tests/etalon-mOnS.txt")
   , adjustOption (\(SC.SmallCheckDepth n) -> SC.SmallCheckDepth (n `div` 2)) $
       SC.testProperty "zetaOnS monotonic" testZetaOnS1
   , QC.testProperty "zetaOnS monotonic" testZetaOnS1

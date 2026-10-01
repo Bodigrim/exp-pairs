@@ -14,6 +14,7 @@ import Data.String
 import Text.RawString.QQ     (r)
 
 import Data.List (sortOn, subsequences)
+import qualified Data.List.NonEmpty as NE
 import Data.Monoid
 import Data.Foldable
 import Data.Maybe
@@ -87,7 +88,7 @@ nonTrivial _   = True
 absExpr :: (Num a, Ord a) => [a] -> [a]
 absExpr [] = []
 absExpr [x] = [x]
-absExpr xxs@(x : xs) = if negate x < last xs then xxs else map negate xxs
+absExpr xxs@(x : xs) = if negate x < NE.last (x NE.:| xs) then xxs else map negate xxs
 
 nub :: Ord a => [a] -> [a]
 nub = toList . S.fromList

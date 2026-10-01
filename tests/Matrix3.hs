@@ -20,7 +20,12 @@ toM = M.fromList 3 3 . toList
 toM3 :: M.Matrix a -> M3.Matrix3 a
 toM3 = M3.fromList . toList
 
-testOp :: (M3.Matrix3 Integer -> M3.Matrix3 Integer -> M3.Matrix3 Integer) -> (M.Matrix Integer -> M.Matrix Integer -> M.Matrix Integer) -> M3.Matrix3 Integer -> M3.Matrix3 Integer -> Bool
+testOp
+  :: (M3.Matrix3 Integer -> M3.Matrix3 Integer -> M3.Matrix3 Integer)
+  -> (M.Matrix Integer -> M.Matrix Integer -> M.Matrix Integer)
+  -> M3.Matrix3 Integer
+  -> M3.Matrix3 Integer
+  -> Bool
 testOp op1 op2 m1 m2 = m'==m'' where
   m'  = toM $ m1 `op1` m2
   m'' = toM m1 `op2` toM m2
@@ -37,7 +42,9 @@ testConv m = (toM3 . toM) m == m
 testMultCol :: M3.Matrix3 Integer -> (Integer, Integer, Integer) -> Bool
 testMultCol m v@(v1, v2, v3) = a==a' && b==b' && c==c' where
   (a, b, c) = M3.multCol m v
-  [a', b', c'] = M.toList $ toM m * M.fromList 3 1 [v1, v2, v3]
+  (a', b', c') = case M.toList $ toM m * M.fromList 3 1 [v1, v2, v3] of
+    [x, y, z] -> (x, y, z)
+    _ -> error "expected 3 results"
 #endif
 
 testMakarov :: M3.Matrix3 Integer -> M3.Matrix3 Integer -> Bool

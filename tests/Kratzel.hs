@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module Kratzel where
 
 import Data.Ratio
@@ -69,9 +70,9 @@ etalonTauabc a b c d e = Finite (d % e) >= (optimalValue . snd) (tauabc a b c)
 testSuite :: TestTree
 testSuite = testGroup "Kratzel"
   [ testCase "etalon tauab"
-    (testEtalon 100 (\[x1, x2, x3, x4] -> etalonTauab x1 x2 x3 x4) "tests/etalon-tauab.txt")
+    (testEtalon 100 (\case [x1, x2, x3, x4] -> etalonTauab x1 x2 x3 x4; _ -> error "should be 4 arguments") "tests/etalon-tauab.txt")
   , testCase "etalon tauabc"
-    (testEtalon 100 (\[x1, x2, x3, x4, x5] -> etalonTauabc x1 x2 x3 x4 x5) "tests/etalon-tauabc.txt")
+    (testEtalon 100 (\case [x1, x2, x3, x4, x5] -> etalonTauabc x1 x2 x3 x4 x5; _ -> error "should be 5 arguments") "tests/etalon-tauabc.txt")
 
   , SC.testProperty "tauabcd compare with 1/(a+b+c+d)" testAbcdCompareLow
   , QC.testProperty "tauabcd compare with 1/(a+b+c+d)" testAbcdCompareLow
